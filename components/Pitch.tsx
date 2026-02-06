@@ -1,8 +1,10 @@
-import { formations } from "../lib/formations";
+"use client";
+
 import PositionSlot from "./PositionSlot";
+import { useLineupStore } from "@/stores/lineupStore";
 
 export default function Pitch() {
-    const formation = formations["4-3-3"];
+    const slots = useLineupStore((s) => s.slots);
 
     return (
         <div className="w-full max-w-2xl mx-auto aspect-[2/3] relative rounded-2xl overflow-hidden shadow-2xl">
@@ -13,8 +15,8 @@ export default function Pitch() {
             <div className="absolute w-32 h-32 border border-white/40 rounded-full
                       left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
 
-            {formation.map((pos, i) => (
-                <PositionSlot key={i} {...pos} />
+            {slots.map((slot) => (
+                <PositionSlot key={slot.id} {...slot} />
             ))}
         </div>
     );
