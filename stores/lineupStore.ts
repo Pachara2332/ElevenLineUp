@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { formations } from "@/lib/formations";
 
+
 type Slot = {
   id: string;
   role: string;
@@ -14,6 +15,7 @@ type LineupState = {
   slots: Slot[];
   setFormation: (name: string) => void;
   reset: () => void;
+  assignPlayer: (slotId: string, playerId: string) => void;
 };
 
 function buildSlots(name: string): Slot[] {
@@ -41,4 +43,12 @@ export const useLineupStore = create<LineupState>((set) => ({
       formationName: "4-3-3",
       slots: buildSlots("4-3-3"),
     }),
+
+  assignPlayer: (slotId: string, playerId: string) =>
+    set((state) => ({
+      slots: state.slots.map((s) =>
+        s.id === slotId ? { ...s, playerId } : s
+      ),
+    })),
+
 }));
