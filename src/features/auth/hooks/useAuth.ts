@@ -10,7 +10,8 @@ interface User {
 
 async function fetchUser() {
   const res = await fetch('/api/auth/me');
-  if (!res.ok) throw new Error('Not authenticated');
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error('Failed to fetch user');
   const data = await res.json();
   return data.data.user as User;
 }

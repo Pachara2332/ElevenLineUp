@@ -23,9 +23,22 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--background);
-  color: var(--foreground);
   min-height: 100vh;
+}
+
+/* Auth Pages Background - ใช้เฉพาะหน้า login/register */
+.auth-page-bg {
+  background: linear-gradient(to bottom right, #a3e635, #10b981);
+  /* Polka Dot Pattern */
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.3) 2px, transparent 2px),
+    linear-gradient(to bottom right, #a3e635, #10b981);
+  background-size: 32px 32px, 100% 100%;
+}
+
+/* Homepage Background - ถ้ามี */
+.home-page-bg {
+  background-color: var(--background);
   /* Polka Dot Pattern */
   background-image: radial-gradient(rgba(255, 255, 255, 0.3) 2px, transparent 2px);
   background-size: 32px 32px;
@@ -69,4 +82,41 @@ body {
 
 .glass-button:active {
   transform: translateY(0);
+}
+
+/* Animation Utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.fade-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.zoom-in {
+  animation: zoomIn 0.5s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
