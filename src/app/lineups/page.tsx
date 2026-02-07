@@ -9,7 +9,7 @@ export default function LineupsPage() {
     return (
         <div className="min-h-screen p-4 md:p-8 relative">
             <div className="absolute top-4 left-4 md:top-8 md:left-8 z-10">
-                <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 text-emerald-900 font-bold transition-all backdrop-blur-sm">
+                <Link href="/select-team" className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 text-emerald-900 font-bold transition-all backdrop-blur-sm">
                     <ArrowLeftIcon className="w-5 h-5" />
                     <span>Home</span>
                 </Link>

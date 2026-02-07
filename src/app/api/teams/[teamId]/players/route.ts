@@ -1,22 +1,26 @@
 
-import { ApiHandler } from '@/lib/api-handler';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
 
-export const GET = ApiHandler.handle(async (req, ctx) => {
-  const { teamId } = ctx.params;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ teamId: string }> }
+) {
+  try {
+    const { teamId } = await params;
 
-  // In a real app with separate Player model, we would query prisma.player.findMany({ where: { teamId } })
-  // For this MVP, players are stored as JSON on the team model, so we fetch the team and return its players.
-  
-  const team = await prisma.premierTeam.findUnique({
-    where: { id: teamId },
-    select: { players: true },
-  });
+    const team = await prisma.premierTeam.findUnique({
+      where: { id: teamId },
+      select: { players: true },
+    });
 
-  if (!team) {
-      return ApiHandler.error('Team not found', 404, 'NOT_FOUND');
+    if (!team) {
+      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ data: team.players });
+  } catch (error) {
+    console.error('Error fetching players:', error);
+    return NextResponse.json({ error: 'Failed to fetch players' }, { status: 500 });
   }
-  
-  return NextResponse.json({ data: team.players });
-});
+}

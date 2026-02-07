@@ -52,7 +52,11 @@ export default function TeamSelection() {
                                 : 'border-transparent bg-white/10 hover:bg-white/20 hover:scale-105'
                         )}
                     >
-                        <span className="text-6xl drop-shadow-md transition-transform group-hover:rotate-12 duration-300">{team.logo}</span>
+                        <img
+                            src={team.logo}
+                            alt={team.name}
+                            className="w-20 h-20 object-contain drop-shadow-md transition-transform group-hover:rotate-12 duration-300"
+                        />
                         <span className={clsx(
                             "font-bold text-lg uppercase tracking-wider",
                             selectedTeamId === team.id ? "text-emerald-900" : "text-emerald-900/70"

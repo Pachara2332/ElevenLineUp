@@ -19,12 +19,14 @@ interface LineupState {
   slots: LineupSlot[];
   squad: Player[];
   selectedTeamId: string | null;
+  selectedSlotId: string | null;
   
   // Actions
   setSlots: (slots: LineupSlot[]) => void;
   updateSlot: (slotId: string, player: Player) => void;
   setSquad: (players: Player[]) => void;
   setSelectedTeamId: (id: string) => void;
+  setSelectedSlotId: (id: string | null) => void;
   resetLineup: () => void;
 }
 
@@ -32,6 +34,7 @@ export const useLineupStore = create<LineupState>((set) => ({
   slots: INITIAL_SLOTS,
   squad: [],
   selectedTeamId: null,
+  selectedSlotId: null,
 
   setSlots: (slots) => set({ slots }),
   
@@ -40,11 +43,14 @@ export const useLineupStore = create<LineupState>((set) => ({
       slots: state.slots.map((slot) => 
         slot.id === slotId ? { ...slot, player } : slot
       ),
+      selectedSlotId: null, // Clear selection after placing player
     })),
 
   setSquad: (squad) => set({ squad }),
   
   setSelectedTeamId: (id) => set({ selectedTeamId: id }),
   
-  resetLineup: () => set({ slots: INITIAL_SLOTS, selectedTeamId: null, squad: [] }),
+  setSelectedSlotId: (id) => set({ selectedSlotId: id }),
+  
+  resetLineup: () => set({ slots: INITIAL_SLOTS, selectedTeamId: null, squad: [], selectedSlotId: null }),
 }));
