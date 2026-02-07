@@ -1,14 +1,63 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../lib/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  lineups   Lineup[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PremierTeam {
+  id        String   @id @default(cuid())
+  name      String
+  logo      String
+  players   Json // Array of player objects
+  lineups   Lineup[]
+  createdAt DateTime @default(now())
+}
+
+model Lineup {
+  id        String @id @default(cuid())
+  name      String
+  formation String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  premierTeamId String
+  premierTeam   PremierTeam @relation(fields: [premierTeamId], references: [id])
+
+  slots LineupSlot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LineupSlot {
+  id String @id @default(cuid())
+
+  lineupId String
+  lineup   Lineup @relation(fields: [lineupId], references: [id], onDelete: Cascade)
+
+  position String // GK, LCB, RCM, ST, etc.
+  x        Float // Position on pitch (0-1)
+  y        Float // Position on pitch (0-1)
+
+  playerId    String? // Reference to player in JSON
+  playerName  String?
+  playerImage String?
+
+  @@unique([lineupId, position])
 }

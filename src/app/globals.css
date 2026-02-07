@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --background: #a3e635;
+  /* Lime 400 */
+  --foreground: #1a2e05;
+  --primary: #ffffff;
+  --primary-foreground: #064e3b;
+  /* Emerald 900 */
+  --card: rgba(255, 255, 255, 0.25);
+  --card-foreground: #064e3b;
+  --input: rgba(255, 255, 255, 0.5);
+  --ring: #10b981;
+  /* Emerald 500 */
+}
+
+@theme {
+  --font-sans: 'Outfit', sans-serif;
+  --color-brand-lime: #a3e635;
+  --color-brand-emerald: #10b981;
+  --color-brand-dark: #064e3b;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  /* Polka Dot Pattern */
+  background-image: radial-gradient(rgba(255, 255, 255, 0.3) 2px, transparent 2px);
+  background-size: 32px 32px;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.glass-input {
+  background: var(--input);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--ring);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+}
+
+.glass-button {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 800;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.glass-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.glass-button:active {
+  transform: translateY(0);
+}
