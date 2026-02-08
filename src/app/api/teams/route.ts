@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export const GET = ApiHandler.handle(async () => {
-  const teams = await prisma.Team.findMany({
+  const teams = await prisma.team.findMany({
     orderBy: { name: 'asc' },
   });
   

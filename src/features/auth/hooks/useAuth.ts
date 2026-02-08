@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 interface User {
-  id: string;
+  userId: string;
   name: string;
   email: string;
 }
@@ -59,7 +59,7 @@ export function useAuth() {
       mutationFn: loginUser,
       onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['auth', 'user'] });
-          router.push('/select-team');
+          router.push('/dashboard');
           router.refresh();
       }
   });
@@ -68,7 +68,7 @@ export function useAuth() {
       mutationFn: registerUser,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['auth', 'user'] });
-        router.push('/select-team');
+        router.push('/dashboard');
         router.refresh();
       }
   });

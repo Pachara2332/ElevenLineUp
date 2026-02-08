@@ -1,12 +1,12 @@
-
 export interface User {
-  id: string;
+  userId: string;
   name: string;
   email: string;
 }
 
 export interface Player {
-  id: string;
+  id: string; // Player ID from JSON/External API might still be 'id', let's check seed.ts regarding players. 
+  // In seed.ts players have 'id'. In schema, players is Json. So this persists as 'id'.
   name: string;
   position: string;
   teamId: string;
@@ -14,7 +14,7 @@ export interface Player {
 }
 
 export interface Team {
-  id: string;
+  teamId: string;
   name: string;
   league: string;
   logo: string;
@@ -22,7 +22,8 @@ export interface Team {
 }
 
 export interface LineupSlot {
-  id: string;
+  slotId?: string; // Optional because templates don't have DB IDs yet.
+  id: string; // Kept as id for UI (dnd-kit)
   position: string;
   x: number;
   y: number;
@@ -30,7 +31,7 @@ export interface LineupSlot {
 }
 
 export interface Lineup {
-  id: string;
+  lineupId: string;
   name: string;
   formation: string;
   teamId: string;

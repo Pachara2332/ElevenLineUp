@@ -305,6 +305,7 @@ async function main() {
   for (const team of ALL_TEAMS) {
     const t = await prisma.team.create({
       data: {
+        teamId: team.players[0].id.split('_')[0], // Use prefix as ID e.g. 'ars'
         name: team.name,
         league: (team as any).league || 'Premier League',
         logo: team.logo,

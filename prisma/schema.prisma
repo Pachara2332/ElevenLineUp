@@ -11,55 +11,63 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  userId    String   @id @default(cuid()) @map("id")
   email     String   @unique
   password  String
   name      String
   lineups   Lineup[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("User")
 }
 
 model Team {
-  id        String   @id @default(cuid())
+  teamId    String   @id @default(cuid()) @map("id")
   name      String
-  league    String   @default("Premier League")
+  league    String
   logo      String
-  players   Json // Array of player objects
+  players   Json
   lineups   Lineup[]
   createdAt DateTime @default(now())
+
+  @@map("Team")
 }
 
 model Lineup {
-  id        String @id @default(cuid())
+  lineupId  String  @id @default(cuid()) @map("id")
   name      String
-  formation String
+  formation String  @default("4-3-3")
+  isPublic  Boolean @default(false)
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
-  TeamId String
-  Team   Team   @relation(fields: [TeamId], references: [id])
+  teamId String @map("team_id")
+  team   Team   @relation(fields: [teamId], references: [teamId])
 
   slots LineupSlot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("Lineup")
 }
 
 model LineupSlot {
-  id String @id @default(cuid())
+  slotId String @id @default(cuid()) @map("id")
 
-  lineupId String
-  lineup   Lineup @relation(fields: [lineupId], references: [id], onDelete: Cascade)
+  lineupId String @map("lineup_id")
+  lineup   Lineup @relation(fields: [lineupId], references: [lineupId], onDelete: Cascade)
 
-  position String // GK, LCB, RCM, ST, etc.
-  x        Float // Position on pitch (0-1)
-  y        Float // Position on pitch (0-1)
+  position String
+  x        Float
+  y        Float
 
-  playerId    String? // Reference to player in JSON
+  playerId    String?
   playerName  String?
   playerImage String?
 
   @@unique([lineupId, position])
+  @@map("LineupSlot")
 }

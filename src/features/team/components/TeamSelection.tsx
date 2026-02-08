@@ -66,11 +66,11 @@ export default function TeamSelection() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
                 {filteredTeams?.map((team) => (
                     <button
-                        key={team.id}
-                        onClick={() => setSelectedTeamId(team.id)}
+                        key={team.teamId}
+                        onClick={() => setSelectedTeamId(team.teamId)}
                         className={clsx(
                             'p-6 rounded-2xl border-4 transition-all duration-300 flex flex-col items-center justify-center gap-4 aspect-square group',
-                            selectedTeamId === team.id
+                            selectedTeamId === team.teamId
                                 ? 'border-white bg-white/40 scale-105 shadow-xl'
                                 : 'border-transparent bg-white/10 hover:bg-white/20 hover:scale-105'
                         )}
@@ -82,7 +82,7 @@ export default function TeamSelection() {
                         />
                         <span className={clsx(
                             "font-bold text-lg uppercase tracking-wider",
-                            selectedTeamId === team.id ? "text-emerald-900" : "text-emerald-900/70"
+                            selectedTeamId === team.teamId ? "text-emerald-900" : "text-emerald-900/70"
                         )}>{team.name}</span>
                     </button>
                 ))}

@@ -31,7 +31,7 @@ export const POST = ApiHandler.handle(async (req) => {
     return ApiHandler.error('Invalid credentials', 401, 'INVALID_CREDENTIALS');
   }
 
-  const token = jwt.sign({ userId: user.id, email: user.email }, config.auth.jwtSecret, {
+  const token = jwt.sign({ userId: user.userId, email: user.email }, config.auth.jwtSecret, {
     expiresIn: '7d',
   });
 
@@ -43,5 +43,5 @@ export const POST = ApiHandler.handle(async (req) => {
     path: '/',
   });
 
-  return ApiHandler.success({ user: { id: user.id, name: user.name, email: user.email } });
+  return ApiHandler.success({ user: { userId: user.userId, name: user.name, email: user.email } });
 });

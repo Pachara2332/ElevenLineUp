@@ -31,10 +31,18 @@ export default function LineupBuilder() {
         selectedSlotId,
         setSelectedSlotId,
         formation,
-        setFormation
+        setFormation,
+        saveLineup,
+        loadLineup
     } = useLineupStore();
 
-    // Fetch players for the selected team
+    const [isSaving, setIsSaving] = React.useState(false);
+    const [lineupName, setLineupName] = React.useState('');
+    const [showSaveModal, setShowSaveModal] = React.useState(false);
+    const [showLoadModal, setShowLoadModal] = React.useState(false);
+    const [myLineups, setMyLineups] = React.useState<any[]>([]);
+
+    // Fetch players and lineups
     useEffect(() => {
         if (!selectedTeamId) return;
 
@@ -52,27 +60,69 @@ export default function LineupBuilder() {
         fetchPlayers();
     }, [selectedTeamId, setSquad]);
 
+    const fetchMyLineups = async () => {
+        try {
+            const res = await fetch('/api/lineups');
+            if (res.ok) {
+                const json = await res.json();
+                setMyLineups(json.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch lineups', error);
+        }
+    };
+
     // Filter squad based on selected slot position
+    // Updated: REMOVE strict filtering to allow creativity (GK as ST)
+    // But maybe keep it as a "Recommended" filter? 
+    // For now, let's keep the filter but add a "Show All" toggle or just relax it?
+    // User requested: "GK to ST" -> so we should probably remove the strict filter or make it optional.
+    // Let's make it optional: If specific slot selected, show relevant + option for others?
+    // Or just show all sorted by relevance? 
+    // Implementation Plan said: "Relax position restrictions".
+    // So let's show ALL players, maybe highlighting the ones matching the position.
+
     const filteredSquad = useMemo(() => {
-        if (!selectedSlotId) return squad;
-
-        const positionType = POSITION_MAP[selectedSlotId];
-        if (!positionType) return squad;
-
-        return squad.filter(player => player.position === positionType);
-    }, [squad, selectedSlotId]);
+        // Simple approach: Show all players, maybe sort matchers first?
+        // Or just return all squad for maximum freedom as requested.
+        return squad;
+    }, [squad]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (over && active.data.current) {
             const player = active.data.current as Player;
+            // Allow any player in any slot
             updateSlot(over.id as string, player);
         }
     };
 
+    const handleSave = async () => {
+        if (!lineupName) return;
+        setIsSaving(true);
+        try {
+            await saveLineup(lineupName);
+            setShowSaveModal(false);
+            setLineupName('');
+            alert('Lineup saved successfully!');
+        } catch (error) {
+            alert('Failed to save lineup');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleLoad = async (id: string) => {
+        try {
+            await loadLineup(id);
+            setShowLoadModal(false);
+        } catch (error) {
+            alert('Failed to load lineup');
+        }
+    };
+
     const handleSlotClick = (slotId: string) => {
-        // Toggle selection: if same slot, deselect; otherwise select
         setSelectedSlotId(selectedSlotId === slotId ? null : slotId);
     };
 
@@ -84,6 +134,23 @@ export default function LineupBuilder() {
                 <div className="flex-grow flex items-center justify-center glass-panel rounded-3xl p-6 relative overflow-hidden">
                     {/* Decorative Background Element */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+
+                    {/* Toolbar */}
+                    <div className="absolute top-6 left-6 z-10 flex gap-2">
+                        <button
+                            onClick={() => setShowSaveModal(true)}
+                            className="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition shadow-lg"
+                        >
+                            Save Lineup
+                        </button>
+                        <button
+                            onClick={() => { setShowLoadModal(true); fetchMyLineups(); }}
+                            className="bg-white/50 text-emerald-900 px-4 py-2 rounded-xl font-bold hover:bg-white/80 transition shadow-lg"
+                        >
+                            My Lineups
+                        </button>
+                    </div>
+
                     <Pitch
                         slots={slots}
                         selectedSlotId={selectedSlotId}
@@ -107,32 +174,70 @@ export default function LineupBuilder() {
                                 <option value="4-1-4-1">4-1-4-1</option>
                                 <option value="3-4-2-1">3-4-2-1</option>
                             </select>
-                            {selectedSlotId && (
-                                <button
-                                    onClick={() => setSelectedSlotId(null)}
-                                    className="text-sm px-3 py-1 rounded-full bg-yellow-400 text-emerald-900 font-bold hover:bg-yellow-300 transition-colors"
-                                >
-                                    {POSITION_MAP[selectedSlotId]} ✕
-                                </button>
-                            )}
                         </div>
                     </div>
-                    {selectedSlotId && (
-                        <p className="text-sm text-emerald-700 -mt-2">
-                            กดที่ตำแหน่ง <span className="font-bold">{selectedSlot?.position}</span> → แสดงเฉพาะ {POSITION_MAP[selectedSlotId]}
-                        </p>
-                    )}
+
                     <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
-                        {filteredSquad.length > 0 ? (
-                            filteredSquad.map((player) => (
-                                <DraggablePlayer key={player.id} player={player} />
-                            ))
-                        ) : (
-                            <p className="text-emerald-700/50 text-center py-4">ไม่มีนักเตะในตำแหน่งนี้</p>
-                        )}
+                        {filteredSquad.map((player) => (
+                            <DraggablePlayer key={player.id} player={player} />
+                        ))}
                     </div>
                 </div>
             </div>
+
+            {/* Save Modal */}
+            {showSaveModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-2xl w-full max-w-sm">
+                        <h3 className="text-xl font-bold text-emerald-900 mb-4">Save Lineup</h3>
+                        <input
+                            type="text"
+                            placeholder="Lineup Name (e.g. Dream Team A)"
+                            className="w-full p-3 border rounded-lg mb-4"
+                            value={lineupName}
+                            onChange={e => setLineupName(e.target.value)}
+                        />
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setShowSaveModal(false)} className="px-4 py-2 text-gray-500">Cancel</button>
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving || !lineupName}
+                                className="px-4 py-2 bg-emerald-600 text-white rounded-lg disabled:opacity-50"
+                            >
+                                {isSaving ? 'Saving...' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Load Modal */}
+            {showLoadModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-bold text-emerald-900">My Lineups</h3>
+                            <button onClick={() => setShowLoadModal(false)} className="text-gray-500">✕</button>
+                        </div>
+                        <div className="overflow-y-auto flex-1 space-y-2">
+                            {myLineups.length === 0 ? (
+                                <p className="text-center text-gray-500 py-8">No saved lineups yet.</p>
+                            ) : (
+                                myLineups.map((l: any) => (
+                                    <div key={l.lineupId} className="p-4 border rounded-xl hover:bg-emerald-50 cursor-pointer flex justify-between items-center" onClick={() => handleLoad(l.lineupId)}>
+                                        <div>
+                                            <p className="font-bold text-emerald-900">{l.name}</p>
+                                            <p className="text-xs text-gray-500">{l.formation} • {new Date(l.updatedAt).toLocaleDateString()}</p>
+                                        </div>
+                                        <div className="text-emerald-600">Load →</div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </DndContext>
     );
 }

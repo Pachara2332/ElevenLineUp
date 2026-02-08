@@ -99,9 +99,11 @@ interface LineupState {
   setSelectedSlotId: (id: string | null) => void;
   setFormation: (formation: string) => void;
   resetLineup: () => void;
+  saveLineup: (name: string) => Promise<any>;
+  loadLineup: (lineupId: string) => Promise<void>;
 }
 
-export const useLineupStore = create<LineupState>((set) => ({
+export const useLineupStore = create<LineupState>((set, get) => ({
   slots: FORMATIONS['4-3-3'],
   squad: [],
   selectedTeamId: null,
@@ -111,12 +113,36 @@ export const useLineupStore = create<LineupState>((set) => ({
   setSlots: (slots) => set({ slots }),
   
   updateSlot: (slotId, player) => 
-    set((state) => ({
-      slots: state.slots.map((slot) => 
-        slot.id === slotId ? { ...slot, player } : slot
-      ),
-      selectedSlotId: null, // Clear selection after placing player
-    })),
+    set((state) => {
+        const targetSlot = state.slots.find(s => s.id === slotId);
+        if (!targetSlot) return state;
+
+        // 1. Strict GK Rules
+        // Rule A: GK player can ONLY go into a GK slot
+        if (player.position === 'GK' && targetSlot.position !== 'GK') {
+            return state; // Silently reject
+        }
+        // Rule B: GK slot can ONLY accept a GK player
+        if (targetSlot.position === 'GK' && player.position !== 'GK') {
+            return state; // Silently reject
+        }
+
+        // 2. Prevent Duplicates (Move player if already on pitch)
+        // Remove this player from any other slots they might occupy
+        const slotsWithoutPlayer = state.slots.map(slot => 
+            (slot.player && slot.player.id === player.id) 
+                ? { ...slot, player: undefined } 
+                : slot
+        );
+
+        // 3. Place player in target slot
+        return {
+            slots: slotsWithoutPlayer.map((slot) => 
+                slot.id === slotId ? { ...slot, player } : slot
+            ),
+            selectedSlotId: null, // Clear selection
+        };
+    }),
 
   setSquad: (squad) => set({ squad }),
   
@@ -142,4 +168,54 @@ export const useLineupStore = create<LineupState>((set) => ({
   }),
   
   resetLineup: () => set({ slots: FORMATIONS['4-3-3'], selectedTeamId: null, squad: [], selectedSlotId: null, formation: '4-3-3' }),
+
+  saveLineup: async (name: string) => {
+      const state = get();
+      if (!state.selectedTeamId) throw new Error("No team selected");
+
+      const payload = {
+          name,
+          teamId: state.selectedTeamId,
+          formation: state.formation,
+          slots: state.slots,
+      };
+
+      const res = await fetch('/api/lineups', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error('Failed to save lineup');
+      return await res.json();
+  },
+
+  loadLineup: async (lineupId: string) => {
+      const res = await fetch(`/api/lineups/${lineupId}`);
+      if (!res.ok) throw new Error('Failed to load lineup');
+      const json = await res.json();
+      const lineup = json.data;
+
+      // Map DB slots back to store format
+      const slots = lineup.slots.map((s: any) => ({
+          id: s.position.toLowerCase(), // UI ID
+          slotId: s.slotId, // DB ID
+          position: s.position,
+          x: s.x,
+          y: s.y,
+          player: s.playerId ? {
+              id: s.playerId,
+              name: s.playerName,
+              image: s.playerImage,
+              position: s.position, // Fallback
+              teamId: lineup.teamId // Fallback
+          } : undefined
+      }));
+
+      set({
+          selectedTeamId: lineup.teamId,
+          formation: lineup.formation,
+          slots: slots,
+      });
+  }
 }));

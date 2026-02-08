@@ -18,8 +18,8 @@ export const GET = ApiHandler.handle(async (req) => {
     const decoded = jwt.verify(token, config.auth.jwtSecret) as { userId: string };
     
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { id: true, name: true, email: true },
+      where: { userId: decoded.userId },
+      select: { userId: true, name: true, email: true },
     });
 
     if (!user) {
