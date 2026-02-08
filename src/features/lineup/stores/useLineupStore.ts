@@ -190,32 +190,41 @@ export const useLineupStore = create<LineupState>((set, get) => ({
       return await res.json();
   },
 
-  loadLineup: async (lineupId: string) => {
-      const res = await fetch(`/api/lineups/${lineupId}`);
-      if (!res.ok) throw new Error('Failed to load lineup');
-      const json = await res.json();
-      const lineup = json.data;
-
-      // Map DB slots back to store format
-      const slots = lineup.slots.map((s: any) => ({
-          id: s.position.toLowerCase(), // UI ID
-          slotId: s.slotId, // DB ID
-          position: s.position,
-          x: s.x,
-          y: s.y,
-          player: s.playerId ? {
-              id: s.playerId,
-              name: s.playerName,
-              image: s.playerImage,
-              position: s.position, // Fallback
-              teamId: lineup.teamId // Fallback
-          } : undefined
-      }));
-
-      set({
-          selectedTeamId: lineup.teamId,
-          formation: lineup.formation,
-          slots: slots,
-      });
+  // ✅ ใหม่ - โหลดแผนเฉยๆ ไม่ดาวน์โหลด PDF
+loadLineup: async (id: string) => {
+  try {
+    const res = await fetch(`/api/lineups/${id}`);
+    if (!res.ok) {
+      throw new Error('Failed to load lineup');
+    }
+    
+    const { data } = await res.json();
+    
+    // Update formation
+    set({ formation: data.formation });
+    
+    // Map slots back to state structure
+    const loadedSlots = data.slots.map((slot: any) => ({
+      id: slot.slotId || slot.id, // รองรับทั้ง slotId (ถ้ามี) และ id
+      position: slot.position,
+      x: slot.x,
+      y: slot.y,
+      player: slot.playerId ? {
+        id: slot.playerId,
+        name: slot.playerName || 'Unknown',
+        image: slot.playerImage || null,
+      } : null,
+    }));
+    
+    // Update slots in store
+    set({ slots: loadedSlots });
+    
+    console.log('✅ Lineup loaded successfully:', data.name);
+    
+  } catch (error) {
+    console.error('❌ Failed to load lineup:', error);
+    throw error;
   }
+}
+
 }));

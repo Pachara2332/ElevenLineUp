@@ -1,6 +1,5 @@
-
 'use client';
-
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo } from 'react';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { Pitch } from './Pitch';
@@ -42,12 +41,8 @@ export default function LineupBuilder() {
     const [showSaveModal, setShowSaveModal] = React.useState(false);
     const [showLoadModal, setShowLoadModal] = React.useState(false);
     const [myLineups, setMyLineups] = React.useState<any[]>([]);
+    const [playerSearch, setPlayerSearch] = React.useState("");
 
-    // Fetch players and lineups
-    // Fetch players and lineups
-    // Note: Players are now fetched by the parent page based on URL teamId
-    // We keep this hook mainly to ensure store is synced if needed, or we can remove it.
-    // For now, let's remove the direct fetch here to avoid double fetching and rely on the store being populated.
     useEffect(() => {
         // Legacy fetch removed in favor of page-level fetching
     }, []);
@@ -64,28 +59,17 @@ export default function LineupBuilder() {
         }
     };
 
-    // Filter squad based on selected slot position
-    // Updated: REMOVE strict filtering to allow creativity (GK as ST)
-    // But maybe keep it as a "Recommended" filter? 
-    // For now, let's keep the filter but add a "Show All" toggle or just relax it?
-    // User requested: "GK to ST" -> so we should probably remove the strict filter or make it optional.
-    // Let's make it optional: If specific slot selected, show relevant + option for others?
-    // Or just show all sorted by relevance? 
-    // Implementation Plan said: "Relax position restrictions".
-    // So let's show ALL players, maybe highlighting the ones matching the position.
-
     const filteredSquad = useMemo(() => {
-        // Simple approach: Show all players, maybe sort matchers first?
-        // Or just return all squad for maximum freedom as requested.
-        return squad;
-    }, [squad]);
+        return squad.filter(p =>
+            p.name.toLowerCase().includes(playerSearch.toLowerCase())
+        );
+    }, [squad, playerSearch]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (over && active.data.current) {
             const player = active.data.current as Player;
-            // Allow any player in any slot
             updateSlot(over.id as string, player);
         }
     };
@@ -116,12 +100,36 @@ export default function LineupBuilder() {
         }
     };
 
-    const handleLoad = async (id: string) => {
+    // ✅ ฟังก์ชันโหลดแผนกลับมาดู (ไม่ดาวน์โหลด PDF)
+    const handleLoadLineup = async (id: string) => {
         try {
             await loadLineup(id);
             setShowLoadModal(false);
+            showAlert('Success!', 'Lineup loaded successfully.', 'success');
         } catch (error) {
             showAlert('Error', 'Failed to load lineup.', 'error');
+        }
+    };
+
+    // ✅ ฟังก์ชันดาวน์โหลด PDF แยกต่างหาก
+    const handleDownloadPDF = async (id: string, name: string) => {
+        try {
+            const res = await fetch(`/api/lineups/${id}/pdf`);
+            if (!res.ok) {
+                throw new Error('Failed to generate PDF');
+            }
+            
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name || 'lineup'}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showAlert('Success!', 'PDF downloaded successfully.', 'success');
+        } catch (error) {
+            showAlert('Error', 'Failed to download PDF.', 'error');
         }
     };
 
@@ -135,10 +143,8 @@ export default function LineupBuilder() {
         <DndContext onDragEnd={handleDragEnd}>
             <div className="flex flex-col md:flex-row gap-8 h-[calc(100vh-140px)]">
                 <div className="flex-grow flex items-center justify-center glass-panel rounded-3xl p-6 relative overflow-hidden">
-                    {/* Decorative Background Element */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
 
-                    {/* Toolbar */}
                     <div className="absolute top-6 left-6 z-10 flex gap-2">
                         <button
                             onClick={() => setShowSaveModal(true)}
@@ -161,14 +167,17 @@ export default function LineupBuilder() {
                     />
                 </div>
 
-                <div className="w-full md:w-80 glass-panel p-6 rounded-3xl flex flex-col gap-4 overflow-hidden">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-black text-emerald-900 drop-shadow-sm uppercase tracking-wide">Squad</h2>
-                        <div className="flex gap-2">
+                <div className="w-full md:w-[380px] glass-panel p-6 rounded-3xl flex flex-col gap-5 overflow-hidden">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-black text-emerald-900 uppercase tracking-wide">
+                                Squad
+                            </h2>
+
                             <select
                                 value={formation}
                                 onChange={(e) => setFormation(e.target.value)}
-                                className="bg-white/50 border border-emerald-200 text-emerald-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-1"
+                                className="bg-white/50 border border-emerald-200 text-emerald-900 text-sm rounded-lg p-2"
                             >
                                 <option value="4-3-3">4-3-3</option>
                                 <option value="4-2-3-1">4-2-3-1</option>
@@ -178,6 +187,15 @@ export default function LineupBuilder() {
                                 <option value="3-4-2-1">3-4-2-1</option>
                             </select>
                         </div>
+
+                        <input
+                            type="text"
+                            placeholder="Search player..."
+                            value={playerSearch}
+                            onChange={(e) => setPlayerSearch(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-emerald-200
+                                       focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                        />
                     </div>
 
                     <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
@@ -214,25 +232,45 @@ export default function LineupBuilder() {
                 </div>
             )}
 
-            {/* Load Modal */}
+            {/* Load Modal - ✅ แก้ไขให้มี 2 ปุ่ม */}
             {showLoadModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white p-6 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-bold text-emerald-900">My Lineups</h3>
-                            <button onClick={() => setShowLoadModal(false)} className="text-gray-500">✕</button>
+                            <button onClick={() => setShowLoadModal(false)} className="text-gray-500 text-2xl hover:text-gray-700">✕</button>
                         </div>
                         <div className="overflow-y-auto flex-1 space-y-2">
                             {myLineups.length === 0 ? (
                                 <p className="text-center text-gray-500 py-8">No saved lineups yet.</p>
                             ) : (
                                 myLineups.map((l: any) => (
-                                    <div key={l.lineupId} className="p-4 border rounded-xl hover:bg-emerald-50 cursor-pointer flex justify-between items-center" onClick={() => handleLoad(l.lineupId)}>
-                                        <div>
-                                            <p className="font-bold text-emerald-900">{l.name}</p>
-                                            <p className="text-xs text-gray-500">{l.formation} • {new Date(l.updatedAt).toLocaleDateString()}</p>
+                                    <div key={l.lineupId} className="p-4 border border-emerald-200 rounded-xl hover:bg-emerald-50 transition">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <p className="font-bold text-emerald-900 text-lg">{l.name}</p>
+                                                <p className="text-xs text-gray-500">{l.formation} • {new Date(l.updatedAt).toLocaleDateString()}</p>
+                                            </div>
                                         </div>
-                                        <div className="text-emerald-600">Load →</div>
+                                        
+                                        {/* ✅ ปุ่ม 2 ปุ่มแยกกัน */}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleLoadLineup(l.lineupId)}
+                                                className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 transition"
+                                            >
+                                                📋 Load Lineup
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDownloadPDF(l.lineupId, l.name);
+                                                }}
+                                                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+                                            >
+                                                📄 Download PDF
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             )}

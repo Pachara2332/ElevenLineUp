@@ -57,6 +57,7 @@ export async function PUT(
         prisma.lineupSlot.createMany({
           data: slots.map((slot: any) => ({
             lineupId: id,
+            slotId: slot.id, 
             position: slot.position,
             x: slot.x,
             y: slot.y,

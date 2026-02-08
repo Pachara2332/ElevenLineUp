@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { useQuery } from '@tanstack/react-query';
 import { Team } from '@prisma/client';
 
+
 async function fetchTeams() {
     const res = await fetch('/api/teams');
     if (!res.ok) throw new Error('Failed to fetch teams');
@@ -18,15 +19,32 @@ export default function TeamSelection() {
     const router = useRouter();
     const { selectedTeamId, setSelectedTeamId } = useLineupStore();
 
-    const [selectedLeague, setSelectedLeague] = useState('Premier League');
-    const leagues = ['Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1'];
+    const [selectedLeague, setSelectedLeague] = useState('ALL');
+    const [search, setSearch] = useState("");
+
+    const leagues = ['ALL', 'Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1'];
+
+    // useEffect(() => {
+    //     if (search.length > 0) {
+    //         setSelectedLeague('ALL');
+    //     }
+    // }, [search]); เพื่อกลับมาค้นหาทั้งหมด
 
     const { data: teams, isLoading } = useQuery({
         queryKey: ['teams'],
         queryFn: fetchTeams,
     });
 
-    const filteredTeams = teams?.filter(team => team.league === selectedLeague);
+    const filteredTeams = teams
+        ?.filter(team =>
+            selectedLeague === 'ALL' || team.league === selectedLeague
+        )
+        ?.filter(team =>
+            team.name.toLowerCase().includes(search.toLowerCase())
+        );
+
+
+
 
     const handleContinue = () => {
         if (selectedTeamId) {
@@ -44,6 +62,18 @@ export default function TeamSelection() {
                 Select Your Club
             </h1>
             <p className="text-center text-emerald-800 mb-8 text-lg font-medium">Choose the badge you fight for</p>
+<div className="flex justify-center mb-10">
+    <input
+        type="text"
+        placeholder="Search club..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full max-w-md px-5 py-3 rounded-full 
+                   border border-emerald-200 
+                   shadow-sm focus:outline-none 
+                   focus:ring-2 focus:ring-emerald-500"
+    />
+</div>
 
             {/* League Tabs */}
             <div className="flex justify-center gap-3 mb-12 flex-wrap">
@@ -68,6 +98,11 @@ export default function TeamSelection() {
                     <button
                         key={team.teamId}
                         onClick={() => setSelectedTeamId(team.teamId)}
+                        onDoubleClick={() => {
+                            setSelectedTeamId(team.teamId);
+                            router.push(`/lineups/${team.teamId}`);
+                        }}
+
                         className={clsx(
                             'p-6 rounded-2xl border-4 transition-all duration-300 flex flex-col items-center justify-center gap-4 aspect-square group',
                             selectedTeamId === team.teamId
@@ -84,6 +119,13 @@ export default function TeamSelection() {
                             "font-bold text-lg uppercase tracking-wider",
                             selectedTeamId === team.teamId ? "text-emerald-900" : "text-emerald-900/70"
                         )}>{team.name}</span>
+                        {selectedTeamId === team.teamId && (
+    <p className="text-xs font-semibold animate-fade-in">
+    <span className="text-emerald-900">Double click</span>
+    <span className="text-emerald-500"> to start instantly</span>
+</p>
+
+)}
                     </button>
                 ))}
             </div>

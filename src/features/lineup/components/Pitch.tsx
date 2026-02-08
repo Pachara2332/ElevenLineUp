@@ -79,9 +79,10 @@ export const Pitch: React.FC<PitchProps> = ({ slots, selectedSlotId, onSlotClick
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-8 border-2 border-white/30 border-b-0"></div>
 
             {/* Slots */}
-            {slots.map((slot) => (
-                <PitchSlot
-                    key={slot.id}
+            {slots.map((slot, index) => (
+            <PitchSlot
+                    key={`${slot.id}-${index}`}
+
                     slot={slot}
                     isSelected={selectedSlotId === slot.id}
                     onClick={() => onSlotClick(slot.id)}
