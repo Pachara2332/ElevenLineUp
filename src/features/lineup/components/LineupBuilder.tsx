@@ -7,6 +7,7 @@ import { Pitch } from './Pitch';
 import { DraggablePlayer } from './DraggablePlayer';
 import { Player } from '@/types';
 import { useLineupStore } from '../stores/useLineupStore';
+import AlertModal from '@/components/AlertModal';
 
 // Map slot positions to player position types
 const POSITION_MAP: Record<string, string> = {
@@ -43,22 +44,13 @@ export default function LineupBuilder() {
     const [myLineups, setMyLineups] = React.useState<any[]>([]);
 
     // Fetch players and lineups
+    // Fetch players and lineups
+    // Note: Players are now fetched by the parent page based on URL teamId
+    // We keep this hook mainly to ensure store is synced if needed, or we can remove it.
+    // For now, let's remove the direct fetch here to avoid double fetching and rely on the store being populated.
     useEffect(() => {
-        if (!selectedTeamId) return;
-
-        const fetchPlayers = async () => {
-            try {
-                const res = await fetch(`/api/teams/${selectedTeamId}/players`);
-                if (!res.ok) throw new Error('Failed to fetch players');
-                const json = await res.json();
-                setSquad(json.data);
-            } catch (error) {
-                console.error('Error fetching players:', error);
-            }
-        };
-
-        fetchPlayers();
-    }, [selectedTeamId, setSquad]);
+        // Legacy fetch removed in favor of page-level fetching
+    }, []);
 
     const fetchMyLineups = async () => {
         try {
@@ -98,6 +90,17 @@ export default function LineupBuilder() {
         }
     };
 
+    const [alertConfig, setAlertConfig] = React.useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'error' | 'info';
+    }>({ isOpen: false, title: '', message: '', type: 'info' });
+
+    const showAlert = (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
+        setAlertConfig({ isOpen: true, title, message, type });
+    };
+
     const handleSave = async () => {
         if (!lineupName) return;
         setIsSaving(true);
@@ -105,9 +108,9 @@ export default function LineupBuilder() {
             await saveLineup(lineupName);
             setShowSaveModal(false);
             setLineupName('');
-            alert('Lineup saved successfully!');
+            showAlert('Success!', 'Lineup saved successfully.', 'success');
         } catch (error) {
-            alert('Failed to save lineup');
+            showAlert('Error', 'Failed to save lineup. Please try again.', 'error');
         } finally {
             setIsSaving(false);
         }
@@ -118,7 +121,7 @@ export default function LineupBuilder() {
             await loadLineup(id);
             setShowLoadModal(false);
         } catch (error) {
-            alert('Failed to load lineup');
+            showAlert('Error', 'Failed to load lineup.', 'error');
         }
     };
 
@@ -237,6 +240,14 @@ export default function LineupBuilder() {
                     </div>
                 </div>
             )}
+
+            <AlertModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                type={alertConfig.type}
+            />
 
         </DndContext>
     );

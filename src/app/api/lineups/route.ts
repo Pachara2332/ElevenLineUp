@@ -1,36 +1,33 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-// import { getServerSession } from 'next-auth'; // Commented out until next-auth is installed
-// If using custom auth, import your session helper
-// import { getSession } from '@/lib/auth'; 
-
-// Temporary mock session for development if Auth isn't fully ready
-async function getSession() {
-  // TODO: Replace with real auth check
-  return { user: { id: 'user_1' } }; 
-}
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
+import { config } from '@/config/unifiedConfig';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { name, teamId, formation, slots } = body;
 
-    // TODO: Get real user ID from session
-    // const session = await getServerSession();
-    // if (!session || !session.user) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
-    // const userId = session.user.userId;
-    
-    // Using a placeholder user for now until Auth is fully integrated in this route
-    // In a real app, this MUST be the logged-in user's ID
-    const userId = 'user_clsd...'; // You might need to fetch a real user ID or use the one from seed
+    const cookieStore = await cookies();
+    const token = cookieStore.get(config.auth.cookieName)?.value;
 
-    // For now, let's try to find the first user in DB to attach to
-    const user = await prisma.user.findFirst();
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    let userId: string;
+    try {
+      const decoded = jwt.verify(token, config.auth.jwtSecret) as { userId: string };
+      userId = decoded.userId;
+    } catch (err) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    // specific check for user existence (optional but good)
+    const user = await prisma.user.findUnique({ where: { userId } });
     if (!user) {
-        return NextResponse.json({ error: 'No users found in DB. Please register first.' }, { status: 400 });
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const newLineup = await prisma.lineup.create({
@@ -65,15 +62,24 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    // Get user from session
-    const user = await prisma.user.findFirst();
-    if (!user) {
-       return NextResponse.json({ data: [] }); // Return empty if no user
+    const cookieStore = await cookies();
+    const token = cookieStore.get(config.auth.cookieName)?.value;
+
+    if (!token) {
+        return NextResponse.json({ data: [] });
+    }
+
+    let userId: string;
+    try {
+        const decoded = jwt.verify(token, config.auth.jwtSecret) as { userId: string };
+        userId = decoded.userId;
+    } catch (err) {
+        return NextResponse.json({ data: [] });
     }
 
     const lineups = await prisma.lineup.findMany({
       where: {
-        userId: user.userId,
+        userId: userId,
       },
       orderBy: {
         updatedAt: 'desc',

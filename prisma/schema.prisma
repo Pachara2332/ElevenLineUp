@@ -68,6 +68,5 @@ model LineupSlot {
   playerName  String?
   playerImage String?
 
-  @@unique([lineupId, position])
   @@map("LineupSlot")
 }

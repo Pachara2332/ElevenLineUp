@@ -30,7 +30,7 @@ export default function TeamSelection() {
 
     const handleContinue = () => {
         if (selectedTeamId) {
-            router.push('/lineups');
+            router.push(`/lineups/${selectedTeamId}`);
         }
     };
 
