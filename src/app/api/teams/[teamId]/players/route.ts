@@ -9,7 +9,7 @@ export async function GET(
   try {
     const { teamId } = await params;
 
-    const team = await prisma.premierTeam.findUnique({
+    const team = await prisma.Team.findUnique({
       where: { id: teamId },
       select: { players: true },
     });

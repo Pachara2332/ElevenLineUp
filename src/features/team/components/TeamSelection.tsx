@@ -5,23 +5,28 @@ import { useRouter } from 'next/navigation';
 import { useLineupStore } from '@/features/lineup/stores/useLineupStore';
 import clsx from 'clsx';
 import { useQuery } from '@tanstack/react-query';
-import { PremierTeam } from '@prisma/client';
+import { Team } from '@prisma/client';
 
 async function fetchTeams() {
     const res = await fetch('/api/teams');
     if (!res.ok) throw new Error('Failed to fetch teams');
     const json = await res.json();
-    return json.data as PremierTeam[];
+    return json.data as Team[];
 }
 
 export default function TeamSelection() {
     const router = useRouter();
     const { selectedTeamId, setSelectedTeamId } = useLineupStore();
 
+    const [selectedLeague, setSelectedLeague] = useState('Premier League');
+    const leagues = ['Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1'];
+
     const { data: teams, isLoading } = useQuery({
         queryKey: ['teams'],
         queryFn: fetchTeams,
     });
+
+    const filteredTeams = teams?.filter(team => team.league === selectedLeague);
 
     const handleContinue = () => {
         if (selectedTeamId) {
@@ -34,14 +39,32 @@ export default function TeamSelection() {
     }
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-8 glass-panel rounded-[3rem] shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="w-full max-w-6xl mx-auto p-8 glass-panel rounded-[3rem] shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
             <h1 className="text-5xl font-black text-center mb-4 text-emerald-900 uppercase tracking-tighter drop-shadow-sm">
                 Select Your Club
             </h1>
-            <p className="text-center text-emerald-800 mb-12 text-lg font-medium">Choose the badge you fight for</p>
+            <p className="text-center text-emerald-800 mb-8 text-lg font-medium">Choose the badge you fight for</p>
+
+            {/* League Tabs */}
+            <div className="flex justify-center gap-3 mb-12 flex-wrap">
+                {leagues.map(league => (
+                    <button
+                        key={league}
+                        onClick={() => setSelectedLeague(league)}
+                        className={clsx(
+                            "px-6 py-2 rounded-full font-bold transition-all duration-300 uppercase tracking-widest text-sm",
+                            selectedLeague === league
+                                ? "bg-emerald-600 text-white shadow-lg scale-105"
+                                : "bg-white/40 text-emerald-900 hover:bg-white/60"
+                        )}
+                    >
+                        {league}
+                    </button>
+                ))}
+            </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-                {teams?.map((team) => (
+                {filteredTeams?.map((team) => (
                     <button
                         key={team.id}
                         onClick={() => setSelectedTeamId(team.id)}

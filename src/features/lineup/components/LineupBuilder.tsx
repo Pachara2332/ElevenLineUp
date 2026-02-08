@@ -29,7 +29,9 @@ export default function LineupBuilder() {
         squad,
         selectedTeamId,
         selectedSlotId,
-        setSelectedSlotId
+        setSelectedSlotId,
+        formation,
+        setFormation
     } = useLineupStore();
 
     // Fetch players for the selected team
@@ -92,14 +94,28 @@ export default function LineupBuilder() {
                 <div className="w-full md:w-80 glass-panel p-6 rounded-3xl flex flex-col gap-4 overflow-hidden">
                     <div className="flex items-center justify-between">
                         <h2 className="text-2xl font-black text-emerald-900 drop-shadow-sm uppercase tracking-wide">Squad</h2>
-                        {selectedSlotId && (
-                            <button
-                                onClick={() => setSelectedSlotId(null)}
-                                className="text-sm px-3 py-1 rounded-full bg-yellow-400 text-emerald-900 font-bold hover:bg-yellow-300 transition-colors"
+                        <div className="flex gap-2">
+                            <select
+                                value={formation}
+                                onChange={(e) => setFormation(e.target.value)}
+                                className="bg-white/50 border border-emerald-200 text-emerald-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-1"
                             >
-                                {POSITION_MAP[selectedSlotId]} ✕
-                            </button>
-                        )}
+                                <option value="4-3-3">4-3-3</option>
+                                <option value="4-2-3-1">4-2-3-1</option>
+                                <option value="3-4-3">3-4-3</option>
+                                <option value="5-3-2">5-3-2</option>
+                                <option value="4-1-4-1">4-1-4-1</option>
+                                <option value="3-4-2-1">3-4-2-1</option>
+                            </select>
+                            {selectedSlotId && (
+                                <button
+                                    onClick={() => setSelectedSlotId(null)}
+                                    className="text-sm px-3 py-1 rounded-full bg-yellow-400 text-emerald-900 font-bold hover:bg-yellow-300 transition-colors"
+                                >
+                                    {POSITION_MAP[selectedSlotId]} ✕
+                                </button>
+                            )}
+                        </div>
                     </div>
                     {selectedSlotId && (
                         <p className="text-sm text-emerald-700 -mt-2">

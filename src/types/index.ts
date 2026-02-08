@@ -16,6 +16,7 @@ export interface Player {
 export interface Team {
   id: string;
   name: string;
+  league: string;
   logo: string;
   players: Player[];
 }

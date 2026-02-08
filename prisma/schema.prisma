@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -19,9 +20,10 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-model PremierTeam {
+model Team {
   id        String   @id @default(cuid())
   name      String
+  league    String   @default("Premier League")
   logo      String
   players   Json // Array of player objects
   lineups   Lineup[]
@@ -36,8 +38,8 @@ model Lineup {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  premierTeamId String
-  premierTeam   PremierTeam @relation(fields: [premierTeamId], references: [id])
+  TeamId String
+  Team   Team   @relation(fields: [TeamId], references: [id])
 
   slots LineupSlot[]
 

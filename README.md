@@ -44,7 +44,7 @@
 ```
 User
  └── Lineup
-       ├── PremierTeam (Big Six - Read-only)
+       ├── Team (Big Six - Read-only)
        │     └── players (JSON Array)
        │
        ├── Pitch Slots (11 players)
@@ -74,7 +74,7 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-model PremierTeam {
+model Team {
   id        String   @id @default(cuid())
   name      String
   logo      String
@@ -89,8 +89,8 @@ model Lineup {
   formation     String
   userId        String
   user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  premierTeamId String
-  premierTeam   PremierTeam  @relation(fields: [premierTeamId], references: [id])
+  TeamId String
+  Team   Team  @relation(fields: [TeamId], references: [id])
   slots         LineupSlot[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt

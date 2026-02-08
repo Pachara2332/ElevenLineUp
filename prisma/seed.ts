@@ -197,22 +197,121 @@ const TEAMS = [
   }
 ];
 
+const EUROPEAN_TEAMS = [
+  // La Liga
+  {
+    name: 'Real Madrid',
+    league: 'La Liga',
+    logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
+    players: [
+      { id: 'rma_1', name: 'Thibaut Courtois', position: 'GK', number: 1, nationality: 'Belgium', age: 31, rating: 90, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250024467.jpg' },
+      { id: 'rma_2', name: 'Dani Carvajal', position: 'DEF', number: 2, nationality: 'Spain', age: 32, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250014644.jpg' },
+      { id: 'rma_3', name: 'Éder Militão', position: 'DEF', number: 3, nationality: 'Brazil', age: 26, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250106403.jpg' },
+      { id: 'rma_4', name: 'David Alaba', position: 'DEF', number: 4, nationality: 'Austria', age: 31, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250000452.jpg' },
+      { id: 'rma_5', name: 'Ferland Mendy', position: 'DEF', number: 23, nationality: 'France', age: 28, rating: 82, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250103758.jpg' },
+      { id: 'rma_6', name: 'Aurélien Tchouaméni', position: 'MID', number: 18, nationality: 'France', age: 24, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250125642.jpg' },
+      { id: 'rma_7', name: 'Federico Valverde', position: 'MID', number: 15, nationality: 'Uruguay', age: 25, rating: 88, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250064500.jpg' },
+      { id: 'rma_8', name: 'Jude Bellingham', position: 'MID', number: 5, nationality: 'England', age: 20, rating: 90, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250125642.jpg' },
+      { id: 'rma_9', name: 'Rodrygo', position: 'FWD', number: 11, nationality: 'Brazil', age: 23, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250106403.jpg' },
+      { id: 'rma_10', name: 'Vinícius Jr.', position: 'FWD', number: 7, nationality: 'Brazil', age: 23, rating: 89, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250079979.jpg' },
+      { id: 'rma_11', name: 'Kylian Mbappé', position: 'FWD', number: 9, nationality: 'France', age: 25, rating: 91, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250076574.jpg' }
+    ]
+  },
+  {
+    name: 'Barcelona',
+    league: 'La Liga',
+    logo: 'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg',
+    players: [
+      { id: 'bar_1', name: 'Marc-André ter Stegen', position: 'GK', number: 1, nationality: 'Germany', age: 31, rating: 89, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/104386.jpg' },
+      { id: 'bar_2', name: 'Jules Koundé', position: 'DEF', number: 23, nationality: 'France', age: 25, rating: 84, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250081734.jpg' },
+      { id: 'bar_3', name: 'Ronald Araújo', position: 'DEF', number: 4, nationality: 'Uruguay', age: 25, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250106678.jpg' },
+      { id: 'bar_4', name: 'Pau Cubarsí', position: 'DEF', number: 33, nationality: 'Spain', age: 17, rating: 80, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250175841.jpg' },
+      { id: 'bar_5', name: 'João Cancelo', position: 'DEF', number: 2, nationality: 'Portugal', age: 29, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250024467.jpg' },
+      { id: 'bar_6', name: 'Frenkie de Jong', position: 'MID', number: 21, nationality: 'Netherlands', age: 26, rating: 87, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250081734.jpg' },
+      { id: 'bar_7', name: 'Pedri', position: 'MID', number: 8, nationality: 'Spain', age: 21, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250130986.jpg' },
+      { id: 'bar_8', name: 'Gavi', position: 'MID', number: 6, nationality: 'Spain', age: 19, rating: 83, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250156972.jpg' },
+      { id: 'bar_9', name: 'Lamine Yamal', position: 'FWD', number: 27, nationality: 'Spain', age: 16, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250175841.jpg' },
+      { id: 'bar_10', name: 'Robert Lewandowski', position: 'FWD', number: 9, nationality: 'Poland', age: 35, rating: 90, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250002164.jpg' },
+      { id: 'bar_11', name: 'Raphinha', position: 'FWD', number: 11, nationality: 'Brazil', age: 27, rating: 84, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250081734.jpg' }
+    ]
+  },
+  // Serie A
+  {
+    name: 'Juventus',
+    league: 'Serie A',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/b/bc/Juventus_FC_2017_icon_%28black%29.svg',
+    players: [
+      { id: 'juv_1', name: 'Wojciech Szczesny', position: 'GK', number: 1, nationality: 'Poland', age: 34, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/104396.jpg' },
+      { id: 'juv_2', name: 'Gleison Bremer', position: 'DEF', number: 3, nationality: 'Brazil', age: 27, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250103758.jpg' },
+      { id: 'juv_3', name: 'Danilo', position: 'DEF', number: 6, nationality: 'Brazil', age: 32, rating: 83, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250024467.jpg' },
+      { id: 'juv_4', name: 'Federico Gatti', position: 'DEF', number: 4, nationality: 'Italy', age: 25, rating: 80, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250103758.jpg' },
+      { id: 'juv_5', name: 'Manuel Locatelli', position: 'MID', number: 5, nationality: 'Italy', age: 26, rating: 83, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250064376.jpg' },
+      { id: 'juv_6', name: 'Adrien Rabiot', position: 'MID', number: 25, nationality: 'France', age: 29, rating: 84, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250064376.jpg' },
+      { id: 'juv_7', name: 'Weston McKennie', position: 'MID', number: 16, nationality: 'USA', age: 25, rating: 81, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250064376.jpg' },
+      { id: 'juv_8', name: 'Filip Kostic', position: 'MID', number: 11, nationality: 'Serbia', age: 31, rating: 82, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250064376.jpg' },
+      { id: 'juv_9', name: 'Federico Chiesa', position: 'FWD', number: 7, nationality: 'Italy', age: 26, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250080608.jpg' },
+      { id: 'juv_10', name: 'Dusan Vlahovic', position: 'FWD', number: 9, nationality: 'Serbia', age: 24, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250106678.jpg' }
+    ]
+  },
+  // Bundesliga
+  {
+    name: 'Bayern Munich',
+    league: 'Bundesliga',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png',
+    players: [
+      { id: 'bay_1', name: 'Manuel Neuer', position: 'GK', number: 1, nationality: 'Germany', age: 38, rating: 88, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/93630.jpg' },
+      { id: 'bay_2', name: 'Joshua Kimmich', position: 'DEF', number: 6, nationality: 'Germany', age: 29, rating: 88, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250073289.jpg' },
+      { id: 'bay_3', name: 'Matthijs de Ligt', position: 'DEF', number: 4, nationality: 'Netherlands', age: 24, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250024467.jpg' },
+      { id: 'bay_4', name: 'Dayot Upamecano', position: 'DEF', number: 2, nationality: 'France', age: 25, rating: 84, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250024467.jpg' },
+      { id: 'bay_5', name: 'Alphonso Davies', position: 'DEF', number: 19, nationality: 'Canada', age: 23, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250024467.jpg' },
+      { id: 'bay_6', name: 'Leon Goretzka', position: 'MID', number: 8, nationality: 'Germany', age: 29, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250024467.jpg' },
+      { id: 'bay_7', name: 'Jamal Musiala', position: 'MID', number: 42, nationality: 'Germany', age: 21, rating: 87, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250133469.jpg' },
+      { id: 'bay_8', name: 'Leroy Sané', position: 'FWD', number: 10, nationality: 'Germany', age: 28, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250064350.jpg' },
+      { id: 'bay_9', name: 'Harry Kane', position: 'FWD', number: 9, nationality: 'England', age: 30, rating: 92, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250013589.jpg' },
+      { id: 'bay_10', name: 'Thomas Müller', position: 'FWD', number: 25, nationality: 'Germany', age: 34, rating: 84, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/93630.jpg' }
+    ]
+  },
+  // Ligue 1
+  {
+    name: 'Paris Saint-Germain',
+    league: 'Ligue 1',
+    logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png',
+    players: [
+      { id: 'psg_1', name: 'Gianluigi Donnarumma', position: 'GK', number: 99, nationality: 'Italy', age: 25, rating: 88, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250081822.jpg' },
+      { id: 'psg_2', name: 'Achraf Hakimi', position: 'DEF', number: 2, nationality: 'Morocco', age: 25, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250103759.jpg' },
+      { id: 'psg_3', name: 'Marquinhos', position: 'DEF', number: 5, nationality: 'Brazil', age: 29, rating: 87, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250103759.jpg' },
+      { id: 'psg_4', name: 'Lucas Hernández', position: 'DEF', number: 21, nationality: 'France', age: 28, rating: 85, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250103759.jpg' },
+      { id: 'psg_5', name: 'Nuno Mendes', position: 'DEF', number: 25, nationality: 'Portugal', age: 21, rating: 83, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250103759.jpg' },
+      { id: 'psg_6', name: 'Warren Zaïre-Emery', position: 'MID', number: 33, nationality: 'France', age: 18, rating: 82, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250165747.jpg' },
+      { id: 'psg_7', name: 'Vitinha', position: 'MID', number: 17, nationality: 'Portugal', age: 24, rating: 84, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250136278.jpg' },
+      { id: 'psg_8', name: 'Fabián Ruiz', position: 'MID', number: 8, nationality: 'Spain', age: 28, rating: 82, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250136278.jpg' },
+      { id: 'psg_9', name: 'Ousmane Dembélé', position: 'FWD', number: 10, nationality: 'France', age: 26, rating: 86, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250080614.jpg' },
+      { id: 'psg_10', name: 'Kylian Mbappé', position: 'FWD', number: 7, nationality: 'France', age: 25, rating: 91, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250076574.jpg' }, // Duplicate Mbappe strictly for testing :D
+      { id: 'psg_11', name: 'Gonçalo Ramos', position: 'FWD', number: 9, nationality: 'Portugal', age: 22, rating: 81, image: 'https://img.uefa.com/imgml/TP/players/1/2025/324x324/250076574.jpg' }
+    ]
+  }
+];
+
 async function main() {
   console.log('Start seeding ...');
   
   // Clear existing teams first (optional, but recommended for clean seeding)
-  await prisma.premierTeam.deleteMany();
+  await prisma.team.deleteMany();
   console.log('Cleared existing teams');
   
-  for (const team of TEAMS) {
-    const t = await prisma.premierTeam.create({
+  // Combine all teams
+  const ALL_TEAMS = [...TEAMS, ...EUROPEAN_TEAMS];
+
+  for (const team of ALL_TEAMS) {
+    const t = await prisma.team.create({
       data: {
         name: team.name,
+        league: (team as any).league || 'Premier League',
         logo: team.logo,
         players: team.players,
       },
     });
-    console.log(`Created team: ${t.name} with ${team.players.length} players (id: ${t.id})`);
+    console.log(`Created team: ${t.name} (${(team as any).league || 'Premier League'}) with ${team.players.length} players`);
   }
 
   console.log('Seeding finished.');
