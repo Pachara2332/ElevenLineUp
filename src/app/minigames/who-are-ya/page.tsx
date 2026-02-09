@@ -61,7 +61,7 @@ export default function WhoAreYaPage() {
     return (
         <div className="min-h-screen p-4 flex flex-col items-center">
             <header className="mb-6 w-full max-w-lg flex justify-between items-center text-white glass-panel p-4 rounded-2xl">
-                <button onClick={() => router.back()} className="font-bold text-white/70 hover:text-white">← Back</button>
+                <button onClick={() => router.back()} className="font-bold text-black/70 hover:text-black">← Back</button>
                 <div className="font-black text-xl">WHO ARE YA?</div>
                 <div className="text-sm font-bold bg-white/20 px-3 py-1 rounded-full">
                     {attempts}/8 Tries
@@ -108,7 +108,7 @@ export default function WhoAreYaPage() {
                             />
                             <button
                                 type="submit"
-                                className="bg-emerald-600 text-white font-black uppercase px-6 rounded-xl hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-200"
+                                className="bg-emerald-600 text-black font-black uppercase px-6 rounded-xl hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-200"
                             >
                                 Guess
                             </button>
