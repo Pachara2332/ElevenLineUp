@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { useQuery } from '@tanstack/react-query';
 import { Team } from '@prisma/client';
 
+keepPreviousData: true
 
 async function fetchTeams() {
     const res = await fetch('/api/teams');
@@ -34,18 +35,36 @@ export default function TeamSelection() {
     //     }
     // }, [search]); เพื่อกลับมาค้นหาทั้งหมด
 
-    const { data: teams, isLoading } = useQuery({
-        queryKey: ['teams'],
-        queryFn: fetchTeams,
-    });
+ 
+const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-    const filteredTeams = teams
-        ?.filter(team =>
-            selectedLeague === 'ALL' || team.league === selectedLeague
-        )
-        ?.filter(team =>
-            team.name.toLowerCase().includes(search.toLowerCase())
-        );
+useEffect(() => {
+    const t = setTimeout(() => {
+        setDebouncedSearch(search);
+    }, 300);   // delay 300ms
+
+    return () => clearTimeout(t);
+}, [search]);
+
+const { data: teams, isLoading, isFetching } = useQuery({
+    queryKey: ['teams-search', debouncedSearch],
+    queryFn: async () => {
+        const res = await fetch(`/api/teams/search?q=${debouncedSearch}`);
+        const json = await res.json();
+        return json.data as Team[];
+    },
+    placeholderData: (prev) => prev
+});
+
+
+
+
+
+
+const filteredTeams = teams
+    ?.filter(team =>
+        selectedLeague === 'ALL' || team.league === selectedLeague
+    );
 
 
 
@@ -56,9 +75,11 @@ export default function TeamSelection() {
         }
     };
 
-    if (isLoading) {
-        return <div className="text-white text-2xl font-bold animate-pulse">Loading Teams...</div>;
-    }
+   if (isLoading && !teams) {
+    return <div className="text-white text-2xl font-bold animate-pulse">Loading Teams...</div>;
+}
+
+
 
     return (
         <div className="w-full max-w-6xl mx-auto p-8 glass-panel rounded-[3rem] shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -78,7 +99,12 @@ export default function TeamSelection() {
                    focus:ring-2 focus:ring-emerald-500"
                 />
             </div>
-
+            
+{isFetching && (
+    <div className="text-xs text-emerald-600 text-center mb-3">
+        searching...
+    </div>
+)}
             {/* League Tabs */}
             <div className="flex justify-center gap-3 mb-12 flex-wrap">
                 {leagues.map(league => (
