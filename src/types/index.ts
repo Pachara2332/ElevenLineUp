@@ -5,12 +5,15 @@ export interface User {
 }
 
 export interface Player {
-  id: string; // Player ID from JSON/External API might still be 'id', let's check seed.ts regarding players. 
-  // In seed.ts players have 'id'. In schema, players is Json. So this persists as 'id'.
+  id: string;
   name: string;
   position: string;
-  teamId: string;
-  image: string;
+  teamId?: string;
+  image?: string;
+  nationality?: string;
+  dateOfBirth?: string;
+  height?: number;
+  foot?: string;
 }
 
 export interface Team {
