@@ -1,5 +1,4 @@
-
-import prisma from '@/lib/prisma';
+import prisma from '../lib/prisma';
 import fs from 'fs';
 import path from 'path';
 
@@ -20,6 +19,43 @@ async function main() {
   const season = leagueData.season || '2025-2026';
 
   console.log(`Processing ${leagueName} Season ${season}`);
+
+  // 1. Seed Teams (with Players) from scraped_data.json
+  const scrapedDataPath = path.join(process.cwd(), 'prisma', 'scraped_data.json');
+  if (fs.existsSync(scrapedDataPath)) {
+      console.log('📖 Reading scraped team data...');
+      const scrapedData = JSON.parse(fs.readFileSync(scrapedDataPath, 'utf-8'));
+      
+      for (const teamData of scrapedData) {
+        // Clean team name if necessary (remove trailing " F.C.")
+        const cleanName = teamData.name.replace(/ F\.C\.$/, '');
+        
+        const existingTeam = await prisma.team.findFirst({
+            where: { name: cleanName }
+        });
+
+        if (existingTeam) {
+            await prisma.team.update({
+                where: { teamId: existingTeam.teamId },
+                data: {
+                    logo: teamData.logo_url,
+                    players: teamData.players
+                }
+            });
+        } else {
+            await prisma.team.create({
+                data: {
+                    name: cleanName,
+                    league: leagueData.name || 'Premier League', // Default to current league for now
+                    logo: teamData.logo_url,
+                    players: teamData.players
+                }
+            });
+        }
+      }
+      // REVISION: I need to check if schema has unique on Team name. 
+      // If not, I will do: findFirst({ where: { name: teamData.name } }) -> if found update, else create.
+  }
 
   // Seed Standings
   for (const team of leagueData.standings) {
