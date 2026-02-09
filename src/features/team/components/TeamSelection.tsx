@@ -17,7 +17,11 @@ async function fetchTeams() {
 
 export default function TeamSelection() {
     const router = useRouter();
-    const { selectedTeamId, setSelectedTeamId } = useLineupStore();
+    const { selectedTeamId, setSelectedTeamId, resetLineup } = useLineupStore();
+
+    useEffect(() => {
+        resetLineup();
+    }, [resetLineup]);
 
     const [selectedLeague, setSelectedLeague] = useState('ALL');
     const [search, setSearch] = useState("");
@@ -62,18 +66,18 @@ export default function TeamSelection() {
                 Select Your Club
             </h1>
             <p className="text-center text-emerald-800 mb-8 text-lg font-medium">Choose the badge you fight for</p>
-<div className="flex justify-center mb-10">
-    <input
-        type="text"
-        placeholder="Search club..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-md px-5 py-3 rounded-full 
+            <div className="flex justify-center mb-10">
+                <input
+                    type="text"
+                    placeholder="Search club..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full max-w-md px-5 py-3 rounded-full 
                    border border-emerald-200 
                    shadow-sm focus:outline-none 
                    focus:ring-2 focus:ring-emerald-500"
-    />
-</div>
+                />
+            </div>
 
             {/* League Tabs */}
             <div className="flex justify-center gap-3 mb-12 flex-wrap">
@@ -120,12 +124,12 @@ export default function TeamSelection() {
                             selectedTeamId === team.teamId ? "text-emerald-900" : "text-emerald-900/70"
                         )}>{team.name}</span>
                         {selectedTeamId === team.teamId && (
-    <p className="text-xs font-semibold animate-fade-in">
-    <span className="text-emerald-900">Double click</span>
-    <span className="text-emerald-500"> to start instantly</span>
-</p>
+                            <p className="text-xs font-semibold animate-fade-in">
+                                <span className="text-emerald-900">Double click</span>
+                                <span className="text-emerald-500"> to start instantly</span>
+                            </p>
 
-)}
+                        )}
                     </button>
                 ))}
             </div>

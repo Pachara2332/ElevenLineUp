@@ -11,13 +11,16 @@ datasource db {
 }
 
 model User {
-  userId    String   @id @default(cuid()) @map("id")
-  email     String   @unique
+  userId    String    @id @default(cuid()) @map("id")
+  email     String    @unique
   password  String
   name      String
   lineups   Lineup[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  posts     Post[]
+  comments  Comment[]
+  likes     Like[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("User")
 }
@@ -69,4 +72,80 @@ model LineupSlot {
   playerImage String?
 
   @@map("LineupSlot")
+}
+
+model LeagueStanding {
+  id           String  @id @default(cuid())
+  league       String
+  season       String
+  teamName     String
+  position     Int
+  played       Int
+  won          Int
+  drawn        Int
+  lost         Int
+  goalsFor     Int
+  goalsAgainst Int
+  points       Int
+  form         String?
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([league, season, teamName])
+  @@index([league, season, position])
+  @@map("LeagueStanding")
+}
+
+model Fixture {
+  id       String   @id @default(cuid())
+  league   String
+  season   String
+  homeTeam String
+  awayTeam String
+  kickoff  DateTime
+  status   String // scheduled, live, finished
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([league, season, homeTeam, awayTeam, kickoff])
+  @@map("Fixture")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  authorId  String
+  content   String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+
+  author   User      @relation(fields: [authorId], references: [userId])
+  comments Comment[]
+  likes    Like[]
+
+  @@map("Post")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("Comment")
+}
+
+model Like {
+  id     String @id @default(cuid())
+  postId String
+  userId String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@map("Like")
 }
