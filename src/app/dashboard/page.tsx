@@ -1,4 +1,6 @@
 'use client';
+import ProfileDrawer from '@/app/dashboard/ProfileDrawer'
+import { useState } from 'react'
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import TeamSelection from '@/features/team/components/TeamSelection';
@@ -9,6 +11,7 @@ import { useEffect } from 'react';
 export default function DashboardPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
     const router = useRouter();
+const [openProfile, setOpenProfile] = useState(false)
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -29,9 +32,18 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-black text drop-shadow-md">
                         Dashboard <span className="text-emerald-300">Overview</span>
                     </h1>
-                    <p className="text-white/80">Welcome back, {user.name}</p>
+                    <p className="text-emerald-700">Welcome back, {user.name}</p>
                 </div>
-                <LogoutButton />
+               <div className="flex items-center gap-3">
+   <button
+      onClick={()=>setOpenProfile(true)}
+      className="px-4 py-2 rounded-xl bg-white/40 text-emerald-900 font-bold"
+   >
+      Profile
+   </button>
+   <LogoutButton />
+</div>
+
             </header>
 
             <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -88,6 +100,12 @@ export default function DashboardPage() {
                     <DashboardFixtures />
                 </div>
             </main>
+            <ProfileDrawer
+   open={openProfile}
+   onClose={()=>setOpenProfile(false)}
+   user={user}
+/>
+
         </div>
     );
 }
