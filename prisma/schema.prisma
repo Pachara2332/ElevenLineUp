@@ -22,6 +22,7 @@ model User {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   matchPredictions MatchPrediction[]
+  userGameStats    UserGameStats[]
 
   @@map("User")
 }
@@ -186,4 +187,66 @@ model Like {
 
   @@unique([postId, userId])
   @@map("Like")
+}
+
+// --- Mini Games System ---
+
+model DailyTicTacToe {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  rows      Json // Array of {label, type, value}
+  cols      Json // Array of {label, type, value}
+  solutions Json // { "0-0": ["playerId1"], "0-1": ... }
+
+  createdAt DateTime @default(now())
+
+  @@map("DailyTicTacToe")
+}
+
+model DailyMissingXI {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  teamName  String
+  formation String
+  players   Json // Array of slots { position, name, x, y, isMissing } 
+
+  createdAt DateTime @default(now())
+
+  @@map("DailyMissingXI")
+}
+
+model DailyWhoAreYa {
+  id            String   @id @default(cuid())
+  date          DateTime @unique
+  playerId      String? // Optional link to scraped player ID if we had a Player model
+  playerName    String
+  teamName      String?
+  blurredImage  String
+  pixelateLevel Int      @default(10)
+
+  createdAt DateTime @default(now())
+
+  @@map("DailyWhoAreYa")
+}
+
+model UserGameStats {
+  id       String @id @default(cuid())
+  userId   String
+  gameType String // "TIC_TAC_TOE", "MISSING_XI", "WHO_ARE_YA"
+
+  currentStreak Int       @default(0)
+  maxStreak     Int       @default(0)
+  lastPlayedAt  DateTime?
+  totalPlayed   Int       @default(0)
+  totalWins     Int       @default(0)
+
+  history Json? // Detailed history log
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, gameType])
+  @@map("UserGameStats")
 }

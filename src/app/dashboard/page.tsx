@@ -57,6 +57,12 @@ export default function DashboardPage() {
                             >
                                 Community Hub
                             </button>
+                            <button
+                                onClick={() => router.push('/minigames')}
+                                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg uppercase tracking-widest hover:scale-105 transition-all shadow-lg"
+                            >
+                                🎮 Mini Games
+                            </button>
                         </div>
                     </div>
 
