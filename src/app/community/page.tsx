@@ -24,7 +24,7 @@ export default function CommunityPage() {
                         <h1 className="text-3xl font-black text drop-shadow-md">
                             Community <span className="text-emerald-300">Hub</span>
                         </h1>
-                        <p className="text-white/80">Share your squads and discuss with others</p>
+                        <p className="text-emerald-700">Share your squads and discuss with others</p>
                     </div>
                 </div>
                 <LogoutButton />

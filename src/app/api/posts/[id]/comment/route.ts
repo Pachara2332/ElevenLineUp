@@ -1,40 +1,37 @@
-
-import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
-import { getAuthUser } from '@/lib/auth-helper';
+import { NextRequest, NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import { getAuthUser } from '@/lib/auth-helper'
 
 export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const user = await getAuthUser();
-    if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const { id } = await context.params
+  const user = await getAuthUser()
 
-    const { text } = await req.json();
-    const postId = params.id;
-
-    if (!text) {
-        return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    const comment = await prisma.comment.create({
-        data: {
-            postId,
-            userId: user.userId,
-            text
-        },
-        include: {
-            user: { select: { name: true } }
-        }
-    });
-
-    return NextResponse.json({ data: comment });
-
-  } catch (error) {
-    console.error("Comment error:", error);
-    return NextResponse.json({ error: "Failed to add comment" }, { status: 500 });
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const body = await req.json()
+  const text = body.text?.trim()
+
+  if (!text) {
+    return NextResponse.json({ error: 'Text required' }, { status: 400 })
+  }
+
+  const comment = await prisma.comment.create({
+    data: {
+      text,
+      postId: id,
+      userId: user.userId
+    },
+    include: {
+      user: {
+        select: { userId: true, name: true }
+      }
+    }
+  })
+
+  return NextResponse.json(comment)
 }
