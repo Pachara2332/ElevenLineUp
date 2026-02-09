@@ -1,9 +1,7 @@
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import fs from 'fs';
 import path from 'path';
-
-const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Start seeding from JSON...');
@@ -41,6 +39,7 @@ async function main() {
         lost: team.lost,
         goalsFor: team.goalsFor,
         goalsAgainst: team.goalsAgainst,
+        goalDifference: team.goalsFor - team.goalsAgainst, // Calculate GD
         points: team.points,
         form: team.form,
       },
@@ -55,6 +54,7 @@ async function main() {
         lost: team.lost,
         goalsFor: team.goalsFor,
         goalsAgainst: team.goalsAgainst,
+        goalDifference: team.goalsFor - team.goalsAgainst, // Calculate GD
         points: team.points,
         form: team.form,
       },
@@ -91,5 +91,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    // await prisma.$disconnect(); 
   });

@@ -17,7 +17,7 @@ export default function CommunityPage() {
         <div className="min-h-screen p-4 md:p-8">
             <header className="flex justify-between items-center mb-8 max-w-4xl mx-auto">
                 <div className="flex items-center gap-4">
-                    <Link href="/dashboard" className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
+                    <Link href="/dashboard" className="p-2 rounded-full bg-white/10 hover:bg-white/20 text transition-colors">
                         <ArrowLeftIcon className="w-6 h-6" />
                     </Link>
                     <div>

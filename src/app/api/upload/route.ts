@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       ContentType: 'image/jpeg',
     }));
 
-    const url = domain ? `${domain}/${key}` : key; 
+    const url = domain ? `${domain}/${key}` : `https://pub-b54491c0affd4412b86ae26eb6c9e7b3.r2.dev/${key}`; 
 
     return NextResponse.json({ url, key });
   } catch (error) {

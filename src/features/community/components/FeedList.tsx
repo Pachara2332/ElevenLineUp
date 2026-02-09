@@ -7,6 +7,7 @@ import { HandThumbUpIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline
 import { HandThumbUpIcon as HandThumbUpIconSolid } from '@heroicons/react/24/solid';
 import { useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import clsx from 'clsx';
 
 interface Post {
     id: string;

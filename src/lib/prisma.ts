@@ -1,15 +1,8 @@
 
 import { PrismaClient } from '@prisma/client';
-import { config } from '@/config/unifiedConfig';
 
 const prismaClientSingleton = () => {
-  return new PrismaClient({
-    datasources: {
-      db: {
-        url: config.db.url,
-      },
-    },
-  });
+  return new PrismaClient();
 };
 
 declare global {

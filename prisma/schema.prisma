@@ -11,28 +11,33 @@ datasource db {
 }
 
 model User {
-  userId    String    @id @default(cuid()) @map("id")
-  email     String    @unique
-  password  String
-  name      String
-  lineups   Lineup[]
-  posts     Post[]
-  comments  Comment[]
-  likes     Like[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  userId           String            @id @default(cuid()) @map("id")
+  email            String            @unique
+  password         String
+  name             String
+  lineups          Lineup[]
+  posts            Post[]
+  comments         Comment[]
+  likes            Like[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  matchPredictions MatchPrediction[]
 
   @@map("User")
 }
 
 model Team {
-  teamId    String   @id @default(cuid()) @map("id")
-  name      String
-  league    String
-  logo      String
-  players   Json
-  lineups   Lineup[]
-  createdAt DateTime @default(now())
+  teamId      String            @id @default(cuid()) @map("id")
+  name        String
+  league      String
+  logo        String
+  players     Json
+  lineups     Lineup[]
+  posts       Post[]
+  comments    Comment[]
+  likes       Like[]
+  predictions MatchPrediction[]
+  createdAt   DateTime          @default(now())
 
   @@map("Team")
 }
@@ -47,7 +52,7 @@ model Lineup {
   user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   teamId String @map("team_id")
-  team   Team   @relation(fields: [teamId], references: [teamId])
+  team   Team   @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
 
   slots LineupSlot[]
 
@@ -75,40 +80,67 @@ model LineupSlot {
 }
 
 model LeagueStanding {
-  id           String  @id @default(cuid())
-  league       String
-  season       String
-  teamName     String
-  position     Int
-  played       Int
-  won          Int
-  drawn        Int
-  lost         Int
-  goalsFor     Int
-  goalsAgainst Int
-  points       Int
-  form         String?
+  id             String  @id @default(cuid())
+  league         String
+  season         String
+  teamName       String
+  position       Int
+  played         Int
+  won            Int
+  drawn          Int
+  lost           Int
+  goalsFor       Int
+  goalsAgainst   Int
+  goalDifference Int     @default(0) // Pre-calculated: goalsFor - goalsAgainst
+  points         Int
+  form           String?
 
   updatedAt DateTime @updatedAt
 
   @@unique([league, season, teamName])
-  @@index([league, season, position])
+  @@index([league, season, position, goalDifference])
   @@map("LeagueStanding")
 }
 
 model Fixture {
-  id       String   @id @default(cuid())
-  league   String
-  season   String
-  homeTeam String
-  awayTeam String
-  kickoff  DateTime
-  status   String // scheduled, live, finished
+  id        String   @id @default(cuid())
+  league    String
+  season    String
+  homeTeam  String
+  awayTeam  String
+  kickoff   DateTime
+  status    String // scheduled, live, finished
+  homeScore Int?
+  awayScore Int?
 
   updatedAt DateTime @updatedAt
 
+  predictions MatchPrediction[]
+
   @@unique([league, season, homeTeam, awayTeam, kickoff])
   @@map("Fixture")
+}
+
+model MatchPrediction {
+  id        String @id @default(cuid())
+  userId    String
+  fixtureId String
+
+  predictedHome Int
+  predictedAway Int
+  points        Int? // Calculated after match finishes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  fixture Fixture @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  team    Team?   @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
+
+  teamTeamId String?
+
+  @@unique([userId, fixtureId])
+  @@map("MatchPrediction")
 }
 
 model Post {
@@ -118,9 +150,11 @@ model Post {
   imageUrl  String?
   createdAt DateTime @default(now())
 
-  author   User      @relation(fields: [authorId], references: [userId])
-  comments Comment[]
-  likes    Like[]
+  author     User      @relation(fields: [authorId], references: [userId])
+  comments   Comment[]
+  likes      Like[]
+  team       Team?     @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
+  teamTeamId String?
 
   @@map("Post")
 }
@@ -132,8 +166,10 @@ model Comment {
   text      String
   createdAt DateTime @default(now())
 
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  post       Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  team       Team?   @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
+  teamTeamId String?
 
   @@map("Comment")
 }
@@ -143,8 +179,10 @@ model Like {
   postId String
   userId String
 
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  post       Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  team       Team?   @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
+  teamTeamId String?
 
   @@unique([postId, userId])
   @@map("Like")
