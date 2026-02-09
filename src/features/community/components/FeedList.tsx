@@ -52,7 +52,8 @@ export default function FeedList() {
 }
 
 function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string }) {
-    
+    const [showComments, setShowComments] = useState(false)
+
     const isLiked = post.likes.some(l => l.userId === currentUserId);
     const [liked, setLiked] = useState(isLiked);
     const [likesCount, setLikesCount] = useState(post._count.likes);
@@ -112,14 +113,19 @@ const [comments, setComments] = useState(post.comments || [])
                 <span>{likesCount}</span>
             </button>
 
-            <button className="flex items-center gap-2 text-emerald-900/60 hover:text-emerald-900 font-semibold transition-colors">
-                <ChatBubbleLeftIcon className="w-6 h-6" />
-                <span>{comments.length} Comments</span>
+           <button
+            onClick={() => setShowComments(prev => !prev)}
+            className="flex items-center gap-2 text-emerald-900/60 hover:text-emerald-900 font-semibold transition-colors"
+            >
+            <ChatBubbleLeftIcon className="w-6 h-6" />
+            <span>{comments.length} Comments</span>
             </button>
+
         </div>
 
         {/* comments section */}
-        <div className="mt-4">
+        {showComments && (
+        <div className="mt-4 transition-all duration-300 ease-in-out">
             <CommentList comments={comments} />
 
             <CommentBox
@@ -127,6 +133,8 @@ const [comments, setComments] = useState(post.comments || [])
                 onNewComment={(c)=>setComments(prev=>[...prev,c])}
             />
         </div>
+        )}
+
     </div>
 );
 

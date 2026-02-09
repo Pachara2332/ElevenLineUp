@@ -8,11 +8,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
     const take = 50;
-    
-    // Optional: Get current user to check "liked" status effectively if we want to optimize later
-    // const user = await getAuthUser();
 
     const posts = await prisma.post.findMany({
       take,
@@ -23,7 +19,21 @@ export async function GET(req: Request) {
         author: {
           select: {
             name: true,
-            // avatar: true 
+          }
+        },
+        comments: {                 // ← เพิ่มตรงนี้
+          include: {
+            user: {
+              select: { name: true }
+            }
+          },
+          orderBy: {
+            createdAt: 'asc'
+          }
+        },
+        likes: {
+          select: {
+            userId: true
           }
         },
         _count: {
@@ -31,11 +41,6 @@ export async function GET(req: Request) {
             likes: true,
             comments: true,
           }
-        },
-        likes: {
-            select: {
-                userId: true
-            }
         }
       },
     });
@@ -46,6 +51,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
   }
 }
+
 
 export async function POST(req: Request) {
   try {
