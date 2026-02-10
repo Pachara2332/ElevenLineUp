@@ -64,14 +64,6 @@ export default function MiniGamesPage() {
                 ))}
             </div>
 
-            <div className="mt-12 text-center">
-                <button
-                    onClick={() => router.push('/dashboard')}
-                    className="text-black/60 hover:text-black font-bold transition-colors flex items-center justify-center gap-2 mx-auto"
-                >
-                    ← Back to Dashboard
-                </button>
-            </div>
         </div>
     );
 }
