@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import LogoutButton from '@/components/LogoutButton';
 import ProfileDrawer from '@/app/dashboard/ProfileDrawer';
+import NotificationDropdown from './NotificationDropdown';
 import { usePathname, useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -62,8 +63,8 @@ export default function DashboardHeader() {
                             <button
                                 onClick={() => router.back()}
                                 className={`p-2 rounded-full transition-all ${scrolled
-                                        ? 'bg-emerald-100/50 hover:bg-emerald-200/50 text-emerald-800'
-                                        : 'bg-white/20 hover:bg-white/30 text-emerald-900 group'
+                                    ? 'bg-emerald-100/50 hover:bg-emerald-200/50 text-emerald-800'
+                                    : 'bg-white/20 hover:bg-white/30 text-emerald-900 group'
                                     }`}
                                 aria-label="Go back"
                             >
@@ -87,6 +88,7 @@ export default function DashboardHeader() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <NotificationDropdown />
                         <button
                             onClick={() => setOpenProfile(true)}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${scrolled

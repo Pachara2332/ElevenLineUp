@@ -28,10 +28,36 @@ export async function POST(
     },
     include: {
       user: {
-        select: { userId: true, name: true }
+        select: { userId: true, name: true, avatar: true }
+      },
+      post: {
+        select: { authorId: true }
       }
     }
   })
+
+  // Create Notification
+  if (comment.post.authorId !== user.userId) {
+    const notification = await prisma.notification.create({
+      data: {
+        userId: comment.post.authorId,
+        actorId: user.userId,
+        type: 'COMMENT',
+        message: 'commented on your post',
+        postId: id
+      },
+      include: {
+        actor: { select: { name: true, avatar: true } },
+        post: { select: { id: true } }
+      }
+    });
+
+    // Emit Socket Event
+    const io = (global as any).io;
+    if (io) {
+        io.to(`user-${comment.post.authorId}`).emit('notification', notification);
+    }
+  }
 
   return NextResponse.json(comment)
 }
