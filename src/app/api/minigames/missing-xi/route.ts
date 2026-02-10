@@ -1,61 +1,62 @@
-
-import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
-    try {
-        const game = await prisma.dailyMissingXI.findFirst({
-             where: { date: { lte: new Date() } },
-             orderBy: { date: 'desc' }
-        });
+  // Mock Data: Real Madrid 2016/17 UCL Final
+  const mockGame = {
+    id: "mock-missing-xi-1",
+    team: {
+      name: "Real Madrid",
+      logo: "/teams/realmd.png", // Mock path
+    },
+    season: "2016/17",
+    formation: "4-3-3",
+    lineup: [
+      { name: "Navas", position: "GK", x: 50, y: 90, is_masked: false },
+      { name: "Carvajal", position: "RB", x: 90, y: 70, is_masked: false },
+      { name: "Varane", position: "CB", x: 65, y: 75, is_masked: false },
+      { name: "Ramos", position: "CB", x: 35, y: 75, is_masked: true }, // MISSING
+      { name: "Marcelo", position: "LB", x: 10, y: 70, is_masked: false },
+      { name: "Casemiro", position: "CDM", x: 50, y: 60, is_masked: true }, // MISSING
+      { name: "Modric", position: "CM", x: 70, y: 55, is_masked: false },
+      { name: "Kroos", position: "CM", x: 30, y: 55, is_masked: false },
+      { name: "Isco", position: "CAM", x: 50, y: 40, is_masked: false },
+      { name: "Benzema", position: "ST", x: 50, y: 15, is_masked: true }, // MISSING
+      { name: "Ronaldo", position: "LW", x: 20, y: 25, is_masked: false },
+    ],
+  };
 
-        if (!game) return NextResponse.json({ error: "No game found" }, { status: 404 });
-
-        // Transform players to hide the names of missing ones
-        const players = (game.players as any[]).map(p => ({
-            ...p,
-            name: p.isMissing ? '???' : p.name, // Hide name if missing
-            isRevealed: !p.isMissing
-        }));
-
-        return NextResponse.json({
-            data: {
-                id: game.id,
-                date: game.date,
-                teamName: game.teamName,
-                formation: game.formation,
-                players
-            }
-        });
-
-    } catch (error) {
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-    }
+  return NextResponse.json({
+    data: mockGame,
+  });
 }
+
 export async function POST(req: Request) {
-    try {
-        const { gameId, guess } = await req.json(); // guess is a player name string
-        
-        const game = await prisma.dailyMissingXI.findUnique({ where: { id: gameId } });
-        if (!game) return NextResponse.json({ error: "Game not found" }, { status: 404 });
+  try {
+    const { guess } = await req.json();
 
-        // Check if guess matches ANY missing player
-        const players = game.players as any[];
-        const matchIndex = players.findIndex(p => 
-            p.isMissing && p.name.toLowerCase() === guess.toLowerCase()
-        );
+    // Mock check logic
+    const correctAnswers: Record<string, string> = {
+      ramos: "Sergio Ramos",
+      casemiro: "Casemiro",
+      benzema: "Karim Benzema",
+    };
 
-        if (matchIndex !== -1) {
-            return NextResponse.json({
-                correct: true,
-                player: players[matchIndex],
-                index: matchIndex
-            });
-        }
+    const guessLower = guess.toLowerCase();
 
-        return NextResponse.json({ correct: false });
+    // Check if guess matches any partial key
+    const match = Object.keys(correctAnswers).find((k) =>
+      guessLower.includes(k),
+    );
 
-    } catch (error) {
-        return NextResponse.json({ error: "Validation failed" }, { status: 500 });
+    if (match) {
+      return NextResponse.json({
+        correct: true,
+        real_name: correctAnswers[match],
+      });
     }
+
+    return NextResponse.json({ correct: false });
+  } catch (error) {
+    return NextResponse.json({ error: "Validation failed" }, { status: 500 });
+  }
 }
