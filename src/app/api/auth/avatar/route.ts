@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
 import { getAuthUser } from '@/lib/auth-helper'
 import prisma from '@/lib/prisma'
-import { existsSync } from 'fs'
+import { r2 } from "@/lib/r2"
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { v4 as uuid } from "uuid"
+import sharp from "sharp"
 
 export async function POST(req: Request) {
   try {
@@ -35,24 +36,31 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // สร้างชื่อไฟล์ที่ unique
-    const fileExtension = file.name.split('.').pop() || 'png'
-    const fileName = `${user.userId}-${Date.now()}.${fileExtension}`
-    
-    // กำหนด path สำหรับบันทึกไฟล์
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-    const filePath = path.join(uploadDir, fileName)
+    // Resize and optimize with sharp for avatar
+    // Avatar usually doesn't need to be huge, 400x400 is good
+    const optimizedBuffer = await sharp(buffer)
+        .resize(400, 400, {
+            fit: 'cover', // Cut to square
+            position: 'center'
+        })
+        .jpeg({ quality: 80 })
+        .toBuffer()
 
-    // สร้างโฟลเดอร์ถ้ายังไม่มี
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
-    }
+    // สร้าง key สำหรับ R2 (แยก folder avatars)
+    const key = `avatars/${user.userId}-${uuid()}.jpg`
+    const bucket = process.env.R2_BUCKET
+    const domain = process.env.NEXT_PUBLIC_R2_DOMAIN
 
-    // บันทึกไฟล์
-    await writeFile(filePath, buffer)
+    // Upload to subscriber bucket
+    await r2.send(new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: optimizedBuffer,
+      ContentType: 'image/jpeg',
+    }))
 
     // URL สำหรับเข้าถึงรูปภาพ
-    const avatarUrl = `/uploads/${fileName}`
+    const avatarUrl = domain ? `${domain}/${key}` : `https://pub-b54491c0affd4412b86ae26eb6c9e7b3.r2.dev/${key}`
 
     // อัพเดท database
     await prisma.user.update({

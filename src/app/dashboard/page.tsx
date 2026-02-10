@@ -1,18 +1,13 @@
 'use client';
-import ProfileDrawer from '@/app/dashboard/ProfileDrawer'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import TeamSelection from '@/features/team/components/TeamSelection';
-import LogoutButton from '@/components/LogoutButton';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import DashboardStandings from '@/components/dashboard/DashboardStandings';
 import DashboardFixtures from '@/components/dashboard/DashboardFixtures';
 
 export default function DashboardPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
     const router = useRouter();
-    const [openProfile, setOpenProfile] = useState(false)
     const [userStats, setUserStats] = useState({
         lineupsCount: 0,
         winRate: 0
@@ -48,23 +43,17 @@ export default function DashboardPage() {
 
     const calculateWinRate = (gameStats: any) => {
         if (!gameStats || Object.keys(gameStats).length === 0) return 0
-        
+
         let totalPlayed = 0
         let totalWins = 0
-        
+
         Object.values(gameStats).forEach((stat: any) => {
             totalPlayed += stat.totalPlayed || 0
             totalWins += stat.totalWins || 0
         })
-        
+
         if (totalPlayed === 0) return 0
         return Math.round((totalWins / totalPlayed) * 100)
-    }
-
-    const handleProfileClose = () => {
-        setOpenProfile(false)
-        // รีเฟรชข้อมูลสถิติหลังปิด profile
-        fetchUserStats()
     }
 
     if (isLoading) {
@@ -74,25 +63,7 @@ export default function DashboardPage() {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen p-4 md:p-8">
-            <header className="flex justify-between items-center mb-8 max-w-7xl mx-auto">
-                <div>
-                    <h1 className="text-3xl font-black text drop-shadow-md">
-                        Dashboard <span className="text-emerald-300">Overview</span>
-                    </h1>
-                    <p className="text-emerald-700">Welcome back, {user.name}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setOpenProfile(true)}
-                        className="px-4 py-2 rounded-xl bg-white/40 text-emerald-900 font-bold hover:bg-white/60 transition-all"
-                    >
-                        Profile
-                    </button>
-                    <LogoutButton />
-                </div>
-            </header>
-
+        <div className="p-4 md:p-8">
             <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column: Actions & Stats */}
                 <div className="lg:col-span-4 space-y-6">
@@ -151,12 +122,6 @@ export default function DashboardPage() {
                     <DashboardFixtures />
                 </div>
             </main>
-
-            <ProfileDrawer
-                open={openProfile}
-                onClose={handleProfileClose}
-                user={user}
-            />
         </div>
     );
 }
