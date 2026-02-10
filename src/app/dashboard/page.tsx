@@ -1,14 +1,22 @@
 'use client';
-
+import ProfileDrawer from '@/app/dashboard/ProfileDrawer'
+import { useState } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import TeamSelection from '@/features/team/components/TeamSelection';
 import LogoutButton from '@/components/LogoutButton';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import DashboardStandings from '@/components/dashboard/DashboardStandings';
+import DashboardFixtures from '@/components/dashboard/DashboardFixtures';
 
 export default function DashboardPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
     const router = useRouter();
+    const [openProfile, setOpenProfile] = useState(false)
+    const [userStats, setUserStats] = useState({
+        lineupsCount: 0,
+        winRate: 0
+    })
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -16,11 +24,54 @@ export default function DashboardPage() {
         }
     }, [isLoading, isAuthenticated, router]);
 
+    // ดึงข้อมูลสถิติผู้ใช้
+    useEffect(() => {
+        if (user) {
+            fetchUserStats()
+        }
+    }, [user])
+
+    const fetchUserStats = async () => {
+        try {
+            const res = await fetch('/api/user/stats')
+            if (res.ok) {
+                const data = await res.json()
+                setUserStats({
+                    lineupsCount: data.data.lineupsCount || 0,
+                    winRate: calculateWinRate(data.data.gameStats) || 0
+                })
+            }
+        } catch (error) {
+            console.error('Failed to fetch user stats:', error)
+        }
+    }
+
+    const calculateWinRate = (gameStats: any) => {
+        if (!gameStats || Object.keys(gameStats).length === 0) return 0
+        
+        let totalPlayed = 0
+        let totalWins = 0
+        
+        Object.values(gameStats).forEach((stat: any) => {
+            totalPlayed += stat.totalPlayed || 0
+            totalWins += stat.totalWins || 0
+        })
+        
+        if (totalPlayed === 0) return 0
+        return Math.round((totalWins / totalPlayed) * 100)
+    }
+
+    const handleProfileClose = () => {
+        setOpenProfile(false)
+        // รีเฟรชข้อมูลสถิติหลังปิด profile
+        fetchUserStats()
+    }
+
     if (isLoading) {
         return <div className="text-white text-2xl font-bold animate-pulse text-center mt-20">Loading Dashboard...</div>;
     }
 
-    if (!user) return null; // Will redirect
+    if (!user) return null;
 
     return (
         <div className="min-h-screen p-4 md:p-8">
@@ -29,9 +80,17 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-black text drop-shadow-md">
                         Dashboard <span className="text-emerald-300">Overview</span>
                     </h1>
-                    <p className="text-white/80">Welcome back, {user.name}</p>
+                    <p className="text-emerald-700">Welcome back, {user.name}</p>
                 </div>
-                <LogoutButton />
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setOpenProfile(true)}
+                        className="px-4 py-2 rounded-xl bg-white/40 text-emerald-900 font-bold hover:bg-white/60 transition-all"
+                    >
+                        Profile
+                    </button>
+                    <LogoutButton />
+                </div>
             </header>
 
             <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -66,16 +125,20 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* Placeholder for My Lineups or Other stats */}
+                    {/* Your Stats - แสดงข้อมูลจริง */}
                     <div className="glass-panel p-6 rounded-3xl">
-                        <h3 className="font-bold text-emerald-900 mb-2">Your Stats</h3>
+                        <h3 className="font-bold text-emerald-900 mb-4">Your Stats</h3>
                         <div className="grid grid-cols-2 gap-4 text-center">
                             <div className="bg-white/20 rounded-xl p-4">
-                                <div className="text-2xl font-black text-emerald-800">0</div>
+                                <div className="text-2xl font-black text-emerald-800">
+                                    {userStats.lineupsCount}
+                                </div>
                                 <div className="text-xs font-bold text-emerald-900/60 uppercase">Lineups</div>
                             </div>
                             <div className="bg-white/20 rounded-xl p-4">
-                                <div className="text-2xl font-black text-emerald-800">-</div>
+                                <div className="text-2xl font-black text-emerald-800">
+                                    {userStats.winRate > 0 ? `${userStats.winRate}%` : '-'}
+                                </div>
                                 <div className="text-xs font-bold text-emerald-900/60 uppercase">Win Rate</div>
                             </div>
                         </div>
@@ -88,10 +151,12 @@ export default function DashboardPage() {
                     <DashboardFixtures />
                 </div>
             </main>
+
+            <ProfileDrawer
+                open={openProfile}
+                onClose={handleProfileClose}
+                user={user}
+            />
         </div>
     );
 }
-
-// Minimal placeholder for the sub-components to avoid build errors if not imported yet
-import DashboardStandings from '@/components/dashboard/DashboardStandings';
-import DashboardFixtures from '@/components/dashboard/DashboardFixtures';

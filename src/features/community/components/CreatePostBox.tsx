@@ -18,12 +18,13 @@ export default function CreatePostBox() {
 
     // 1. Upload Image
     const uploadImage = async (file: File) => {
-        const formData = new FormData();
+        const formData = new FormData();    
         formData.append('file', file);
 
         const res = await fetch('/api/upload', {
             method: 'POST',
             body: formData,
+            credentials: 'include' 
         });
 
         if (!res.ok) throw new Error('Upload failed');
@@ -45,7 +46,8 @@ export default function CreatePostBox() {
                     content,
                     imageUrl
                 }),
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
+                 credentials: 'include'
             });
 
             if (!res.ok) throw new Error('Failed to create post');
