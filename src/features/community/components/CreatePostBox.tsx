@@ -18,13 +18,13 @@ export default function CreatePostBox() {
 
     // 1. Upload Image
     const uploadImage = async (file: File) => {
-        const formData = new FormData();    
+        const formData = new FormData();
         formData.append('file', file);
 
         const res = await fetch('/api/upload', {
             method: 'POST',
             body: formData,
-            credentials: 'include' 
+            credentials: 'include'
         });
 
         if (!res.ok) throw new Error('Upload failed');
@@ -47,7 +47,7 @@ export default function CreatePostBox() {
                     imageUrl
                 }),
                 headers: { 'Content-Type': 'application/json' },
-                 credentials: 'include'
+                credentials: 'include'
             });
 
             if (!res.ok) throw new Error('Failed to create post');
@@ -83,9 +83,17 @@ export default function CreatePostBox() {
         <div className="glass-panel p-6 rounded-3xl mb-8">
             <div className="flex gap-4">
                 {/* Avatar placeholder if no user image */}
-                <div className="w-12 h-12 rounded-full bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shrink-0">
-                    {user.name.charAt(0)}
-                </div>
+                {user.avatar ? (
+                    <img
+                        src={user.avatar}
+                        alt={user.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-emerald-700 hover:scale-105 transition-transform"
+                    />
+                ) : (
+                    <div className="w-12 h-12 rounded-full bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shrink-0">
+                        {user.name.charAt(0)}
+                    </div>
+                )}
 
                 <div className="flex-1">
                     <textarea

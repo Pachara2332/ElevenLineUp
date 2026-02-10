@@ -19,12 +19,16 @@ export async function GET(req: Request) {
         author: {
           select: {
             name: true,
+            avatar: true,
           }
         },
         comments: {                 // ← เพิ่มตรงนี้
           include: {
             user: {
-              select: { name: true }
+              select: { 
+                name: true, 
+                avatar: true 
+              }
             }
           },
           orderBy: {
@@ -74,7 +78,7 @@ export async function POST(req: Request) {
         imageUrl,
       },
       include: {
-          author: { select: { name: true } },
+          author: { select: { name: true, avatar: true } },
           _count: { select: { likes: true, comments: true } },
           likes: true
       }
