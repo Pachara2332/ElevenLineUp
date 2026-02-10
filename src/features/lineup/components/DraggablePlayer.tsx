@@ -170,11 +170,12 @@ export const DraggablePlayer: React.FC<DraggablePlayerProps> = ({ player }) => {
       {...listeners}
       {...attributes}
       className={`
+        relative
         flex items-center p-2 gap-3 rounded-2xl cursor-grab active:cursor-grabbing
         bg-gradient-to-br from-slate-800 to-slate-900
         border border-slate-600/50 hover:border-emerald-400/50
         transition-all shadow-lg hover:shadow-emerald-500/20
-        ${isDragging ? "opacity-50 scale-95" : "hover:scale-[1.02]"}
+        ${isDragging ? "opacity-50 scale-95 z-0" : "hover:scale-[1.02] hover:z-50"}
       `}
     >
       {/* Avatar - same style as pitch slot */}

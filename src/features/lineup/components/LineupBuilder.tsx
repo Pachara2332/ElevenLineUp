@@ -55,41 +55,12 @@ export default function LineupBuilder() {
     slotPosition: string;
   } | null>(null);
 
-  // Filter state
+  // Filter state - เหลือแค่ search
   const [activeFilters, setActiveFilters] = useState<{
     search: string;
-    season: string;
-    birthYearFrom: string;
-    birthYearTo: string;
-    heightFrom: string;
-    heightTo: string;
-    preferredFoot: string;
   }>({
     search: "",
-    season: "",
-    birthYearFrom: "",
-    birthYearTo: "",
-    heightFrom: "",
-    heightTo: "",
-    preferredFoot: "",
   });
-
-  const [seasons, setSeasons] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchSeasons = async () => {
-      try {
-        const res = await fetch("/api/filters/seasons");
-        if (res.ok) {
-          const json = await res.json();
-          setSeasons(json);
-        }
-      } catch (error) {
-        console.error("Failed to fetch seasons", error);
-      }
-    };
-    fetchSeasons();
-  }, []);
 
   useEffect(() => {
     // Legacy fetch removed in favor of page-level fetching
@@ -250,20 +221,17 @@ export default function LineupBuilder() {
 
       if (filters) {
         if (filters.search) params.append("search", filters.search);
-        if (filters.season) params.append("season", filters.season);
-
-        if (filters.birthYearFrom)
-          params.append("birth_year", filters.birthYearFrom);
-        if (filters.heightFrom) params.append("min_height", filters.heightFrom);
-        if (filters.heightTo) params.append("max_height", filters.heightTo);
-        if (filters.preferredFoot)
-          params.append("foot", filters.preferredFoot.toLowerCase());
       }
+
+      console.log(`[Frontend] Fetching players with params:`, params.toString());
 
       const res = await fetch(
         `/api/teams/${selectedTeamId}/players?${params.toString()}`,
       );
       const json = await res.json();
+      
+      console.log(`[Frontend] Final result: ${json.data?.length || 0} players`);
+      
       setSquad(json.data || []);
     } catch (error) {
       console.error("Failed to fetch players:", error);
@@ -323,7 +291,7 @@ export default function LineupBuilder() {
           />
         </div>
 
-        <div className="w-full md:w-[380px] glass-panel p-6 rounded-3xl flex flex-col gap-5 overflow-hidden">
+        <div className="w-full md:w-[380px] glass-panel p-6 rounded-3xl flex flex-col gap-5">
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div>
@@ -357,19 +325,24 @@ export default function LineupBuilder() {
             </div>
           </div>
 
-          {/* Advanced Filter */}
-          <AdvancedFilter
-            seasons={seasons}
-            onFilterChange={(filters) => {
-              setActiveFilters(filters);
-              // Re-fetch with new filters
-              if (selectedSlot) {
-                fetchPlayersWithFilters(selectedSlot.position, filters);
-              }
-            }}
-          />
+          {/* Simple Filter: Search Only */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search player..."
+              value={activeFilters.search}
+              onChange={(e) => {
+                const newFilters = { search: e.target.value };
+                setActiveFilters(newFilters);
+                if (selectedSlot) {
+                  fetchPlayersWithFilters(selectedSlot.position, newFilters);
+                }
+              }}
+              className="w-full px-4 py-2 rounded-lg bg-white border border-emerald-200 text-emerald-900 text-sm placeholder-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
 
-          <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
+          <div className="space-y-3 overflow-y-auto overflow-x-visible pr-2 custom-scrollbar flex-1">
             {isLoadingPlayers ? (
               <div className="text-center py-8 text-emerald-600 animate-pulse">
                 Loading players...

@@ -1,42 +1,44 @@
+import { NextResponse } from "next/server";
 
-import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+const EXTERNAL_API = process.env.EXTERNAL_API_URL || "http://localhost:8000";
 
 export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const query = searchParams.get('q');
+  const { searchParams } = new URL(req.url);
+  const query = searchParams.get("q");
 
-    if (!query || query.length < 3) {
-        return NextResponse.json({ data: [] });
+  if (!query || query.length < 3) {
+    return NextResponse.json({ data: [] });
+  }
+
+  try {
+    const params = new URLSearchParams();
+    params.set("name", query); // Map 'q' to 'name'
+    params.set("limit", "20");
+
+    const res = await fetch(
+      `${EXTERNAL_API}/api/players/search?${params.toString()}`,
+    );
+
+    if (!res.ok) {
+      return NextResponse.json({ data: [] });
     }
 
-    // This is expensive in a real app (scanning JSON), but fine for MVP with 20 teams.
-    const teams = await prisma.team.findMany({
-        select: {
-            name: true,
-            players: true
-        }
-    });
+    const json = await res.json();
 
-    const results = [];
-    const lowerQuery = query.toLowerCase();
-
-    for (const team of teams) {
-        const players = team.players as any[];
-        if (!players) continue;
-
-        for (const p of players) {
-            if (p.name.toLowerCase().includes(lowerQuery)) {
-                results.push({
-                    name: p.name,
-                    team: team.name,
-                    position: p.position,
-                    image_url: p.image_url
-                });
-                if (results.length > 10) break;
-            }
-        }
-    }
+    // Backend returns { total: number, players: [...] }
+    // Frontend expects { data: [{ name, team, position, image_url }, ...] }
+    const results =
+      json.players?.map((p: any) => ({
+        name: p.player_name,
+        team: p.current_club_name,
+        position: p.main_position,
+        image_url: p.player_image_url,
+        id: p.player_id,
+      })) || [];
 
     return NextResponse.json({ data: results });
+  } catch (error) {
+    console.error("Player search error:", error);
+    return NextResponse.json({ data: [] });
+  }
 }

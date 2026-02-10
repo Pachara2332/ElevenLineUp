@@ -1,16 +1,14 @@
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 
 export default function MiniGamesLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return (
-        <div className="min-h-screen">
-            <DashboardHeader />
-            <main>
-                {children}
-            </main>
-        </div>
-    );
+  return (
+    <div className="min-h-screen">
+      <DashboardHeader />
+      <main>{children}</main>
+    </div>
+  );
 }

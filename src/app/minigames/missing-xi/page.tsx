@@ -1,14 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import Navbar from "@/components/Navbar";
+
+interface Player {
+  id: string;
+  name: string;
+  position: string;
+  x: number;
+  y: number;
+  is_masked: boolean;
+  image_url?: string;
+}
+
+interface Game {
+  id: string;
+  team: { name: string };
+  season: string;
+  formation: string;
+  lineup: Player[];
+}
 
 export default function MissingXIPage() {
-  const router = useRouter();
-  const { data: game, isLoading } = useQuery({
+  const { data: game, isLoading } = useQuery<Game>({
     queryKey: ["missing-xi"],
     queryFn: async () => {
       const res = await fetch("/api/minigames/missing-xi");
@@ -17,11 +34,11 @@ export default function MissingXIPage() {
     },
   });
 
-  const [revealedPlayers, setRevealedPlayers] = useState<Record<number, any>>(
-    {},
-  );
+  const [revealedPlayers, setRevealedPlayers] = useState<
+    Record<number, { name: string }>
+  >({});
   const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(
-    null,
+    null
   );
 
   const checkGuessMutation = useMutation({
@@ -30,7 +47,7 @@ export default function MissingXIPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          gameId: game.id,
+          gameId: game?.id,
           guess,
         }),
       });
@@ -42,7 +59,7 @@ export default function MissingXIPage() {
           ...prev,
           [selectedSlotIndex!]: { name: data.real_name },
         }));
-        setSelectedSlotIndex(null); // Close modal
+        setSelectedSlotIndex(null);
       } else {
         alert("Incorrect guess!");
       }
@@ -51,141 +68,192 @@ export default function MissingXIPage() {
 
   if (isLoading)
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center">
-        <div className="text-emerald-500 text-xl font-bold animate-pulse">
-          Loading Lineup...
+      <div className="min-h-screen flex flex-col">
+        <Navbar title="Missing XI" subtitle="Guess the missing players" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-emerald-600 text-xl font-bold animate-pulse">
+            Loading Lineup...
+          </div>
         </div>
       </div>
     );
 
   if (!game)
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center">
-        <div className="text-slate-400 text-xl font-bold">
-          No Missing XI Game Today
+      <div className="min-h-screen flex flex-col">
+        <Navbar title="Missing XI" subtitle="Guess the missing players" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-gray-500 text-xl font-bold">
+            No Missing XI Game Today
+          </div>
         </div>
       </div>
     );
 
+  const totalMissing = game.lineup.filter((p) => p.is_masked).length;
+  const totalRevealed = Object.keys(revealedPlayers).length;
+  const isComplete = totalRevealed === totalMissing;
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 p-4 flex flex-col items-center">
-      {/* Header */}
-      <div className="w-full max-w-2xl flex justify-between items-center mb-6 mt-4">
-        <button
-          onClick={() => router.push("/minigames")}
-          className="text-slate-500 hover:text-white transition-colors text-sm font-bold flex items-center gap-2"
-        >
-          ← Back
-        </button>
-        <div className="text-center">
-          <div className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">
-            MISSING XI
-          </div>
-          <div className="text-xl md:text-2xl font-black text-white">
-            {game.team.name}
-          </div>
-          <div className="flex justify-center gap-3 text-xs font-medium text-slate-400 mt-1">
-            <span className="bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
-              {game.season}
-            </span>
-            <span className="bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
-              {game.formation}
-            </span>
-          </div>
-        </div>
-        <div className="w-16"></div> {/* Spacer to balance Back button */}
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Navbar title="Missing XI" subtitle="Guess the missing players" />
 
-      <main className="flex-1 flex flex-col items-center w-full">
-        {/* PITCH CONTAINER - REUSING DESIGN FROM PITCH COMPONENT */}
-        <div className="relative w-full max-w-md aspect-[2/3] rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/10">
-          {/* Pitch background with gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-800 via-emerald-700 to-emerald-900" />
-
-          {/* Grass texture overlay */}
-          <div
-            className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 20px,
-                rgba(0,0,0,0.1) 20px,
-                rgba(0,0,0,0.1) 40px
-                )`,
-            }}
-          />
-
-          {/* Pitch border */}
-          <div className="absolute inset-3 border-2 border-white/30 rounded-lg" />
-
-          {/* Center line */}
-          <div className="absolute top-1/2 left-3 right-3 h-0.5 bg-white/30" />
-
-          {/* Center circle */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/30 rounded-full" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/30 rounded-full" />
-
-          {/* Penalty Areas (Simplified) */}
-          <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-40 h-20 border-2 border-white/30 border-t-0 rounded-b-lg" />
-          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-40 h-20 border-2 border-white/30 border-b-0 rounded-t-lg" />
-
-          {/* Players */}
-          {game.lineup.map((player: any, idx: number) => {
-            // Logic to check if this specific slot is revealed
-            const isRevealed = !player.is_masked || revealedPlayers[idx];
-            const isMissing = !isRevealed;
-
-            return (
-              <div
-                key={idx}
-                style={{
-                  left: `${player.x}%`,
-                  top: `${player.y}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-                className="absolute flex flex-col items-center group cursor-pointer z-10"
-                onClick={() => isMissing && setSelectedSlotIndex(idx)}
-              >
-                <div
-                  className={clsx(
-                    "w-12 h-12 rounded-full flex items-center justify-center font-bold border-2 shadow-lg transition-transform hover:scale-110",
-                    isMissing
-                      ? "bg-gradient-to-br from-slate-200 to-white text-slate-900 border-white ring-4 ring-emerald-500/50 animate-pulse"
-                      : "bg-slate-800 text-white border-slate-600",
-                  )}
-                >
-                  {isMissing ? (
-                    <span className="text-2xl font-black text-slate-800">
-                      ?
-                    </span>
-                  ) : (
-                    <div className="flex flex-col items-center leading-none">
-                      <span className="text-[10px] opacity-70 mb-0.5">PO</span>
-                      <span className="text-xs font-bold">
-                        {player.position}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div
-                  className={clsx(
-                    "mt-1 px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap shadow-md backdrop-blur-md",
-                    isMissing
-                      ? "bg-emerald-500 text-white"
-                      : "bg-black/60 text-white border border-white/10",
-                  )}
-                >
-                  {isMissing
-                    ? "GUESS ME"
-                    : revealedPlayers[idx]?.name || player.name}
+      <div className="px-4 md:px-8 pb-8 flex-1">
+        <div className="max-w-7xl mx-auto">
+          {/* Game Info Header */}
+          <div className="glass-panel rounded-3xl p-6 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-black text-emerald-900 uppercase tracking-wide mb-2">
+                  {game.team.name}
+                </h2>
+                <div className="flex gap-3 text-sm font-medium text-emerald-700">
+                  <span className="bg-white/60 px-3 py-1 rounded-lg">
+                    {game.season}
+                  </span>
+                  <span className="bg-white/60 px-3 py-1 rounded-lg">
+                    {game.formation}
+                  </span>
                 </div>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-3xl font-black text-emerald-600">
+                    {totalRevealed}/{totalMissing}
+                  </div>
+                  <div className="text-xs font-bold text-emerald-700 uppercase">
+                    Revealed
+                  </div>
+                </div>
+                {isComplete && (
+                  <div className="bg-emerald-600 text-white px-6 py-3 rounded-xl font-black text-lg animate-in zoom-in">
+                    🎉 COMPLETE!
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Pitch Container */}
+          <div className="glass-panel rounded-3xl p-6 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+
+            <div className="relative w-full aspect-[2/3] max-w-md mx-auto rounded-2xl shadow-2xl">
+              {/* Pitch background */}
+              <div className="absolute inset-0 bg-gradient-to-b from-green-600 via-green-700 to-green-800" />
+
+              {/* Grass texture */}
+              <div
+                className="absolute inset-0 opacity-30"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(0,0,0,0.1) 20px,
+                    rgba(0,0,0,0.1) 40px
+                  )`,
+                }}
+              />
+
+              {/* Pitch markings */}
+              <div className="absolute inset-3 border-2 border-white/40 rounded-lg" />
+              <div className="absolute top-1/2 left-3 right-3 h-0.5 bg-white/40" />
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 border-2 border-white/40 rounded-full" />
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/40 rounded-full" />
+              <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-52 h-28 border-2 border-white/40 border-t-0 rounded-b-lg" />
+              <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-28 h-12 border-2 border-white/40 border-t-0 rounded-b-lg" />
+              <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-52 h-28 border-2 border-white/40 border-b-0 rounded-t-lg" />
+              <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-28 h-12 border-2 border-white/40 border-b-0 rounded-t-lg" />
+
+              {/* Players */}
+              {game.lineup.map((player, idx) => {
+                const isRevealed = !player.is_masked || revealedPlayers[idx];
+                const isMissing = !isRevealed;
+                const displayName = isRevealed
+                  ? (revealedPlayers[idx]?.name || player.name)
+                      .replace(/\s*\(\d+\)$/, "")
+                      .split(" ")
+                      .slice(-1)[0]
+                  : "?";
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      left: `${player.x}%`,
+                      top: `${player.y}%`,
+                    }}
+                    onClick={() => isMissing && setSelectedSlotIndex(idx)}
+                    className={clsx(
+                      "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer group hover:z-20",
+                      isMissing ? "w-14 h-14" : "w-16 h-20"
+                    )}
+                  >
+                    {isMissing ? (
+                      <div className="w-full h-full rounded-2xl flex flex-col items-center justify-center bg-gradient-to-b from-yellow-400 to-yellow-500 shadow-xl hover:scale-110 transition-transform ring-4 ring-yellow-300/50 animate-pulse">
+                        <span className="text-3xl font-black text-yellow-900">
+                          ?
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Hover popup */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
+                          <div className="bg-slate-900 rounded-xl p-2 shadow-xl border border-slate-600 whitespace-nowrap flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
+                              {player.image_url ? (
+                                <img
+                                  src={player.image_url}
+                                  alt={displayName}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold">
+                                  {displayName.charAt(0)}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-white font-bold text-xs">
+                                {revealedPlayers[idx]?.name || player.name}
+                              </span>
+                              <span className="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded text-center">
+                                {player.position}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-slate-900" />
+                        </div>
+
+                        {/* Player card */}
+                        <div className="w-full h-full rounded-2xl flex flex-col items-center justify-center bg-gradient-to-b from-slate-800/90 to-slate-900/90 backdrop-blur-sm shadow-xl hover:scale-150 hover:z-50 hover:shadow-2xl transition-all">
+                          <div className="w-11 h-11 rounded-xl overflow-hidden ring-2 ring-white/50 bg-slate-700 flex-shrink-0 shadow-lg">
+                            {player.image_url ? (
+                              <img
+                                src={player.image_url}
+                                alt={displayName}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
+                                {displayName.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-[10px] font-bold text-white mt-0.5 truncate max-w-14 drop-shadow-lg">
+                            {displayName}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
 
       {/* Search Modal */}
       {selectedSlotIndex !== null && (
@@ -201,9 +269,26 @@ export default function MissingXIPage() {
   );
 }
 
-function PlayerSearchModal({ onClose, onSelect, isChecking }: any) {
+interface PlayerSearchModalProps {
+  onClose: () => void;
+  onSelect: (playerName: string) => void;
+  isChecking: boolean;
+}
+
+interface SearchPlayer {
+  id: string;
+  name: string;
+  team: string;
+  image_url?: string;
+}
+
+function PlayerSearchModal({
+  onClose,
+  onSelect,
+  isChecking,
+}: PlayerSearchModalProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchPlayer[]>([]);
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
@@ -229,47 +314,47 @@ function PlayerSearchModal({ onClose, onSelect, isChecking }: any) {
   }, [query]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
-      <div className="bg-slate-800 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[70vh] border border-slate-700 ring-1 ring-white/10">
-        <div className="p-4 bg-slate-900 border-b border-slate-700">
-          <h3 className="font-black text-white text-center text-lg">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
+      <div className="glass-panel w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="p-6 border-b border-emerald-200/30">
+          <h3 className="font-black text-emerald-900 text-center text-2xl uppercase tracking-wide">
             Who is missing?
           </h3>
         </div>
 
-        <div className="p-3 border-b border-slate-700 flex items-center gap-2 bg-slate-800">
-          <MagnifyingGlassIcon className="w-5 h-5 text-slate-500" />
+        <div className="p-4 border-b border-emerald-200/30 flex items-center gap-3 bg-white/40">
+          <MagnifyingGlassIcon className="w-6 h-6 text-emerald-600" />
           <input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search player name..."
-            className="flex-1 bg-transparent outline-none text-white font-bold placeholder:font-normal placeholder:text-slate-500"
+            className="flex-1 bg-transparent outline-none text-emerald-900 font-bold text-lg placeholder:font-normal placeholder:text-emerald-600/50"
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-slate-900/50 p-2 min-h-[300px]">
+        <div className="flex-1 overflow-y-auto bg-white/20 p-3 min-h-[300px] custom-scrollbar">
           {isChecking && (
-            <div className="p-8 text-center text-emerald-400 font-bold animate-pulse">
+            <div className="p-8 text-center text-emerald-600 font-bold animate-pulse">
               Checking Answer...
             </div>
           )}
 
           {!isChecking && searching && (
-            <div className="p-8 text-center text-slate-500 italic">
+            <div className="p-8 text-center text-emerald-700 italic">
               Searching database...
             </div>
           )}
 
           {!isChecking &&
             !searching &&
-            results.map((player: any) => (
+            results.map((player) => (
               <div
                 key={player.id}
                 onClick={() => onSelect(player.name)}
-                className="p-3 mb-2 bg-slate-800 rounded-xl hover:bg-emerald-900/30 hover:border-emerald-500/50 cursor-pointer flex items-center gap-3 transition-all border border-slate-700/50"
+                className="p-4 mb-3 bg-white/80 rounded-2xl hover:bg-white cursor-pointer flex items-center gap-4 transition-all shadow-md hover:shadow-lg border border-emerald-200/50 hover:border-emerald-300"
               >
-                <div className="w-10 h-10 rounded-full bg-slate-700 flex-shrink-0 overflow-hidden border border-slate-600">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex-shrink-0 overflow-hidden shadow-md">
                   {player.image_url ? (
                     <img
                       src={player.image_url}
@@ -277,16 +362,16 @@ function PlayerSearchModal({ onClose, onSelect, isChecking }: any) {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-500 font-bold">
-                      ?
+                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl">
+                      {player.name.charAt(0)}
                     </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-slate-200 text-sm truncate">
+                  <div className="font-bold text-emerald-900 text-base truncate">
                     {player.name}
                   </div>
-                  <div className="text-xs text-slate-500 truncate">
+                  <div className="text-sm text-emerald-600 truncate">
                     {player.team}
                   </div>
                 </div>
@@ -297,16 +382,22 @@ function PlayerSearchModal({ onClose, onSelect, isChecking }: any) {
             !searching &&
             query.length > 2 &&
             results.length === 0 && (
-              <div className="p-8 text-center text-slate-600 text-sm">
+              <div className="p-8 text-center text-emerald-700/60 text-sm">
                 No players found
               </div>
             )}
+
+          {!isChecking && !searching && query.length <= 2 && (
+            <div className="p-8 text-center text-emerald-700/60 text-sm italic">
+              Type at least 3 letters to search
+            </div>
+          )}
         </div>
 
-        <div className="p-3 bg-slate-900 border-t border-slate-700 text-center">
+        <div className="p-4 bg-white/40 border-t border-emerald-200/30 text-center">
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white text-sm font-bold"
+            className="text-emerald-700 hover:text-emerald-900 text-sm font-bold transition-colors"
           >
             Cancel
           </button>

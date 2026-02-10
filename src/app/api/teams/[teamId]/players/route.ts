@@ -38,7 +38,8 @@ export async function GET(
     // All filter params
     const search = searchParams.get("search") || "";
     const nationality = searchParams.get("nationality") || "";
-    const birthYear = searchParams.get("birth_year") || "";
+    const birthYearFrom = searchParams.get("birth_year_from") || "";
+    const birthYearTo = searchParams.get("birth_year_to") || "";
     const minHeight = searchParams.get("min_height") || "";
     const maxHeight = searchParams.get("max_height") || "";
     const foot = searchParams.get("foot") || "";
@@ -50,7 +51,8 @@ export async function GET(
     if (position) apiUrl.searchParams.set("position", position);
     if (search) apiUrl.searchParams.set("search", search);
     if (nationality) apiUrl.searchParams.set("nationality", nationality);
-    if (birthYear) apiUrl.searchParams.set("birth_year", birthYear);
+    if (birthYearFrom) apiUrl.searchParams.set("birth_year_from", birthYearFrom);
+    if (birthYearTo) apiUrl.searchParams.set("birth_year_to", birthYearTo);
     if (minHeight) apiUrl.searchParams.set("min_height", minHeight);
     if (maxHeight) apiUrl.searchParams.set("max_height", maxHeight);
     if (foot) apiUrl.searchParams.set("foot", foot);
@@ -58,14 +60,19 @@ export async function GET(
     if (currentOnly) apiUrl.searchParams.set("current_only", currentOnly);
     apiUrl.searchParams.set("limit", "500"); // Get all players
 
+    console.log(`[API] Fetching players from: ${apiUrl.toString()}`);
+
     const res = await fetch(apiUrl.toString());
 
     if (!res.ok) {
+      console.error(`[API] Failed to fetch players: ${res.status} ${res.statusText}`);
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
     const json = await res.json();
     let players = json.players || [];
+
+    console.log(`[API] Received ${players.length} players from external API`);
 
     // Transform to frontend format
     players = players.map((p: any) => ({
@@ -87,6 +94,7 @@ export async function GET(
           p.position?.toLowerCase().includes(pos.toLowerCase()),
         ),
       );
+      console.log(`[API] After position filter (${position}): ${players.length} players`);
     }
 
     // Apply limit
@@ -101,7 +109,7 @@ export async function GET(
       data: players,
     });
   } catch (error) {
-    console.error("Error fetching players:", error);
+    console.error("[API] Error fetching players:", error);
     return NextResponse.json(
       { error: "Failed to fetch players" },
       { status: 500 },
