@@ -34,12 +34,7 @@ export default function MiniGamesPage() {
 
     return (
         <div className="min-h-screen p-4 md:p-8">
-            <header className="max-w-4xl mx-auto mb-12 text-center">
-                <h1 className="text-4xl md:text-5xl font-black text-white dropshadow-md mb-4">
-                    Mini <span className="text-emerald-300">Games</span> Arena
-                </h1>
-                <p className="text-black/80 text-lg">Test your football knowledge with our daily challenges.</p>
-            </header>
+
 
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
                 {games.map((game) => (
