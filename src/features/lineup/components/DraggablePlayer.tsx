@@ -121,26 +121,56 @@ const getCountryCode = (nationality: string | undefined): string => {
   return found ? countryToCode[found] : "un";
 };
 
-// Shorten position name
+// Shorten position name - รองรับทุกตำแหน่งในโลกฟุตบอล
 const shortenPosition = (position: string | undefined): string => {
   if (!position) return "?";
   const pos = position.toUpperCase();
   if (pos.length <= 3) return pos;
 
   const posMap: Record<string, string> = {
+    // Goalkeeper
     GOALKEEPER: "GK",
+    
+    // Defenders
     "CENTRE-BACK": "CB",
+    "CENTER-BACK": "CB",
     "LEFT-BACK": "LB",
     "RIGHT-BACK": "RB",
+    "LEFT CENTRE-BACK": "LCB",
+    "RIGHT CENTRE-BACK": "RCB",
+    "LEFT WING-BACK": "LWB",
+    "RIGHT WING-BACK": "RWB",
+    "WING-BACK": "WB",
+    SWEEPER: "SW",
+    LIBERO: "SW",
+    
+    // Midfielders
+    "DEFENSIVE MIDFIELD": "CDM",
+    "CENTRAL MIDFIELD": "CM",
+    "ATTACKING MIDFIELD": "CAM",
     "LEFT MIDFIELD": "LM",
     "RIGHT MIDFIELD": "RM",
-    "CENTRAL MIDFIELD": "CM",
-    "DEFENSIVE MIDFIELD": "CDM",
-    "ATTACKING MIDFIELD": "CAM",
+    "LEFT CENTRAL MIDFIELD": "LCM",
+    "RIGHT CENTRAL MIDFIELD": "RCM",
+    "LEFT ATTACKING MIDFIELD": "LAM",
+    "RIGHT ATTACKING MIDFIELD": "RAM",
+    "CENTRE MIDFIELD": "CM",
+    "CENTER MIDFIELD": "CM",
+    
+    // Forwards
+    "CENTRE-FORWARD": "CF",
+    "CENTER-FORWARD": "CF",
+    STRIKER: "ST",
     "LEFT WINGER": "LW",
     "RIGHT WINGER": "RW",
-    "CENTRE-FORWARD": "CF",
+    "LEFT FORWARD": "LF",
+    "RIGHT FORWARD": "RF",
+    "LEFT STRIKER": "LS",
+    "RIGHT STRIKER": "RS",
     "SECOND STRIKER": "SS",
+    "INSIDE FORWARD": "IF",
+    "INSIDE LEFT": "IL",
+    "INSIDE RIGHT": "IR",
   };
 
   if (posMap[pos]) return posMap[pos];
@@ -148,6 +178,57 @@ const shortenPosition = (position: string | undefined): string => {
     if (pos.includes(key)) return val;
   }
   return pos.slice(0, 3);
+};
+
+// Get position color based on category - รองรับทุกตำแหน่งในโลกฟุตบอล
+const getPositionColor = (position: string | undefined): string => {
+  if (!position) return "#10b981"; // default green
+  
+  const pos = position.toUpperCase();
+  
+  // GK - Yellow (#cda20b)
+  if (
+    pos === "GK" || 
+    pos.includes("GOAL") || 
+    pos.includes("KEEPER")
+  ) {
+    return "#cda20b";
+  }
+  
+  // Defenders - Blue (#1e4ca8)
+  if (
+    pos === "LB" || pos === "CB" || pos === "RB" || 
+    pos === "LCB" || pos === "RCB" || 
+    pos === "LWB" || pos === "RWB" || pos === "WB" ||
+    pos === "SW" || // Sweeper/Libero
+    pos.includes("BACK") || 
+    pos.includes("DEFENCE") ||
+    pos.includes("DEFENSE") ||
+    pos.includes("SWEEPER") ||
+    pos.includes("LIBERO")
+  ) {
+    return "#1e4ca8";
+  }
+  
+  // Forwards - Red (#af1616)
+  if (
+    pos === "ST" || pos === "CF" || 
+    pos === "LW" || pos === "RW" ||
+    pos === "LF" || pos === "RF" || 
+    pos === "LS" || pos === "RS" || 
+    pos === "SS" || // Second Striker
+    pos === "IF" || // Inside Forward
+    pos === "IL" || pos === "IR" || // Inside Left/Right
+    pos.includes("FORWARD") || 
+    pos.includes("STRIKER") || 
+    pos.includes("WINGER")
+  ) {
+    return "#af1616";
+  }
+  
+  // Midfielders - Green (#10b981) - default
+  // CDM, CM, CAM, LCM, RCM, LM, RM, LAM, RAM
+  return "#10b981";
 };
 
 export const DraggablePlayer: React.FC<DraggablePlayerProps> = ({ player }) => {
@@ -163,6 +244,7 @@ export const DraggablePlayer: React.FC<DraggablePlayerProps> = ({ player }) => {
       .slice(-1)[0] || "Unknown";
   const countryCode = getCountryCode(player.nationality);
   const shortPos = shortenPosition(player.position);
+  const posColor = getPositionColor(player.position);
 
   return (
     <div
@@ -203,7 +285,10 @@ export const DraggablePlayer: React.FC<DraggablePlayerProps> = ({ player }) => {
 
       {/* Position + Flag */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded">
+        <span 
+          className="text-white text-[10px] font-bold px-2 py-1 rounded"
+          style={{ backgroundColor: posColor }}
+        >
           {shortPos}
         </span>
         <div

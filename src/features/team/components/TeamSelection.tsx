@@ -89,7 +89,7 @@ export default function TeamSelection() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-8 glass-panel rounded-[3rem] shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <div className="w-full max-w-6xl mx-auto p-8 glass-panel rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
       <h1 className="text-5xl font-black text-center mb-4 text-emerald-900 uppercase tracking-tighter drop-shadow-sm">
         Select Your Club
       </h1>
@@ -102,18 +102,18 @@ export default function TeamSelection() {
           placeholder="Search club..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-md px-5 py-3 rounded-full 
+          className="w-full max-w-md px-5 py-3 rounded-xl 
                    border border-emerald-200 
                    shadow-sm focus:outline-none 
                    focus:ring-2 focus:ring-emerald-500"
         />
       </div>
 
-      {isFetching && (
+      {/* {isFetching && (
         <div className="text-xs text-emerald-600 text-center mb-3">
           searching...
         </div>
-      )}
+      )} */}
       {/* League Tabs */}
       <div className="flex justify-center gap-3 mb-12 flex-wrap">
         {leagues.map((league) => (
@@ -121,7 +121,7 @@ export default function TeamSelection() {
             key={league.name}
             onClick={() => setSelectedLeague(league.name)}
             className={clsx(
-              "px-6 py-2 rounded-full font-bold transition-all duration-300 uppercase tracking-widest text-sm",
+              "px-6 py-2 rounded-lg font-bold transition-all duration-300 uppercase tracking-widest text-sm",
               selectedLeague === league.name
                 ? "bg-emerald-600 text-white shadow-lg scale-105"
                 : "bg-white/40 text-emerald-900 hover:bg-white/60",
@@ -177,7 +177,16 @@ export default function TeamSelection() {
         <button
           onClick={handleContinue}
           disabled={!selectedTeamId}
-          className="px-12 py-4 rounded-full glass-button text-xl tracking-widest uppercase disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="
+    px-12 py-4 rounded-3xl 
+    bg-emerald-600 text-white
+    text-xl tracking-widest uppercase font-bold
+    shadow-lg shadow-emerald-500/40
+    transition-all duration-300
+    hover:bg-emerald-500 hover:scale-105
+    active:scale-95
+    disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100
+  "
         >
           Start Building
         </button>

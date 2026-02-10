@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { PlayIcon } from "@heroicons/react/24/outline";
+
 
 const games = [
   {
@@ -34,8 +35,8 @@ export default function MinigamesPage() {
   return (
     <div className="min-h-screen bg-slate-900 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <header className="flex items-center justify-between mb-12">
-          <div className="flex items-center gap-4">
+        <header className="flex items-center justify-between mb-8">
+          {/* <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/dashboard")}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-all border border-slate-700 shadow-sm"
@@ -43,7 +44,7 @@ export default function MinigamesPage() {
               <ArrowLeftIcon className="w-5 h-5" />
               <span>Dashboard</span>
             </button>
-          </div>
+          </div> */}
           <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">
             Minigames
           </h1>
@@ -76,11 +77,12 @@ export default function MinigamesPage() {
                 </p>
 
                 <div className="flex items-center text-sm font-bold text-white/50 group-hover:text-white transition-colors">
-                  Play Now{" "}
-                  <span className="ml-2 transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </div>
+  Play Now
+  <PlayIcon
+    className="ml-2 w-4 h-4 transition-all duration-200 group-hover:scale-110 group-hover:translate-x-0.5"
+
+  />
+</div>
               </div>
             </Link>
           ))}

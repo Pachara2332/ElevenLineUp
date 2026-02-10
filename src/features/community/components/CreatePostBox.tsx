@@ -80,7 +80,7 @@ export default function CreatePostBox() {
     if (!user) return null;
 
     return (
-        <div className="glass-panel p-6 rounded-3xl mb-8">
+        <div className="glass-panel p-6 rounded-2xl mb-8">
             <div className="flex gap-4">
                 {/* Avatar placeholder if no user image */}
                 {user.avatar ? (
@@ -118,7 +118,7 @@ export default function CreatePostBox() {
                     <div className="flex justify-between items-center mt-4 border-t border-emerald-900/10 pt-4">
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-2 text-emerald-700 hover:text-emerald-900 font-semibold px-3 py-2 rounded-xl hover:bg-emerald-900/10 transition-colors"
+                            className="flex items-center gap-2 text-emerald-700 hover:text-emerald-900 font-semibold px-3 py-2 rounded-lg hover:bg-emerald-900/10 transition-colors"
                         >
                             <PhotoIcon className="w-6 h-6" />
                             <span>Photo</span>
@@ -134,7 +134,7 @@ export default function CreatePostBox() {
                         <button
                             onClick={() => createPostMutation.mutate()}
                             disabled={!content.trim() && !file || createPostMutation.isPending}
-                            className="px-6 py-2 bg-emerald-600 text-white rounded-full font-bold shadow-md hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold shadow-md hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             {createPostMutation.isPending ? 'Posting...' : 'Post'}
                         </button>
