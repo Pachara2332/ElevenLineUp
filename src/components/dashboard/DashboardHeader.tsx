@@ -121,7 +121,7 @@ export default function DashboardHeader() {
             <ProfileDrawer
                 open={openProfile}
                 onClose={handleProfileClose}
-                user={user}
+                user={{ ...user, avatar: user.avatar ?? undefined }}
             />
         </>
     );
