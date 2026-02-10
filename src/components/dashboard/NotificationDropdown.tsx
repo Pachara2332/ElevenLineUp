@@ -24,7 +24,19 @@ interface Notification {
 
 export default function NotificationDropdown() {
     const { user } = useAuth();
-    // ... existing state
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const queryClient = useQueryClient();
+
+    // Fetch notifications
+    const { data: notifications = [] } = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
+            const res = await fetch('/api/notifications');
+            if (!res.ok) throw new Error('Failed to fetch notifications');
+            return res.json() as Promise<Notification[]>;
+        },
+    });
 
     // Socket.IO Connection
     useEffect(() => {
