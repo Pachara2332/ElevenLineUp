@@ -2,9 +2,11 @@
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import clsx from 'clsx';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function LogoutButton({ className }: { className?: string }) {
     const { logout } = useAuth();
+    const { t } = useLanguage();
 
     return (
         <button
@@ -14,7 +16,7 @@ export default function LogoutButton({ className }: { className?: string }) {
                 className
             )}
         >
-            Logout
+            {t.dashboard.logout}
         </button>
     );
 }

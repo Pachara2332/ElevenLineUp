@@ -172,9 +172,9 @@ export default function MissingXIPage() {
                 const isMissing = !isRevealed;
                 const displayName = isRevealed
                   ? (revealedPlayers[idx]?.name || player.name)
-                      .replace(/\s*\(\d+\)$/, "")
-                      .split(" ")
-                      .slice(-1)[0]
+                    .replace(/\s*\(\d+\)$/, "")
+                    .split(" ")
+                    .slice(-1)[0]
                   : "?";
 
                 return (

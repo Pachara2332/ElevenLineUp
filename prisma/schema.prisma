@@ -20,15 +20,105 @@ model User {
   posts            Post[]
   comments         Comment[]
   likes            Like[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
   matchPredictions MatchPrediction[]
   userGameStats    UserGameStats[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   notifications     Notification[] @relation("UserNotifications")
   sentNotifications Notification[] @relation("NotificationActor")
+  refreshTokens     RefreshToken[]
+
+  // Community Relations
+  followers Follow[]   @relation("UserFollowers")
+  following Follow[]   @relation("UserFollowing")
+  pollVotes PollVote[]
+  polls     Poll[]
 
   @@map("User")
+}
+
+// ... (Existing models usually here, but I will append new ones at the end of the file or where appropriate)
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [userId], onDelete: Cascade)
+  followingId String
+  following   User     @relation("UserFollowers", fields: [followingId], references: [userId], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@map("Follow")
+}
+
+model Like {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  // Polymorphic-like associations (optional relations)
+  lineupId String?
+  lineup   Lineup? @relation(fields: [lineupId], references: [lineupId], onDelete: Cascade)
+
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, lineupId, postId, commentId, teamId]) // Prevent duplicate likes
+  @@map("Like")
+}
+
+model Poll {
+  id       String @id @default(cuid())
+  question String
+
+  userId  String
+  creator User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  options PollOption[]
+  votes   PollVote[]
+
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("Poll")
+}
+
+model PollOption {
+  id     String     @id @default(cuid())
+  text   String
+  pollId String
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes  PollVote[]
+
+  @@map("PollOption")
+}
+
+model PollVote {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  pollId String
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  optionId String
+  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, pollId]) // One vote per poll per user
+  @@map("PollVote")
 }
 
 model Team {
@@ -63,6 +153,7 @@ model Lineup {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  likes     Like[]
 
   @@map("Lineup")
 }
@@ -176,22 +267,9 @@ model Comment {
   user       User    @relation(fields: [userId], references: [userId], onDelete: Cascade)
   team       Team?   @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
   teamTeamId String?
+  likes      Like[]
 
   @@map("Comment")
-}
-
-model Like {
-  id     String @id @default(cuid())
-  postId String
-  userId String
-
-  post       Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user       User    @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  team       Team?   @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
-  teamTeamId String?
-
-  @@unique([postId, userId])
-  @@map("Like")
 }
 
 model Notification {
@@ -270,4 +348,42 @@ model UserGameStats {
 
   @@unique([userId, gameType])
   @@map("UserGameStats")
+}
+
+// --- Auth System ---
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("RefreshToken")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@map("PasswordResetToken")
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String // Target email (doesn't need to exist in User table)
+  ipAddress String
+  isSuccess Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, ipAddress])
+  @@map("LoginAttempt")
 }

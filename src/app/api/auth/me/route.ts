@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { ApiHandler } from '@/lib/api-handler';
 import prisma from '@/lib/prisma';
@@ -19,7 +18,7 @@ export const GET = ApiHandler.handle(async (req) => {
     
     const user = await prisma.user.findUnique({
       where: { userId: decoded.userId },
-      select: { userId: true, name: true, email: true ,avatar: true},
+      select: { userId: true, name: true, email: true, avatar: true },
     });
 
     if (!user) {

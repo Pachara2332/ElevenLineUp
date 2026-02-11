@@ -165,7 +165,7 @@ export default function TicTacToePage() {
               ))}
 
               {game.rows.map((row, r) => (
-                <>
+                <div key={r}>
                   <div className="flex flex-col items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-3 text-center shadow-lg aspect-square">
                     <div className="text-[10px] font-bold text-white/80 mb-1 tracking-wider uppercase">
                       {row.type}
@@ -227,7 +227,7 @@ export default function TicTacToePage() {
                       </div>
                     );
                   })}
-                </>
+                </div>
               ))}
             </div>
           </div>

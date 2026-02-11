@@ -4,12 +4,15 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function RegisterForm() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { register, isLoading, error } = useAuth();
+
+    const { t } = useLanguage();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -18,12 +21,12 @@ export default function RegisterForm() {
 
     return (
         <div className="w-full max-w-md mx-auto p-8 glass-panel rounded-3xl animate-in fade-in zoom-in duration-500">
-            <h2 className="text-3xl font-black text-center mb-2 text-emerald-900 uppercase tracking-tighter">Join the League</h2>
-            <p className="text-center text-emerald-800 mb-8 font-medium">Create your manager profile</p>
+            <h2 className="text-3xl font-black text-center mb-2 text-emerald-900 uppercase tracking-tighter">{t.auth.create_account_title}</h2>
+            <p className="text-center text-emerald-800 mb-8 font-medium">{t.auth.create_account_subtitle}</p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-emerald-900 uppercase tracking-wide ml-1">Manager Name</label>
+                    <label className="text-sm font-bold text-emerald-900 uppercase tracking-wide ml-1">{t.auth.name}</label>
                     <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-600">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -42,7 +45,7 @@ export default function RegisterForm() {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-emerald-900 uppercase tracking-wide ml-1">Email</label>
+                    <label className="text-sm font-bold text-emerald-900 uppercase tracking-wide ml-1">{t.auth.email}</label>
                     <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-600">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -62,7 +65,7 @@ export default function RegisterForm() {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-emerald-900 uppercase tracking-wide ml-1">Password</label>
+                    <label className="text-sm font-bold text-emerald-900 uppercase tracking-wide ml-1">{t.auth.password}</label>
                     <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-600">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -100,17 +103,17 @@ export default function RegisterForm() {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Creating Account...
+                            {t.auth.registering}
                         </span>
-                    ) : 'Create Account'}
+                    ) : t.auth.register}
                 </button>
             </form>
 
             <div className="mt-8 text-center">
                 <p className="text-emerald-900 font-medium">
-                    Already have an account?{' '}
+                    {t.auth.already_have_account}{' '}
                     <Link href="/login" className="font-extrabold underline decoration-2 underline-offset-4 hover:text-white transition-colors">
-                        Login Here
+                        {t.auth.sign_in_here}
                     </Link>
                 </p>
             </div>

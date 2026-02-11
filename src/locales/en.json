@@ -1,0 +1,48 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "required": "Required",
+        "home": "Home"
+    },
+    "landing": {
+        "season": "Season 2025/26",
+        "title_start": "ELEVEN",
+        "title_end": "LINEUP",
+        "subtitle": "The ultimate Premier League squad builder. Mock up your dream team in seconds.",
+        "start_building": "Start Building",
+        "create_account": "Create Account",
+        "footer": "© 2026 ElevenLineUp. Built for fans."
+    },
+    "auth": {
+        "welcome_back": "Welcome Back",
+        "sign_in_subtitle": "Sign in to manage your dream team",
+        "create_account_title": "Create Account",
+        "create_account_subtitle": "Join the community and build your dream team",
+        "email": "Email",
+        "password": "Password",
+        "confirm_password": "Confirm Password",
+        "name": "Display Name",
+        "forgot_password": "Forgot Password?",
+        "sign_in": "Sign In",
+        "register": "Register",
+        "signing_in": "Signing In...",
+        "registering": "Registering...",
+        "dont_have_account": "Don't have an account?",
+        "already_have_account": "Already have an account?",
+        "register_here": "Register Here",
+        "sign_in_here": "Sign In Here"
+    },
+    "dashboard": {
+        "welcome": "Welcome back",
+        "profile": "Profile",
+        "logout": "Logout",
+        "menu": {
+            "dashboard": "Dashboard",
+            "community": "Community",
+            "minigames": "Mini Games",
+            "profile": "Profile"
+        }
+    }
+}

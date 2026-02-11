@@ -1,0 +1,48 @@
+{
+    "common": {
+        "loading": "กำลังโหลด...",
+        "error": "เกิดข้อผิดพลาด",
+        "success": "สำเร็จ",
+        "required": "จำเป็น",
+        "home": "หน้าแรก"
+    },
+    "landing": {
+        "season": "ฤดูกาล 2025/26",
+        "title_start": "ELEVEN",
+        "title_end": "LINEUP",
+        "subtitle": "สุดยอดโปรแกรมจัดทีมพรีเมียร์ลีก จำลองทีมในฝันของคุณได้ในไม่กี่วินาที",
+        "start_building": "เริ่มจัดทีม",
+        "create_account": "สร้างบัญชี",
+        "footer": "© 2026 ElevenLineUp. สร้างเพื่อแฟนบอล"
+    },
+    "auth": {
+        "welcome_back": "ยินดีต้อนรับกลับ",
+        "sign_in_subtitle": "เข้าสู่ระบบเพื่อจัดการทีมในฝันของคุณ",
+        "create_account_title": "สร้างบัญชีใหม่",
+        "create_account_subtitle": "เข้าร่วมชุมชนและสร้างทีมในฝันของคุณ",
+        "email": "อีเมล",
+        "password": "รหัสผ่าน",
+        "confirm_password": "ยืนยันรหัสผ่าน",
+        "name": "ชื่อที่ใช้แสดง",
+        "forgot_password": "ลืมรหัสผ่าน?",
+        "sign_in": "เข้าสู่ระบบ",
+        "register": "สมัครสมาชิก",
+        "signing_in": "กำลังเข้าสู่ระบบ...",
+        "registering": "กำลังสมัครสมาชิก...",
+        "dont_have_account": "ยังไม่มีบัญชี?",
+        "already_have_account": "มีบัญชีอยู่แล้ว?",
+        "register_here": "สมัครสมาชิกที่นี่",
+        "sign_in_here": "เข้าสู่ระบบที่นี่"
+    },
+    "dashboard": {
+        "welcome": "ยินดีต้อนรับ",
+        "profile": "โปรไฟล์",
+        "logout": "ออกจากระบบ",
+        "menu": {
+            "dashboard": "แดชบอร์ด",
+            "community": "ชุมชน",
+            "minigames": "มินิเกม",
+            "profile": "การตั้งค่า"
+        }
+    }
+}

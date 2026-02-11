@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     description: 'Build your dream Premier League lineup',
 };
 
+import { LanguageProvider } from '@/contexts/LanguageContext';
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -21,7 +23,9 @@ export default function RootLayout({
                 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet" />
             </head>
             <body className="antialiased min-h-screen">
-                <AppProviders>{children}</AppProviders>
+                <LanguageProvider>
+                    <AppProviders>{children}</AppProviders>
+                </LanguageProvider>
             </body>
         </html>
     );
