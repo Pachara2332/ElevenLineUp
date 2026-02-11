@@ -20,21 +20,25 @@ function transformTeam(team: any) {
   };
 }
 
-// Fetch teams from a single competition
+// Fetch teams from a single competition (or global search if empty)
 async function fetchTeamsByCompetition(competitionId: string, search: string) {
   const params = new URLSearchParams();
-  params.set("competition_id", competitionId);
-  if (search) params.set("q", search);
+  if (competitionId) params.set("competition_id", competitionId);
+  if (search) params.set("name", search);
   params.set("limit", "100");
 
-  const res = await fetch(
-    `${EXTERNAL_API}/api/teams/search?${params.toString()}`,
-  );
+  const url = `${EXTERNAL_API}/api/teams/search?${params.toString()}`;
 
-  if (!res.ok) return [];
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [];
 
-  const json = await res.json();
-  return json.teams?.map(transformTeam) || [];
+    const json = await res.json();
+    return json.teams?.map(transformTeam) || [];
+  } catch (error) {
+    console.error(`[TeamSearch] Fetch Exception:`, error);
+    return [];
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -48,11 +52,24 @@ export async function GET(req: NextRequest) {
       // Fetch single league
       teams = await fetchTeamsByCompetition(competitionId, search);
     } else {
-      // Fetch ALL leagues in parallel
-      const results = await Promise.all(
-        ALL_LEAGUES.map((id) => fetchTeamsByCompetition(id, search)),
+      // If no league selected (ALL button), fetch from all 5 major leagues
+      const allTeamsPromises = ALL_LEAGUES.map((leagueId) =>
+        fetchTeamsByCompetition(leagueId, search)
       );
-      teams = results.flat();
+      const allTeamsArrays = await Promise.all(allTeamsPromises);
+      teams = allTeamsArrays.flat();
+
+      // Remove duplicates by teamId
+      const uniqueTeams = new Map();
+      teams.forEach((team) => {
+        if (!uniqueTeams.has(team.teamId)) {
+          uniqueTeams.set(team.teamId, team);
+        }
+      });
+      teams = Array.from(uniqueTeams.values());
+
+      // Sort by name
+      teams.sort((a, b) => a.name.localeCompare(b.name));
     }
 
     return NextResponse.json({ data: teams });

@@ -1,37 +1,37 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { getAuthUser } from '@/lib/auth-helper'
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth-helper";
 
 export async function GET(req: NextRequest) {
-  const user = await getAuthUser()
+  const user = await getAuthUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const notifications = await prisma.notification.findMany({
     where: {
-      userId: user.userId
+      userId: user.userId,
     },
     include: {
       actor: {
         select: {
           name: true,
-          avatar: true
-        }
+          avatar: true,
+        },
       },
       post: {
         select: {
           id: true,
-          content: true
-        }
-      }
+          content: true,
+        },
+      },
     },
     orderBy: {
-      createdAt: 'desc'
+      createdAt: "desc",
     },
-    take: 20
-  })
+    take: 20,
+  });
 
-  return NextResponse.json(notifications)
+  return NextResponse.json(notifications);
 }

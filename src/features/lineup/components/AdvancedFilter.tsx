@@ -242,6 +242,9 @@ export default function AdvancedFilter({
                   max="2010"
                 />
               </div>
+              <p className="text-[10px] text-emerald-500 mt-1 italic">
+                Leave empty to show all years
+              </p>
             </div>
 
             {/* Height Range */}
@@ -270,6 +273,9 @@ export default function AdvancedFilter({
                   max="220"
                 />
               </div>
+              <p className="text-[10px] text-emerald-500 mt-1 italic">
+                Leave empty to show all heights
+              </p>
             </div>
 
             {/* Preferred Foot */}

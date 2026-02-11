@@ -1,31 +1,15 @@
 "use client";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DndContext,
   DragEndEvent,
   DragStartEvent,
-  DragOverlay,
 } from "@dnd-kit/core";
-import { Pitch, getPositionCategory } from "./Pitch";
+import { Pitch } from "./Pitch";
 import { DraggablePlayer } from "./DraggablePlayer";
 import { Player, LineupSlot } from "@/types";
 import { useLineupStore, FORMATION_CATEGORIES } from "../stores/useLineupStore";
 import AlertModal from "@/components/AlertModal";
-import AdvancedFilter from "./AdvancedFilter";
-
-// Map slot positions to player position types
-const POSITION_MAP: Record<string, string> = {
-  gk: "GK",
-  lcb: "DEF",
-  rcb: "DEF",
-  lb: "DEF",
-  rb: "DEF",
-  cm: "MID",
-  lw: "FWD",
-  rw: "FWD",
-  st: "FWD",
-};
 
 export default function LineupBuilder() {
   const {
@@ -46,54 +30,30 @@ export default function LineupBuilder() {
   const [lineupName, setLineupName] = React.useState("");
   const [showSaveModal, setShowSaveModal] = React.useState(false);
   const [showLoadModal, setShowLoadModal] = React.useState(false);
-  const [myLineups, setMyLineups] = React.useState<any[]>([]);
+  const [myLineups, setMyLineups] = React.useState<Array<{
+    lineupId: string;
+    name: string;
+    formation: string;
+    updatedAt: string;
+  }>>([]);
   const [isLoadingPlayers, setIsLoadingPlayers] = React.useState(false);
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
-  const [pendingDrop, setPendingDrop] = useState<{
-    player: Player;
-    slotId: string;
-    slotPosition: string;
-  } | null>(null);
+  const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
-  // Filter state
+  // Filter state - เหลือแค่ search
   const [activeFilters, setActiveFilters] = useState<{
     search: string;
-    season: string;
-    birthYearFrom: string;
-    birthYearTo: string;
-    heightFrom: string;
-    heightTo: string;
-    preferredFoot: string;
   }>({
     search: "",
-    season: "",
-    birthYearFrom: "",
-    birthYearTo: "",
-    heightFrom: "",
-    heightTo: "",
-    preferredFoot: "",
   });
 
-  const [seasons, setSeasons] = useState<string[]>([]);
-
   useEffect(() => {
-    const fetchSeasons = async () => {
-      try {
-        const res = await fetch("/api/filters/seasons");
-        if (res.ok) {
-          const json = await res.json();
-          setSeasons(json);
-        }
-      } catch (error) {
-        console.error("Failed to fetch seasons", error);
-      }
-    };
-    fetchSeasons();
-  }, []);
-
-  useEffect(() => {
-    // Legacy fetch removed in favor of page-level fetching
-  }, []);
+    // โหลดนักเตะทั้งหมดทันทีเมื่อเลือกทีม
+    if (selectedTeamId) {
+      fetchPlayersWithFilters(undefined, activeFilters);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTeamId]);
 
   const fetchMyLineups = async () => {
     try {
@@ -121,55 +81,24 @@ export default function LineupBuilder() {
       const targetSlot = slots.find((s) => s.id === over.id) as LineupSlot;
 
       if (targetSlot) {
-        const playerCategory = getPositionCategory(player.position || "");
-        const slotCategory = getPositionCategory(targetSlot.position);
+        // ตรวจสอบเฉพาะ GK เท่านั้น
+        const isPlayerGK = player.position?.toUpperCase().includes("GOAL") || 
+                          player.position?.toUpperCase() === "GK";
+        const isSlotGK = targetSlot.position === "GK";
 
-        // Debug log
-        console.log(
-          "Player:",
-          player.name,
-          "Position:",
-          player.position,
-          "-> Category:",
-          playerCategory,
-        );
-        console.log(
-          "Slot:",
-          targetSlot.id,
-          "Position:",
-          targetSlot.position,
-          "-> Category:",
-          slotCategory,
-        );
-
-        // Check if positions match
-        if (playerCategory !== slotCategory && playerCategory !== "ANY") {
-          // Show confirmation popup
-          console.log("Position mismatch! Showing confirmation popup");
-          setPendingDrop({
-            player,
-            slotId: over.id as string,
-            slotPosition: targetSlot.position,
-          });
-        } else {
-          // Positions match, drop directly
-          console.log("Position match! Calling updateSlot for slot:", over.id);
-          updateSlot(over.id as string, player);
-          console.log("updateSlot called successfully");
+        // Rule: GK player can ONLY go into GK slot
+        if (isPlayerGK && !isSlotGK) {
+          return; // Silently reject
         }
+        // Rule: GK slot can ONLY accept GK player
+        if (isSlotGK && !isPlayerGK) {
+          return; // Silently reject
+        }
+
+        // ตำแหน่งอื่นๆ ใส่ได้หมด
+        updateSlot(over.id as string, player);
       }
     }
-  };
-
-  const confirmDrop = () => {
-    if (pendingDrop) {
-      updateSlot(pendingDrop.slotId, pendingDrop.player);
-      setPendingDrop(null);
-    }
-  };
-
-  const cancelDrop = () => {
-    setPendingDrop(null);
   };
 
   const [alertConfig, setAlertConfig] = React.useState<{
@@ -195,7 +124,8 @@ export default function LineupBuilder() {
       setShowSaveModal(false);
       setLineupName("");
       showAlert("Success!", "Lineup saved successfully.", "success");
-    } catch (error) {
+    } catch (err) {
+      console.error("Save lineup error:", err);
       showAlert("Error", "Failed to save lineup. Please try again.", "error");
     } finally {
       setIsSaving(false);
@@ -208,7 +138,8 @@ export default function LineupBuilder() {
       await loadLineup(id);
       setShowLoadModal(false);
       showAlert("Success!", "Lineup loaded successfully.", "success");
-    } catch (error) {
+    } catch (err) {
+      console.error("Load lineup error:", err);
       showAlert("Error", "Failed to load lineup.", "error");
     }
   };
@@ -230,7 +161,8 @@ export default function LineupBuilder() {
       window.URL.revokeObjectURL(url);
 
       showAlert("Success!", "PDF downloaded successfully.", "success");
-    } catch (error) {
+    } catch (err) {
+      console.error("Download PDF error:", err);
       showAlert("Error", "Failed to download PDF.", "error");
     }
   };
@@ -250,23 +182,20 @@ export default function LineupBuilder() {
 
       if (filters) {
         if (filters.search) params.append("search", filters.search);
-        if (filters.season) params.append("season", filters.season);
-
-        if (filters.birthYearFrom)
-          params.append("birth_year", filters.birthYearFrom);
-        if (filters.heightFrom) params.append("min_height", filters.heightFrom);
-        if (filters.heightTo) params.append("max_height", filters.heightTo);
-        if (filters.preferredFoot)
-          params.append("foot", filters.preferredFoot.toLowerCase());
       }
+
+      console.log(`[Frontend] Fetching players with params:`, params.toString());
 
       const res = await fetch(
         `/api/teams/${selectedTeamId}/players?${params.toString()}`,
       );
       const json = await res.json();
+      
+      console.log(`[Frontend] Final result: ${json.data?.length || 0} players`);
+      
       setSquad(json.data || []);
-    } catch (error) {
-      console.error("Failed to fetch players:", error);
+    } catch (err) {
+      console.error("Failed to fetch players:", err);
     } finally {
       setIsLoadingPlayers(false);
     }
@@ -276,6 +205,8 @@ export default function LineupBuilder() {
     // Toggle selection - ถ้ากดซ้ำให้ยกเลิก
     if (selectedSlotId === slotId) {
       setSelectedSlotId(null);
+      // โหลดนักเตะทั้งหมดกลับมา
+      await fetchPlayersWithFilters(undefined, activeFilters);
       return;
     }
 
@@ -297,10 +228,10 @@ export default function LineupBuilder() {
         <div className="flex-grow flex items-center justify-center glass-panel rounded-3xl p-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
 
-          <div className="absolute top-6 left-6 z-10 flex gap-2">
+          <div className="absolute top-6 left-10 z-10 flex flex-col gap-2">
             <button
               onClick={() => setShowSaveModal(true)}
-              className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-emerald-700 transition shadow-md"
+              className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-emerald-700 transition shadow-md"
             >
               Save Lineup
             </button>
@@ -309,7 +240,7 @@ export default function LineupBuilder() {
                 setShowLoadModal(true);
                 fetchMyLineups();
               }}
-              className="bg-white/80 text-emerald-900 px-4 py-2 rounded-lg font-bold hover:bg-white transition shadow-md border border-emerald-200"
+              className="bg-white/80 text-emerald-900 px-6 py-2 rounded-lg font-bold hover:bg-white transition shadow-md border border-emerald-200"
             >
               My Lineups
             </button>
@@ -323,7 +254,7 @@ export default function LineupBuilder() {
           />
         </div>
 
-        <div className="w-full md:w-[380px] glass-panel p-6 rounded-3xl flex flex-col gap-5 overflow-hidden">
+        <div className="w-full md:w-[380px] glass-panel p-6 rounded-3xl flex flex-col gap-5">
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div>
@@ -357,19 +288,37 @@ export default function LineupBuilder() {
             </div>
           </div>
 
-          {/* Advanced Filter */}
-          <AdvancedFilter
-            seasons={seasons}
-            onFilterChange={(filters) => {
-              setActiveFilters(filters);
-              // Re-fetch with new filters
-              if (selectedSlot) {
-                fetchPlayersWithFilters(selectedSlot.position, filters);
-              }
-            }}
-          />
+          {/* Simple Filter: Search Only */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search player..."
+              value={activeFilters.search}
+              onChange={(e) => {
+                const newFilters = { search: e.target.value };
+                setActiveFilters(newFilters);
+                
+                // Clear previous timer
+                if (searchDebounceTimer) {
+                  clearTimeout(searchDebounceTimer);
+                }
+                
+                // Set new timer - search after 300ms of no typing
+                const timer = setTimeout(() => {
+                  if (selectedSlot) {
+                    fetchPlayersWithFilters(selectedSlot.position, newFilters);
+                  } else {
+                    fetchPlayersWithFilters(undefined, newFilters);
+                  }
+                }, 300);
+                
+                setSearchDebounceTimer(timer);
+              }}
+              className="w-full px-4 py-2 rounded-lg bg-white border border-emerald-200 text-emerald-900 text-sm placeholder-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
 
-          <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
+          <div className="space-y-3 overflow-y-auto overflow-x-visible pr-2 custom-scrollbar flex-1">
             {isLoadingPlayers ? (
               <div className="text-center py-8 text-emerald-600 animate-pulse">
                 Loading players...
@@ -424,8 +373,8 @@ export default function LineupBuilder() {
 
       {/* Load Modal - ✅ แก้ไขให้มี 2 ปุ่ม */}
       {showLoadModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md max-h-[80vh] flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-emerald-900">My Lineups</h3>
               <button
@@ -441,7 +390,7 @@ export default function LineupBuilder() {
                   No saved lineups yet.
                 </p>
               ) : (
-                myLineups.map((l: any) => (
+                myLineups.map((l) => (
                   <div
                     key={l.lineupId}
                     className="p-4 border border-emerald-200 rounded-xl hover:bg-emerald-50 transition"
@@ -479,52 +428,6 @@ export default function LineupBuilder() {
                   </div>
                 ))
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Position Mismatch Confirmation Modal */}
-      {pendingDrop && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 mx-auto mb-3 bg-amber-100 rounded-full flex items-center justify-center">
-                <span className="text-3xl">⚠️</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Position Mismatch
-              </h3>
-              <p className="text-gray-600">
-                <strong className="text-emerald-700">
-                  {pendingDrop.player.name?.replace(/\s*\(\d+\)$/, "")}
-                </strong>{" "}
-                is a{" "}
-                <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">
-                  {pendingDrop.player.position}
-                </span>{" "}
-                but you&apos;re placing them at{" "}
-                <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">
-                  {pendingDrop.slotPosition}
-                </span>
-              </p>
-            </div>
-            <p className="text-sm text-gray-500 text-center mb-4">
-              Do you want to use this player in this position?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={cancelDrop}
-                className="flex-1 px-4 py-3 border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-100 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDrop}
-                className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition"
-              >
-                Confirm
-              </button>
             </div>
           </div>
         </div>

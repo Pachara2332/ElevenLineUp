@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     }))
 
     // URL สำหรับเข้าถึงรูปภาพ
-    const avatarUrl = domain ? `${domain}/${key}` : `https://pub-b54491c0affd4412b86ae26eb6c9e7b3.r2.dev/${key}`
+    const avatarUrl = domain ? `${domain}${key}` : `https://pub-b54491c0affd4412b86ae26eb6c9e7b3.r2.dev/${key}`
 
     // อัพเดท database
     await prisma.user.update({

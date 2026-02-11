@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import DashboardStandings from '@/components/dashboard/DashboardStandings';
 import DashboardFixtures from '@/components/dashboard/DashboardFixtures';
+import { GameController03Icon } from 'hugeicons-react';
 
 export default function DashboardPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
@@ -20,12 +21,6 @@ export default function DashboardPage() {
     }, [isLoading, isAuthenticated, router]);
 
     // ดึงข้อมูลสถิติผู้ใช้
-    useEffect(() => {
-        if (user) {
-            fetchUserStats()
-        }
-    }, [user])
-
     const fetchUserStats = async () => {
         try {
             const res = await fetch('/api/user/stats')
@@ -41,13 +36,13 @@ export default function DashboardPage() {
         }
     }
 
-    const calculateWinRate = (gameStats: any) => {
+    const calculateWinRate = (gameStats: Record<string, { totalPlayed?: number; totalWins?: number }>) => {
         if (!gameStats || Object.keys(gameStats).length === 0) return 0
 
         let totalPlayed = 0
         let totalWins = 0
 
-        Object.values(gameStats).forEach((stat: any) => {
+        Object.values(gameStats).forEach((stat) => {
             totalPlayed += stat.totalPlayed || 0
             totalWins += stat.totalWins || 0
         })
@@ -55,6 +50,13 @@ export default function DashboardPage() {
         if (totalPlayed === 0) return 0
         return Math.round((totalWins / totalPlayed) * 100)
     }
+
+    useEffect(() => {
+        if (user) {
+            fetchUserStats()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user])
 
     if (isLoading) {
         return <div className="text-white text-2xl font-bold animate-pulse text-center mt-20">Loading Dashboard...</div>;
@@ -89,9 +91,9 @@ export default function DashboardPage() {
                             </button>
                             <button
                                 onClick={() => router.push('/minigames')}
-                                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg uppercase tracking-widest hover:scale-105 transition-all shadow-lg"
+                                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg uppercase tracking-widest hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-2"
                             >
-                                🎮 Mini Games
+                                <GameController03Icon size={24} /> Mini Games
                             </button>
                         </div>
                     </div>
