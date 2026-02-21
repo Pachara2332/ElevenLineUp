@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🎮 Starting mini-games seed...');
 
-  // Start with yesterday, go up to +5 days
+  // Start with roughly a month ago, go up to a month in the future
   const today = startOfDay(new Date());
 
   // Clear existing mini-games data
@@ -17,7 +17,24 @@ async function main() {
 
   let successCount = 0;
 
-  for (let i = -1; i <= 5; i++) {
+  const whoAreYaPlayers = [
+    { name: 'Erling Haaland', team: 'Manchester City' },
+    { name: 'Lionel Messi', team: 'Inter Miami' },
+    { name: 'Bukayo Saka', team: 'Arsenal' },
+    { name: 'Jude Bellingham', team: 'Real Madrid' },
+    { name: 'Kylian Mbappe', team: 'PSG' },
+    { name: 'Marcus Rashford', team: 'Manchester United' },
+    { name: 'Mohamed Salah', team: 'Liverpool' },
+    { name: 'Son Heung-min', team: 'Tottenham' },
+    { name: 'Kevin De Bruyne', team: 'Manchester City' },
+    { name: 'Vinícius Júnior', team: 'Real Madrid' },
+    { name: 'Antoine Griezmann', team: 'Atletico Madrid' },
+    { name: 'Lamine Yamal', team: 'Barcelona' },
+    { name: 'Jamal Musiala', team: 'Bayern Munich' },
+    { name: 'Harry Kane', team: 'Bayern Munich' },
+  ];
+
+  for (let i = -180; i <= 180; i++) {
     const gameDate = addDays(today, i);
 
     try {
@@ -72,14 +89,15 @@ async function main() {
       });
 
       // 3. DailyWhoAreYa (Mock Data)
+      const playerIndex = Math.abs(i) % whoAreYaPlayers.length;
       await prisma.dailyWhoAreYa.create({
         data: {
           date: gameDate,
           playerId: `mock_player_${i}`,
-          playerName: i % 2 === 0 ? 'Erling Haaland' : 'Lionel Messi',
-          teamName: i % 2 === 0 ? 'Manchester City' : 'Inter Miami',
+          playerName: whoAreYaPlayers[playerIndex].name,
+          teamName: whoAreYaPlayers[playerIndex].team,
           blurredImage: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=200&auto=format&fit=crop',
-          pixelateLevel: 20 - (i * 2) // Gradually gets clearer or changes diff logic
+          pixelateLevel: 20 - (Math.abs(i) % 10) // Varies from 11 to 20
         }
       });
 
