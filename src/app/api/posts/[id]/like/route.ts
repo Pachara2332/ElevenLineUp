@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth-helper";
+import { awardXP } from "@/features/gamification/services/xp-service";
 
 export async function POST(
   req: NextRequest,
@@ -13,13 +14,11 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const existing = await prisma.like.findUnique({
+  const existing = await prisma.like.findFirst({
     where: {
-      postId_userId: {
-        postId: id,
-        userId: user.userId,
-      },
-    },
+      postId: id,
+      userId: user.userId,
+    }
   });
 
   if (existing) {
@@ -52,7 +51,7 @@ export async function POST(
   ]);
 
   // Create Notification
-  if (like.post.authorId !== user.userId) {
+  if (like.post && like.post.authorId !== user.userId) {
     const notification = await prisma.notification.create({
       data: {
         userId: like.post.authorId,
@@ -70,6 +69,11 @@ export async function POST(
     if (io) {
       io.to(`user-${like.post.authorId}`).emit("notification", notification);
     }
+  }
+
+  // Award XP to the post author
+  if (like.post && like.post.authorId !== user.userId) {
+    await awardXP(like.post.authorId, 1);
   }
 
   return NextResponse.json({ liked: true });

@@ -110,7 +110,11 @@ export default function LiveMatchThread({ fixtureId }: { fixtureId: string }) {
                 {loading ? (
                     <div className="text-center text-emerald-600 animate-pulse text-sm mt-10">Loading chat history...</div>
                 ) : messages.length === 0 ? (
-                    <div className="text-center text-gray-500 text-sm mt-10 italic">No messages yet. Be the first to shout!</div>
+                    <div className="text-center text-gray-500 text-sm mt-12 flex flex-col items-center justify-center opacity-70">
+                        <div className="text-5xl mb-3 animate-pulse">📢</div>
+                        <p className="font-bold text-emerald-800 text-lg">The stands are quiet...</p>
+                        <p className="text-emerald-600">Give a shout to start the chant!</p>
+                    </div>
                 ) : (
                     messages.map((msg, index) => {
                         const isMe = msg.userId === user.userId;

@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 import { getAuthUser } from '@/lib/auth-helper';
+import { awardPostXP } from '@/features/gamification/services/xp-service';
 
 const prisma = new PrismaClient();
 
@@ -83,6 +84,9 @@ export async function POST(req: Request) {
           likes: true
       }
     });
+
+    // Award XP for creating a post
+    await awardPostXP(user.userId);
 
     return NextResponse.json({ data: post });
   } catch (error) {

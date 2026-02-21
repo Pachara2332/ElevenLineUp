@@ -11,7 +11,9 @@ export default function DashboardPage() {
     const router = useRouter();
     const [userStats, setUserStats] = useState({
         lineupsCount: 0,
-        winRate: 0
+        winRate: 0,
+        xp: 0,
+        badges: [] as string[]
     })
 
     useEffect(() => {
@@ -28,7 +30,9 @@ export default function DashboardPage() {
                 const data = await res.json()
                 setUserStats({
                     lineupsCount: data.data.lineupsCount || 0,
-                    winRate: calculateWinRate(data.data.gameStats) || 0
+                    winRate: calculateWinRate(data.data.gameStats) || 0,
+                    xp: data.data.xp || 0,
+                    badges: data.data.badges || []
                 })
             }
         } catch (error) {
@@ -90,7 +94,7 @@ export default function DashboardPage() {
                                 Community Hub
                             </button>
                             <button
-                                onClick={() => router.push('/minigames')}
+                                onClick={() => router.push('/minigames/quiz-hub')}
                                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg uppercase tracking-widest hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-2"
                             >
                                 <GameController03Icon size={24} /> Mini Games
@@ -100,21 +104,46 @@ export default function DashboardPage() {
 
                     {/* Your Stats - แสดงข้อมูลจริง */}
                     <div className="glass-panel p-6 rounded-3xl">
-                        <h3 className="font-bold text-emerald-900 mb-4">Your Stats</h3>
-                        <div className="grid grid-cols-2 gap-4 text-center">
-                            <div className="bg-white/20 rounded-xl p-4">
+                        <h3 className="font-bold text-emerald-900 mb-4 text-xl">Your Journey</h3>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                            <div className="bg-white/30 rounded-xl p-4 shadow-sm border border-emerald-100">
+                                <div className="text-2xl font-black text-emerald-800">
+                                    {userStats.xp}
+                                </div>
+                                <div className="text-[10px] md:text-xs font-bold text-emerald-900/60 uppercase tracking-widest mt-1">Total XP</div>
+                            </div>
+                            <div className="bg-white/30 rounded-xl p-4 shadow-sm border border-emerald-100">
                                 <div className="text-2xl font-black text-emerald-800">
                                     {userStats.lineupsCount}
                                 </div>
-                                <div className="text-xs font-bold text-emerald-900/60 uppercase">Lineups</div>
+                                <div className="text-[10px] md:text-xs font-bold text-emerald-900/60 uppercase tracking-widest mt-1">Lineups</div>
                             </div>
-                            <div className="bg-white/20 rounded-xl p-4">
+                            <div className="bg-white/30 rounded-xl p-4 shadow-sm border border-emerald-100">
                                 <div className="text-2xl font-black text-emerald-800">
                                     {userStats.winRate > 0 ? `${userStats.winRate}%` : '-'}
                                 </div>
-                                <div className="text-xs font-bold text-emerald-900/60 uppercase">Win Rate</div>
+                                <div className="text-[10px] md:text-xs font-bold text-emerald-900/60 uppercase tracking-widest mt-1">Win Rate</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-4 shadow-sm text-white border border-purple-400">
+                                <div className="text-2xl font-black">
+                                    Lvl. {Math.floor(userStats.xp / 100) + 1}
+                                </div>
+                                <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest mt-1">Current Level</div>
                             </div>
                         </div>
+
+                        {userStats.badges && userStats.badges.length > 0 && (
+                            <div className="mt-6 pt-6 border-t border-emerald-100/50">
+                                <div className="text-xs font-bold text-emerald-900/60 uppercase tracking-widest mb-3">Earned Badges</div>
+                                <div className="flex flex-wrap gap-2">
+                                    {userStats.badges.map((badge, idx) => (
+                                        <div key={idx} className="bg-emerald-100/80 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-200 shadow-sm flex items-center gap-1.5 animate-in slide-in-from-bottom">
+                                            <span className="text-yellow-500 text-sm">🎖️</span> {badge}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -37,6 +37,16 @@ export async function GET(req: Request) {
             totalPlayed: true,
             totalWins: true,
           }
+        },
+
+        // ดึงข้อมูล Gamification (XP & Badges)
+        userStats: {
+          select: {
+            xp: true,
+            predictionWins: true,
+            postsCount: true,
+            badges: true,
+          }
         }
       }
     })
@@ -62,6 +72,8 @@ export async function GET(req: Request) {
       lineupsCount: userData._count.lineups,
       postsCount: userData._count.posts,
       streak: maxStreak,
+      xp: userData.userStats?.xp || 0,
+      badges: userData.userStats?.badges || [],
       
       // รายละเอียดเกมแต่ละประเภท
       gameStats: userData.userGameStats.reduce((acc, stat) => {

@@ -23,6 +23,7 @@ model User {
   likes            Like[]
   matchPredictions MatchPrediction[]
   userGameStats    UserGameStats[]
+  userStats        UserStats?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -41,6 +42,7 @@ model User {
   // Phase B & C Relations
   matchMessages MatchMessage[]
   weeklyEntries WeeklyEntry[]
+  quizAttempts  QuizAttempt[]
 
   @@map("User")
 }
@@ -466,4 +468,67 @@ model WeeklyEntry {
 
   @@unique([challengeId, userId])
   @@map("WeeklyEntry")
+}
+
+// --- Phase D: Reputation & Barage System ---
+
+model UserStats {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  xp             Int      @default(0)
+  predictionWins Int      @default(0)
+  postsCount     Int      @default(0)
+  badges         String[] @default([]) // Array of badge names, e.g., ["Tactical Genius"]
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("UserStats")
+}
+
+// --- Phase E: Football Brain Games Hub (Quiz System) ---
+
+enum QuizType {
+  TEXT
+  IMAGE
+  MISSING_XI
+  WHO_AM_I
+  TRANSFER
+}
+
+enum QuizDifficulty {
+  CASUAL
+  COMPETITIVE
+  HARDCORE
+}
+
+model Quiz {
+  id         String         @id @default(uuid())
+  type       QuizType
+  difficulty QuizDifficulty @default(CASUAL)
+  question   String?
+  imageUrl   String?
+  answer     String
+  options    Json?
+  createdAt  DateTime       @default(now())
+
+  attempts QuizAttempt[]
+
+  @@map("Quiz")
+}
+
+model QuizAttempt {
+  id        String   @id @default(uuid())
+  quizId    String
+  userId    String
+  isCorrect Boolean
+  timeTaken Int // In seconds
+  hintsUsed Int      @default(0)
+  xpEarned  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("QuizAttempt")
 }

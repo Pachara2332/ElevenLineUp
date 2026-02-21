@@ -71,17 +71,17 @@ export default function FixturesList({ fixtures }: { fixtures: Fixture[] }) {
 
             {/* Modal for Live Match Thread */}
             {activeLiveMatch && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm animate-in fade-in">
-                    <div className="w-full max-w-2xl bg-transparent flex flex-col items-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="w-full max-w-2xl bg-transparent flex flex-col items-center animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
                         <div className="w-full text-right mb-2">
                             <button
                                 onClick={() => setActiveLiveMatch(null)}
-                                className="text-white bg-white/20 hover:bg-white/40 rounded-full p-2 px-6 font-bold transition-all w-fit self-end"
+                                className="text-white bg-white/20 hover:bg-white/40 rounded-full p-2 px-6 font-bold transition-all w-fit self-end shadow-md hover:scale-105"
                             >
                                 Close Chat
                             </button>
                         </div>
-                        <div className="w-full shadow-2xl">
+                        <div className="w-full shadow-2xl rounded-3xl overflow-hidden ring-4 ring-emerald-500/20">
                             <LiveMatchThread fixtureId={activeLiveMatch} />
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-helper'
+import { awardXP } from '@/features/gamification/services/xp-service'
 
 export async function POST(
   req: NextRequest,
@@ -62,6 +63,9 @@ export async function POST(
         io.to(`user-${comment.post.authorId}`).emit('notification', notification);
     }
   }
+
+  // Award XP to the commenter
+  await awardXP(user.userId, 2)
 
   return NextResponse.json(comment)
 }

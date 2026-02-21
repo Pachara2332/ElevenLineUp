@@ -46,7 +46,41 @@ export default function FeedList() {
         queryFn: fetchPosts,
     });
 
-    if (isLoading) return <div className="text-center text-emerald-800 animate-pulse">Loading feed...</div>;
+    if (isLoading) {
+        return (
+            <div className="space-y-6">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className="glass-panel p-6 rounded-3xl animate-pulse">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-200/50"></div>
+                            <div>
+                                <div className="h-4 w-32 bg-emerald-200/50 rounded mb-2"></div>
+                                <div className="h-3 w-20 bg-emerald-100/50 rounded"></div>
+                            </div>
+                        </div>
+                        <div className="space-y-3 mb-6">
+                            <div className="h-4 bg-emerald-100/50 rounded w-full"></div>
+                            <div className="h-4 bg-emerald-100/50 rounded w-5/6"></div>
+                        </div>
+                        <div className="flex items-center gap-6 pt-4 border-t border-emerald-900/10">
+                            <div className="h-6 w-12 bg-emerald-100/50 rounded"></div>
+                            <div className="h-6 w-24 bg-emerald-100/50 rounded"></div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    if (!posts || posts.length === 0) {
+        return (
+            <div className="text-center py-16 px-4 glass-panel rounded-3xl border-dashed border-2 border-emerald-200">
+                <div className="text-6xl mb-4 opacity-50 relative animate-bounce">🏟️</div>
+                <h3 className="text-xl font-bold text-emerald-800 mb-2">The stadium is quiet...</h3>
+                <p className="text-emerald-600 font-medium">Be the first to start the conversation!</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -119,11 +153,11 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
                 <button
                     onClick={toggleLike}
                     className={clsx(
-                        "flex items-center gap-2 font-semibold transition-colors",
+                        "flex items-center gap-2 font-semibold transition-transform active:scale-95 group",
                         liked ? "text-emerald-600" : "text-emerald-900/60 hover:text-emerald-900"
                     )}
                 >
-                    {liked ? <HandThumbUpIconSolid className="w-6 h-6" /> : <HandThumbUpIcon className="w-6 h-6" />}
+                    {liked ? <HandThumbUpIconSolid className="w-6 h-6 animate-in zoom-in spin-in-3 duration-300 drop-shadow-sm" /> : <HandThumbUpIcon className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />}
                     <span>{likesCount}</span>
                 </button>
 
