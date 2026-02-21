@@ -50,9 +50,18 @@ export async function POST(req: NextRequest) {
     }
     console.log('✅ Team found:', teamExists.name);
 
+    function generateSlug(name: string, formation: string): string {
+      const base = `${name}-${formation}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const uniqueId = Math.random().toString(36).substring(2, 8);
+      return `${base}-${uniqueId}`;
+    }
+
+    const slug = generateSlug(name, formation || '4-3-3');
+
     // 🔍 LOG 3: ดูข้อมูลที่จะส่งเข้า database
     const lineupData = {
       name,
+      slug,
       formation: formation || '4-3-3',
       userId: user.userId,
       teamId: teamId,

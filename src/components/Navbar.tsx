@@ -21,7 +21,7 @@ export default function Navbar({ title = "Dashboard", subtitle }: NavbarProps) {
           {title} <span className="text-emerald-300">Overview</span>
         </h1>
         <p className="text-emerald-700">
-          {subtitle || (user ? `Welcome back, ${user.name}` : "")}
+          {subtitle || (user ? <>Welcome back, <Link href={`/u/${user.username || user.userId}`} className="font-bold hover:underline">{user.name}</Link></> : "")}
         </p>
       </Link>
       <div className="flex items-center gap-3">

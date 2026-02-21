@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from 'date-fns'
+import Link from 'next/link'
 
 interface Comment {
   id: string
@@ -6,6 +7,7 @@ interface Comment {
   createdAt: string
   user: {
     name: string
+    username?: string | null
     avatar?: string | null
   }
 }
@@ -35,7 +37,9 @@ export default function CommentList({ comments }: Props) {
 
           <div className="bg-white border border-emerald-100 rounded-2xl px-4 py-3 shadow-sm flex-1">
             <div className="flex items-center justify-between">
-              <div className="font-semibold text-emerald-900">{c.user.name}</div>
+              <Link href={`/u/${c.user.username || 'unknown'}`} className="font-semibold text-emerald-900 hover:text-emerald-700 hover:underline">
+                {c.user.name}
+              </Link>
               <div className="text-xs text-emerald-900/50">
                 {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}
               </div>

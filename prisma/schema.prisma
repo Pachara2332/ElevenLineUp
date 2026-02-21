@@ -12,6 +12,7 @@ datasource db {
 
 model User {
   userId           String            @id @default(cuid()) @map("id")
+  username         String            @unique
   email            String            @unique
   password         String
   name             String
@@ -149,6 +150,7 @@ model Team {
 model Lineup {
   lineupId  String  @id @default(cuid()) @map("id")
   name      String
+  slug      String? @unique
   formation String  @default("4-3-3")
   isPublic  Boolean @default(false)
 
@@ -164,6 +166,7 @@ model Lineup {
   updatedAt DateTime @updatedAt
   likes     Like[]
 
+  @@index([slug])
   @@map("Lineup")
 }
 
@@ -473,12 +476,16 @@ model WeeklyEntry {
 // --- Phase D: Reputation & Barage System ---
 
 model UserStats {
-  id             String   @id @default(uuid())
-  userId         String   @unique
-  xp             Int      @default(0)
-  predictionWins Int      @default(0)
-  postsCount     Int      @default(0)
-  badges         String[] @default([]) // Array of badge names, e.g., ["Tactical Genius"]
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  xp                 Int      @default(0)
+  predictionWins     Int      @default(0)
+  postsCount         Int      @default(0)
+  streak             Int      @default(0)
+  predictionAccuracy Float    @default(0)
+  bestLineupId       String?
+  totalQuizzes       Int      @default(0)
+  badges             String[] @default([]) // Array of badge names, e.g., ["Tactical Genius"]
 
   user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 

@@ -4,9 +4,11 @@ interface Props {
   open: boolean
   onClose: () => void
   user: {
+    userId?: string
     name: string
+    username?: string | null
     email?: string
-    avatar?: string 
+    avatar?: string
     lineupsCount?: number
     postsCount?: number
     streak?: number
@@ -42,7 +44,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  
+
   // State สำหรับข้อมูลสถิติที่ดึงจาก API
   const [stats, setStats] = useState<UserStats | null>(null)
   const [loadingStats, setLoadingStats] = useState(false)
@@ -65,7 +67,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
     try {
       setLoadingStats(true)
       const res = await fetch('/api/user/stats')
-      
+
       if (!res.ok) {
         throw new Error('Failed to fetch stats')
       }
@@ -82,12 +84,12 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
   const saveProfile = async () => {
     try {
       console.log('Saving profile with avatar:', avatar)
-      
+
       const res = await fetch('/api/auth/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name, 
+        body: JSON.stringify({
+          name,
           avatar
         })
       })
@@ -102,12 +104,12 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
 
       setSavedNotification(true)
       setUploadSuccess(false)
-      
+
       setTimeout(() => setSavedNotification(false), 2000)
-      
+
       // รีเฟรชข้อมูลสถิติ
       fetchUserStats()
-      
+
       // รีเฟรชหน้าเพื่อให้ข้อมูลอัพเดท
       setTimeout(() => {
         window.location.reload()
@@ -177,7 +179,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
 
       const data = await res.json()
       console.log('Upload response:', data)
-      
+
       setAvatar(data.url)
       setUploadSuccess(true)
 
@@ -233,9 +235,19 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
         </div>
 
         <div className="px-6 pt-16 pb-6">
-          <div className="mb-6">
-            <div className="font-bold text-2xl text-gray-900">{user.name}</div>
-            <div className="text-sm text-gray-500">{user.email}</div>
+          <div className="mb-6 flex justify-between items-start">
+            <div>
+              <div className="font-bold text-2xl text-gray-900">{user.name}</div>
+              <div className="text-sm text-gray-500">{user.email}</div>
+            </div>
+            <a
+              href={`/u/${user.username || user.userId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold leading-tight bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-full hover:bg-emerald-100 transition flex items-center gap-1"
+            >
+              Public Profile ↗
+            </a>
           </div>
 
           <div className="grid grid-cols-3 gap-3 mb-6">
@@ -321,11 +333,10 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
 
                   <div className="flex-1">
                     <label className="cursor-pointer inline-block">
-                      <div className={`px-4 py-2 rounded-lg transition font-medium text-sm text-center ${
-                        uploading 
-                          ? 'bg-gray-400 cursor-not-allowed' 
+                      <div className={`px-4 py-2 rounded-lg transition font-medium text-sm text-center ${uploading
+                          ? 'bg-gray-400 cursor-not-allowed'
                           : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                      }`}>
+                        }`}>
                         {uploading ? 'Uploading...' : 'Choose Image'}
                       </div>
                       <input
@@ -339,7 +350,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
                     <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
                   </div>
                 </div>
-                
+
                 {uploadSuccess && (
                   <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 bg-emerald-50 px-4 py-2.5 rounded-lg border border-emerald-200 animate-fade-in">
                     <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -364,11 +375,10 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
 
               <button
                 onClick={saveProfile}
-                className={`w-full text-white px-4 py-3 rounded-xl font-semibold transition ${
-                  uploadSuccess || name !== user?.name
+                className={`w-full text-white px-4 py-3 rounded-xl font-semibold transition ${uploadSuccess || name !== user?.name
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-lg animate-pulse-slow'
                     : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-lg'
-                }`}
+                  }`}
               >
                 {uploadSuccess || name !== user?.name ? 'Save Changes ⚠️' : 'Save Changes'}
               </button>
@@ -425,35 +435,31 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
               <div className="bg-white rounded-2xl p-5 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-4">Achievements</h3>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className={`rounded-xl p-3 text-center border-2 ${
-                    displayStats.lineupsCount > 0 
-                      ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200' 
+                  <div className={`rounded-xl p-3 text-center border-2 ${displayStats.lineupsCount > 0
+                      ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200'
                       : 'bg-gray-50 border-gray-200 opacity-50'
-                  }`}>
+                    }`}>
                     <div className="text-3xl mb-1">🏆</div>
                     <div className="text-xs font-semibold text-gray-700">First Lineup</div>
                   </div>
-                  <div className={`rounded-xl p-3 text-center border-2 ${
-                    displayStats.streak >= 5
+                  <div className={`rounded-xl p-3 text-center border-2 ${displayStats.streak >= 5
                       ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
                       : 'bg-gray-50 border-gray-200 opacity-50'
-                  }`}>
+                    }`}>
                     <div className="text-3xl mb-1">⭐</div>
                     <div className="text-xs font-semibold text-gray-700">5 Day Streak</div>
                   </div>
-                  <div className={`rounded-xl p-3 text-center border-2 ${
-                    displayStats.postsCount >= 10
+                  <div className={`rounded-xl p-3 text-center border-2 ${displayStats.postsCount >= 10
                       ? 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200'
                       : 'bg-gray-50 border-gray-200 opacity-50'
-                  }`}>
+                    }`}>
                     <div className="text-3xl mb-1">✍️</div>
                     <div className="text-xs font-semibold text-gray-700">10 Posts</div>
                   </div>
-                  <div className={`rounded-xl p-3 text-center border-2 ${
-                    displayStats.streak >= 30
+                  <div className={`rounded-xl p-3 text-center border-2 ${displayStats.streak >= 30
                       ? 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200'
                       : 'bg-gray-50 border-gray-200 opacity-50'
-                  }`}>
+                    }`}>
                     <div className="text-3xl mb-1">🔥</div>
                     <div className="text-xs font-semibold text-gray-700">30 Day Streak</div>
                   </div>

@@ -18,7 +18,7 @@ export const GET = ApiHandler.handle(async (req) => {
     
     const user = await prisma.user.findUnique({
       where: { userId: decoded.userId },
-      select: { userId: true, name: true, email: true, avatar: true, role: true },
+      select: { userId: true, name: true, username: true, email: true, avatar: true, role: true },
     });
 
     if (!user) {

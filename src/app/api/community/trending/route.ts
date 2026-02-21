@@ -35,6 +35,7 @@ export const GET = ApiHandler.handle(async (req) => {
           select: {
             name: true,
             avatar: true,
+            username: true,
           }
         },
         _count: {

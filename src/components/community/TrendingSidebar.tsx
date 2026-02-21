@@ -8,6 +8,7 @@ interface TrendingItem {
     name: string;
     user?: {
         name: string;
+        username?: string | null;
         avatar: string | null;
     };
     _count?: {
@@ -64,7 +65,12 @@ export default function TrendingSidebar() {
                                     {item.name}
                                 </h3>
                                 <p className="text-xs text-emerald-200/60 truncate">
-                                    by {item.user?.name || 'Unknown'} • {item.formation}
+                                    by {' '}
+                                    {item.user ? (
+                                        <Link href={`/u/${item.user.username || 'unknown'}`} className="hover:text-emerald-300 hover:underline z-10 relative" onClick={(e) => e.stopPropagation()}>
+                                            {item.user.name}
+                                        </Link>
+                                    ) : 'Unknown'} • {item.formation}
                                 </p>
                             </div>
                             {item._count?.likes !== undefined && (

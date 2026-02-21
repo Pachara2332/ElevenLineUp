@@ -5,8 +5,8 @@ import { Prisma } from '@prisma/client';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-interface ApiContext {
-  params: Record<string, string>;
+interface ApiContext<T = Record<string, string>> {
+  params: Promise<T>;
 }
 
 interface ApiResponse<T = any> {
@@ -25,8 +25,8 @@ export class ApiHandler {
     return NextResponse.json({ success: false, error: message }, { status });
   }
 
-  static handle(fn: (req: Request, ctx: ApiContext) => Promise<NextResponse>) {
-    return async (req: Request, ctx: ApiContext) => {
+  static handle<T = Record<string, string>>(fn: (req: Request, ctx: ApiContext<T>) => Promise<NextResponse>) {
+    return async (req: Request, ctx: ApiContext<T>) => {
       try {
         return await fn(req, ctx);
       } catch (error: any) {

@@ -93,12 +93,14 @@ export async function awardPredictionWin(userId: string) {
       where: { userId },
       update: { 
         xp: { increment: 10 },
-        predictionWins: { increment: 1 }
+        predictionWins: { increment: 1 },
+        streak: { increment: 1 }
       },
       create: {
         userId,
         xp: 10,
-        predictionWins: 1
+        predictionWins: 1,
+        streak: 1
       },
     });
 
@@ -138,8 +140,15 @@ export async function awardQuizXP(userId: string, isCorrect: boolean, timeTaken:
   try {
     let stats = await prisma.userStats.upsert({
       where: { userId },
-      update: { xp: { increment: totalXP } },
-      create: { userId, xp: totalXP }
+      update: { 
+        xp: { increment: totalXP },
+        totalQuizzes: { increment: 1 } 
+      },
+      create: { 
+        userId, 
+        xp: totalXP,
+        totalQuizzes: 1 
+      }
     });
 
     // Example Badge Check: Football Scholar if XP reaches 500 (can be refined later)

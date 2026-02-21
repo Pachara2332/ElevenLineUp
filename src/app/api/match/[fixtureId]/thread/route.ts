@@ -66,7 +66,9 @@ export const POST = ApiHandler.handle(async (req, { params }) => {
   });
 
   // Global var hack to emit using our socket.io instance
+  // @ts-ignore
   if (global.io) {
+    // @ts-ignore
     global.io.of('/match').to(`match_${fixtureId}`).emit('new_message', message);
   } else {
     console.warn('global.io is not accessible. Make sure you are running via node server.js');

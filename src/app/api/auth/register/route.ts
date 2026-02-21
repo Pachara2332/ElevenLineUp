@@ -20,10 +20,15 @@ export const POST = ApiHandler.handle(async (req) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  const baseUsername = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString();
+  const generatedUsername = `${baseUsername}${randomSuffix}`;
+
   const user = await prisma.user.create({
     data: {
       name,
       email,
+      username: generatedUsername,
       password: hashedPassword,
     },
   });

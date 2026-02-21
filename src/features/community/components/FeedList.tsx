@@ -8,6 +8,7 @@ import { HandThumbUpIcon as HandThumbUpIconSolid } from '@heroicons/react/24/sol
 import { useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import clsx from 'clsx';
+import Link from 'next/link';
 
 interface Post {
     id: string;
@@ -20,6 +21,7 @@ interface Post {
     finalScore: number;
     author: {
         name: string;
+        username?: string | null;
         avatar?: string | null;
     };
     team?: {
@@ -134,7 +136,9 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
                     </div>
                 )}
                 <div>
-                    <div className="font-bold text-emerald-900">{post.author.name}</div>
+                    <Link href={`/u/${post.author.username || 'unknown'}`} className="font-bold text-emerald-900 hover:text-emerald-700 hover:underline">
+                        {post.author.name}
+                    </Link>
                     <div className="text-xs text-emerald-900/60">
                         {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                     </div>

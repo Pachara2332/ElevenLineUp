@@ -26,7 +26,7 @@ async function getAuthenticatedUser() {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const POST = ApiHandler.handle(async (req, ctx) => {
-  const pollId = ctx.params.id;
+  const pollId = (await (ctx.params as Promise<{id: string}>)).id;
   const userId = await getAuthenticatedUser();
 
   if (!userId) {
