@@ -20,21 +20,27 @@ export async function POST(
     return NextResponse.json({ error: 'Text required' }, { status: 400 })
   }
 
-  const comment = await prisma.comment.create({
-    data: {
-      text,
-      postId: id,
-      userId: user.userId
-    },
-    include: {
-      user: {
-        select: { userId: true, name: true, avatar: true }
+  const [comment] = await prisma.$transaction([
+    prisma.comment.create({
+      data: {
+        text,
+        postId: id,
+        userId: user.userId
       },
-      post: {
-        select: { authorId: true }
+      include: {
+        user: {
+          select: { userId: true, name: true, avatar: true }
+        },
+        post: {
+          select: { authorId: true }
+        }
       }
-    }
-  })
+    }),
+    prisma.post.update({
+      where: { id },
+      data: { commentCount: { increment: 1 } }
+    })
+  ])
 
   // Create Notification
   if (comment.post.authorId !== user.userId) {
@@ -43,12 +49,10 @@ export async function POST(
         userId: comment.post.authorId,
         actorId: user.userId,
         type: 'COMMENT',
-        message: 'commented on your post',
-        postId: id
+        entityId: id
       },
       include: {
-        actor: { select: { name: true, avatar: true } },
-        post: { select: { id: true } }
+        actor: { select: { name: true, avatar: true } }
       }
     });
 

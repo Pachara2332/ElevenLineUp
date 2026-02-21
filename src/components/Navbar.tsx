@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import LogoutButton from "@/components/LogoutButton";
+import NotificationBell from "@/components/NotificationBell";
 
 interface NavbarProps {
   title?: string;
@@ -25,11 +26,18 @@ export default function Navbar({ title = "Dashboard", subtitle }: NavbarProps) {
       </Link>
       <div className="flex items-center gap-3">
         <Link
+          href="/fixtures"
+          className="px-4 py-2 rounded-xl bg-white/40 text-emerald-900 font-bold hover:bg-white/60 transition"
+        >
+          Fixtures
+        </Link>
+        <Link
           href="/dashboard"
           className="px-4 py-2 rounded-xl bg-white/40 text-emerald-900 font-bold hover:bg-white/60 transition"
         >
           Profile
         </Link>
+        <NotificationBell />
         <LogoutButton />
       </div>
     </header>

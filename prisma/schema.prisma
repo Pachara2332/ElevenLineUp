@@ -15,6 +15,7 @@ model User {
   email            String            @unique
   password         String
   name             String
+  role             String            @default("USER")
   avatar           String?
   lineups          Lineup[]
   posts            Post[]
@@ -31,10 +32,15 @@ model User {
   refreshTokens     RefreshToken[]
 
   // Community Relations
-  followers Follow[]   @relation("UserFollowers")
-  following Follow[]   @relation("UserFollowing")
-  pollVotes PollVote[]
-  polls     Poll[]
+  followers     Follow[]           @relation("UserFollowers")
+  following     Follow[]           @relation("UserFollowing")
+  pollVotes     PollVote[]
+  polls         Poll[]
+  favoriteTeams UserFavoriteTeam[]
+
+  // Phase B & C Relations
+  matchMessages MatchMessage[]
+  weeklyEntries WeeklyEntry[]
 
   @@map("User")
 }
@@ -122,7 +128,7 @@ model PollVote {
 }
 
 model Team {
-  teamId      String            @id @default(cuid()) @map("id")
+  teamId      String             @id @default(cuid()) @map("id")
   name        String
   league      String
   logo        String
@@ -132,7 +138,8 @@ model Team {
   comments    Comment[]
   likes       Like[]
   predictions MatchPrediction[]
-  createdAt   DateTime          @default(now())
+  favoritedBy UserFavoriteTeam[]
+  createdAt   DateTime           @default(now())
 
   @@map("Team")
 }
@@ -240,18 +247,19 @@ model MatchPrediction {
 }
 
 model Post {
-  id        String   @id @default(cuid())
-  authorId  String
-  content   String
-  imageUrl  String?
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  authorId     String
+  content      String
+  imageUrl     String?
+  likeCount    Int      @default(0) // For feed ranking
+  commentCount Int      @default(0) // For feed ranking
+  createdAt    DateTime @default(now())
 
-  author        User           @relation(fields: [authorId], references: [userId])
-  comments      Comment[]
-  likes         Like[]
-  team          Team?          @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
-  teamTeamId    String?
-  notifications Notification[]
+  author     User      @relation(fields: [authorId], references: [userId])
+  comments   Comment[]
+  likes      Like[]
+  team       Team?     @relation(fields: [teamTeamId], references: [teamId], onDelete: SetNull)
+  teamTeamId String?
 
   @@map("Post")
 }
@@ -273,19 +281,38 @@ model Comment {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String // Recipient (Post Owner)
-  actorId   String // Actor (Liker/Commenter)
-  type      String // 'LIKE', 'COMMENT'
-  message   String
-  isRead    Boolean  @default(false)
-  postId    String?
-  createdAt DateTime @default(now())
-  user      User     @relation("UserNotifications", fields: [userId], references: [userId], onDelete: Cascade)
-  actor     User     @relation("NotificationActor", fields: [actorId], references: [userId], onDelete: Cascade)
-  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id        String           @id @default(uuid())
+  userId    String // Recipient
+  actorId   String // User who triggered it
+  type      NotificationType // e.g., LIKE, COMMENT
+  entityId  String? // The postId, commentId, etc.
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
 
-  @@index([userId])
+  user  User @relation("UserNotifications", fields: [userId], references: [userId], onDelete: Cascade)
+  actor User @relation("NotificationActor", fields: [actorId], references: [userId], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("Notification")
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  POLL_VOTE
+}
+
+model UserFavoriteTeam {
+  id     String @id @default(uuid())
+  userId String
+  teamId String
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [teamId], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+  @@map("UserFavoriteTeam")
 }
 
 // --- Mini Games System ---
@@ -386,4 +413,57 @@ model LoginAttempt {
 
   @@index([email, ipAddress])
   @@map("LoginAttempt")
+}
+
+// --- Phase B: Live Match Thread ---
+
+model MatchThread {
+  id        String         @id @default(uuid())
+  fixtureId String         @unique
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  messages  MatchMessage[]
+
+  @@map("MatchThread")
+}
+
+model MatchMessage {
+  id        String   @id @default(uuid())
+  threadId  String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  thread MatchThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@map("MatchMessage")
+}
+
+// --- Phase C: Weekly Lineup Challenge ---
+
+model WeeklyChallenge {
+  id        String        @id @default(uuid())
+  week      Int           @unique
+  budget    Int
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  entries   WeeklyEntry[]
+
+  @@map("WeeklyChallenge")
+}
+
+model WeeklyEntry {
+  id          String @id @default(uuid())
+  challengeId String
+  userId      String
+  totalPoints Int    @default(0)
+  lineup      Json // { formation: "4-3-3", players: [{id, position, cost, points}] }
+
+  challenge WeeklyChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+  @@map("WeeklyEntry")
 }

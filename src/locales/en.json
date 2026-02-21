@@ -44,5 +44,32 @@
             "minigames": "Mini Games",
             "profile": "Profile"
         }
+    },
+    "admin": {
+        "panel_title": "Admin Panel",
+        "menu": {
+            "dashboard": "Dashboard",
+            "standings": "League Standings",
+            "fixtures": "Fixtures",
+            "users": "Manage Users",
+            "posts": "Moderate Posts",
+            "back": "← Back to App"
+        },
+        "dashboard": {
+            "title": "Admin Dashboard",
+            "subtitle": "Welcome to the Premier League Builder Admin Panel.",
+            "total_users": "Total Users",
+            "total_lineups": "Total Lineups",
+            "total_posts": "Total Posts",
+            "total_fixtures": "Total Fixtures",
+            "manage_standings": "Manage League Standings",
+            "manage_standings_desc": "Update points, wins, losses, and goal differences for Premier League teams.",
+            "manage_fixtures": "Manage Fixtures",
+            "manage_fixtures_desc": "Update scores, match status, and dates for all Premier League fixtures.",
+            "manage_users": "Manage Users",
+            "manage_users_desc": "View user list, change access roles (User/Admin), or delete accounts.",
+            "moderate_posts": "Moderate Posts",
+            "moderate_posts_desc": "Review community content and delete inappropriate posts to keep the platform clean."
+        }
     }
 }

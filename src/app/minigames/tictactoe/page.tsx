@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import Navbar from "@/components/Navbar";
 
 interface GridCell {
   type: string;
@@ -49,7 +48,12 @@ export default function TicTacToePage() {
   if (isLoading)
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar title="Tic-Tac-Toe" subtitle="Match players to criteria" />
+        <div className="mb-6 text-center mt-4 md:mt-8">
+          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+            Tic-Tac-Toe <span className="text-emerald-400">Overview</span>
+          </h1>
+          <p className="text-emerald-700 font-medium mt-1">Match players to criteria</p>
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-emerald-600 text-xl font-bold animate-pulse">
             Loading Grid...
@@ -61,7 +65,12 @@ export default function TicTacToePage() {
   if (!game)
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar title="Tic-Tac-Toe" subtitle="Match players to criteria" />
+        <div className="mb-6 text-center mt-4 md:mt-8">
+          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+            Tic-Tac-Toe <span className="text-emerald-400">Overview</span>
+          </h1>
+          <p className="text-emerald-700 font-medium mt-1">Match players to criteria</p>
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-gray-500 text-xl font-bold">
             No Daily Game Available Today
@@ -76,7 +85,12 @@ export default function TicTacToePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar title="Tic-Tac-Toe" subtitle="Match players to criteria" />
+      <div className="mb-6 text-center mt-4 md:mt-8">
+        <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+          Tic-Tac-Toe <span className="text-emerald-400">Overview</span>
+        </h1>
+        <p className="text-emerald-700 font-medium mt-1">Match players to criteria</p>
+      </div>
 
       <div className="px-4 md:px-8 pb-8 flex-1">
         <div className="max-w-4xl mx-auto">
@@ -165,7 +179,7 @@ export default function TicTacToePage() {
               ))}
 
               {game.rows.map((row, r) => (
-                <div key={r}>
+                <React.Fragment key={r}>
                   <div className="flex flex-col items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-3 text-center shadow-lg aspect-square">
                     <div className="text-[10px] font-bold text-white/80 mb-1 tracking-wider uppercase">
                       {row.type}
@@ -227,7 +241,7 @@ export default function TicTacToePage() {
                       </div>
                     );
                   })}
-                </div>
+                </React.Fragment>
               ))}
             </div>
           </div>

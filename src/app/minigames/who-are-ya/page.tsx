@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import Navbar from "@/components/Navbar";
 
 interface Game {
   id: string;
@@ -62,7 +61,12 @@ export default function WhoAreYaPage() {
   if (isLoading)
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar title="Who Are Ya?" subtitle="Guess the mystery player" />
+        <div className="mb-6 text-center mt-4 md:mt-8">
+          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+            Who Are Ya? <span className="text-emerald-400">Overview</span>
+          </h1>
+          <p className="text-emerald-700 font-medium mt-1">Guess the mystery player</p>
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-emerald-600 text-xl font-bold animate-pulse">
             Loading Mystery Player...
@@ -74,7 +78,12 @@ export default function WhoAreYaPage() {
   if (!game)
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar title="Who Are Ya?" subtitle="Guess the mystery player" />
+        <div className="mb-6 text-center mt-4 md:mt-8">
+          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+            Who Are Ya? <span className="text-emerald-400">Overview</span>
+          </h1>
+          <p className="text-emerald-700 font-medium mt-1">Guess the mystery player</p>
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-gray-500 text-xl font-bold">No Game Today</div>
         </div>
@@ -83,7 +92,12 @@ export default function WhoAreYaPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar title="Who Are Ya?" subtitle="Guess the mystery player" />
+      <div className="mb-6 text-center mt-4 md:mt-8">
+        <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+          Who Are Ya? <span className="text-emerald-400">Overview</span>
+        </h1>
+        <p className="text-emerald-700 font-medium mt-1">Guess the mystery player</p>
+      </div>
 
       <div className="px-4 md:px-8 pb-8 flex-1">
         <div className="max-w-2xl mx-auto">
@@ -117,19 +131,31 @@ export default function WhoAreYaPage() {
           </div>
 
           {/* Image Card */}
-          <div className="glass-panel rounded-3xl overflow-hidden shadow-xl relative">
+          <div className="glass-panel rounded-3xl overflow-hidden shadow-xl relative max-w-md mx-auto">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none z-10" />
 
-            <div className="relative aspect-square bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden">
-              <img
-                src={game.blurredImage}
-                className="w-full h-full object-cover transition-all duration-1000"
-                style={{ filter: `blur(${solved ? 0 : blurLevel}px)` }}
-                alt="Mystery Player"
-              />
+            <div className="relative aspect-square bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden flex items-center justify-center">
+              {/* Silhouette SVG fallback underneath */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-20 text-purple-900">
+                <svg className="w-1/2 h-1/2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+              </div>
+
+              {game.blurredImage && (
+                <img
+                  src={game.blurredImage}
+                  className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 z-10"
+                  style={{ filter: `blur(${solved ? 0 : blurLevel}px)` }}
+                  alt="Mystery Player"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
 
               {solved && (
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-emerald-600 to-transparent p-8 text-center backdrop-blur-sm animate-in slide-in-from-bottom">
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-emerald-600 to-transparent p-8 text-center backdrop-blur-sm animate-in slide-in-from-bottom z-20">
                   <div className="text-white font-black text-3xl uppercase drop-shadow-lg">
                     Correct!
                   </div>
@@ -138,7 +164,7 @@ export default function WhoAreYaPage() {
             </div>
 
             {/* Controls */}
-            <div className="p-6 md:p-8 bg-white/40">
+            <div className="p-6 md:p-8 bg-white/40 relative z-20">
               {feedback && (
                 <div
                   className={clsx(

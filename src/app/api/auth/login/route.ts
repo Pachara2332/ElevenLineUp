@@ -71,5 +71,5 @@ export const POST = ApiHandler.handle(async (req) => {
     path: '/',
   });
 
-  return ApiHandler.success({ user: { userId: user.userId, name: user.name, email: user.email } });
+  return ApiHandler.success({ user: { userId: user.userId, name: user.name, email: user.email, role: user.role } });
 });

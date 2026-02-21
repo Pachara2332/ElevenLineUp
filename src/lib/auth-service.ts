@@ -8,12 +8,13 @@ import crypto from 'crypto';
 interface TokenPayload {
   userId: string;
   email: string;
+  role: string;
 }
 
 export class AuthService {
-  static generateTokens(user: { userId: string; email: string }) {
+  static generateTokens(user: { userId: string; email: string; role: string }) {
     const accessToken = jwt.sign(
-      { userId: user.userId, email: user.email },
+      { userId: user.userId, email: user.email, role: user.role },
       config.auth.jwtSecret,
       { expiresIn: '15m' } // Short-lived access token
     );

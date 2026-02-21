@@ -23,23 +23,33 @@ export async function POST(
   });
 
   if (existing) {
-    await prisma.like.delete({
-      where: { id: existing.id },
-    });
+    await prisma.$transaction([
+      prisma.like.delete({ where: { id: existing.id } }),
+      prisma.post.update({
+        where: { id },
+        data: { likeCount: { decrement: 1 } },
+      })
+    ]);
     return NextResponse.json({ liked: false });
   }
 
-  const like = await prisma.like.create({
-    data: {
-      postId: id,
-      userId: user.userId,
-    },
-    include: {
-      post: {
-        select: { authorId: true },
+  const [like] = await prisma.$transaction([
+    prisma.like.create({
+      data: {
+        postId: id,
+        userId: user.userId,
       },
-    },
-  });
+      include: {
+        post: {
+          select: { authorId: true },
+        },
+      },
+    }),
+    prisma.post.update({
+      where: { id },
+      data: { likeCount: { increment: 1 } },
+    })
+  ]);
 
   // Create Notification
   if (like.post.authorId !== user.userId) {
@@ -48,12 +58,10 @@ export async function POST(
         userId: like.post.authorId,
         actorId: user.userId,
         type: "LIKE",
-        message: "liked your post",
-        postId: id,
+        entityId: id,
       },
       include: {
         actor: { select: { name: true, avatar: true } },
-        post: { select: { id: true } },
       },
     });
 

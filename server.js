@@ -43,6 +43,27 @@ app.prepare().then(() => {
         });
     });
 
+    // --- Phase B: Live Match Namespace ---
+    const matchIo = io.of('/match');
+    matchIo.on('connection', (socket) => {
+        console.log("Client connected to /match:", socket.id);
+
+        socket.on('join_match', (fixtureId) => {
+            if (fixtureId) {
+                const roomName = `match_${fixtureId}`;
+                socket.join(roomName);
+                console.log(`Socket ${socket.id} joined match room: ${roomName}`);
+            }
+        });
+
+        // Note: Actual DB save will happen via an API route which will emit to this room.
+        // We can just pipe events if needed, but best practice is API -> DB -> io.to().emit()
+
+        socket.on('disconnect', () => {
+            console.log("Client disconnected from /match:", socket.id);
+        });
+    });
+
     httpServer
         .once("error", (err) => {
             console.error(err);

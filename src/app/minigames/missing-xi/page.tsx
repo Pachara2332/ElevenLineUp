@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import clsx from "clsx";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import Navbar from "@/components/Navbar";
 
 interface Player {
   id: string;
@@ -69,7 +68,12 @@ export default function MissingXIPage() {
   if (isLoading)
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar title="Missing XI" subtitle="Guess the missing players" />
+        <div className="mb-6 text-center mt-4 md:mt-8">
+          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+            Missing XI <span className="text-emerald-400">Overview</span>
+          </h1>
+          <p className="text-emerald-700 font-medium mt-1">Guess the missing players</p>
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-emerald-600 text-xl font-bold animate-pulse">
             Loading Lineup...
@@ -81,7 +85,12 @@ export default function MissingXIPage() {
   if (!game)
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar title="Missing XI" subtitle="Guess the missing players" />
+        <div className="mb-6 text-center mt-4 md:mt-8">
+          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+            Missing XI <span className="text-emerald-400">Overview</span>
+          </h1>
+          <p className="text-emerald-700 font-medium mt-1">Guess the missing players</p>
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-gray-500 text-xl font-bold">
             No Missing XI Game Today
@@ -96,7 +105,12 @@ export default function MissingXIPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar title="Missing XI" subtitle="Guess the missing players" />
+      <div className="mb-6 text-center mt-4 md:mt-8">
+        <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
+          Missing XI <span className="text-emerald-400">Overview</span>
+        </h1>
+        <p className="text-emerald-700 font-medium mt-1">Guess the missing players</p>
+      </div>
 
       <div className="px-4 md:px-8 pb-8 flex-1">
         <div className="max-w-7xl mx-auto">
@@ -135,10 +149,10 @@ export default function MissingXIPage() {
           </div>
 
           {/* Pitch Container */}
-          <div className="glass-panel rounded-3xl p-6 flex items-center justify-center relative overflow-hidden">
+          <div className="glass-panel rounded-3xl p-4 md:p-6 flex items-center justify-center relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
 
-            <div className="relative w-full aspect-[2/3] max-w-md mx-auto rounded-2xl shadow-2xl">
+            <div className="relative w-full aspect-[4/5] md:aspect-[3/4] max-w-2xl mx-auto rounded-2xl shadow-2xl overflow-hidden">
               {/* Pitch background */}
               <div className="absolute inset-0 bg-gradient-to-b from-green-600 via-green-700 to-green-800" />
 
@@ -187,7 +201,7 @@ export default function MissingXIPage() {
                     onClick={() => isMissing && setSelectedSlotIndex(idx)}
                     className={clsx(
                       "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer group hover:z-20",
-                      isMissing ? "w-14 h-14" : "w-16 h-20"
+                      isMissing ? "w-10 h-10 md:w-14 md:h-14" : "w-12 h-16 md:w-16 md:h-20"
                     )}
                   >
                     {isMissing ? (
@@ -228,7 +242,7 @@ export default function MissingXIPage() {
 
                         {/* Player card */}
                         <div className="w-full h-full rounded-2xl flex flex-col items-center justify-center bg-gradient-to-b from-slate-800/90 to-slate-900/90 backdrop-blur-sm shadow-xl hover:scale-150 hover:z-50 hover:shadow-2xl transition-all">
-                          <div className="w-11 h-11 rounded-xl overflow-hidden ring-2 ring-white/50 bg-slate-700 flex-shrink-0 shadow-lg">
+                          <div className="w-8 h-8 md:w-11 md:h-11 rounded-xl overflow-hidden ring-2 ring-white/50 bg-slate-700 flex-shrink-0 shadow-lg">
                             {player.image_url ? (
                               <img
                                 src={player.image_url}
@@ -236,12 +250,12 @@ export default function MissingXIPage() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
+                              <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs md:text-sm">
                                 {displayName.charAt(0)}
                               </div>
                             )}
                           </div>
-                          <span className="text-[10px] font-bold text-white mt-0.5 truncate max-w-14 drop-shadow-lg">
+                          <span className="text-[8px] md:text-[10px] font-bold text-white mt-0.5 truncate w-[90%] text-center drop-shadow-lg leading-tight">
                             {displayName}
                           </span>
                         </div>

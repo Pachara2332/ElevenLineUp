@@ -34,7 +34,8 @@ export default function NotificationDropdown() {
         queryFn: async () => {
             const res = await fetch('/api/notifications');
             if (!res.ok) throw new Error('Failed to fetch notifications');
-            return res.json() as Promise<Notification[]>;
+            const data = await res.json();
+            return (Array.isArray(data) ? data : data.data?.notifications ?? []) as Notification[];
         },
     });
 

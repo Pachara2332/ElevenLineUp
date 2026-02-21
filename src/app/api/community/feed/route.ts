@@ -1,29 +1,11 @@
 
 import { ApiHandler } from '@/lib/api-handler';
 import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import { config } from '@/config/unifiedConfig';
-import jwt from 'jsonwebtoken';
-
-async function getAuthenticatedUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(config.auth.cookieName)?.value;
-
-  if (!token) return null;
-
-  try {
-    const decoded = jwt.verify(token, config.auth.jwtSecret) as { userId: string };
-    return decoded.userId;
-  } catch (error) {
-    return null;
-  }
-}
+import { getAuthUser } from '@/lib/auth-helper';
 
 export const GET = ApiHandler.handle(async (req) => {
-  const userId = await getAuthenticatedUser();
-  if (!userId) {
-    return ApiHandler.error('Unauthorized', 401, 'UNAUTHORIZED');
-  }
+  const user = await getAuthUser();
+  if (!user) return ApiHandler.error('Unauthorized', 401, 'UNAUTHORIZED');
 
   const url = new URL(req.url);
   const limit = parseInt(url.searchParams.get('limit') || '10');
@@ -32,47 +14,81 @@ export const GET = ApiHandler.handle(async (req) => {
 
   // 1. Get IDs of users I follow
   const following = await prisma.follow.findMany({
-    where: {
-      followerId: userId,
-    },
-    select: {
-      followingId: true,
+    where: { followerId: user.userId },
+    select: { followingId: true },
+  });
+  const followingIds = following.map(f => f.followingId);
+
+  // 2. Get IDs of Teams I follow
+  const favTeams = await prisma.userFavoriteTeam.findMany({
+    where: { userId: user.userId },
+    select: { teamId: true }
+  });
+  const followedTeamIds = favTeams.map(t => t.teamId);
+
+  // 3. Fetch Posts (pool size 100 for ranking algorithm)
+  // Fix: If the user doesn't follow anyone/anything, we should just show the latest global posts.
+  const whereClause = (followingIds.length > 0 || followedTeamIds.length > 0)
+    ? {
+        OR: [
+          { authorId: { in: followingIds } },
+          { teamTeamId: { in: followedTeamIds } }
+        ]
+      }
+    : {}; // Global fallback
+
+  const posts = await prisma.post.findMany({
+    where: whereClause,
+    take: 100, // Fetch top 100 recent posts to score them
+    orderBy: { createdAt: 'desc' },
+    include: {
+      author: {
+        select: { name: true, avatar: true },
+      },
+      team: {
+        select: { name: true, logo: true }
+      },
+      likes: {
+        where: { userId: user.userId },
+        select: { id: true }
+      }
     },
   });
 
-  const followingIds = following.map(f => f.followingId);
+  // 4. Ranking Algorithm
+  const now = Date.now();
+  const scoredPosts = posts.map(post => {
+    const ageInHours = (now - new Date(post.createdAt).getTime()) / (1000 * 60 * 60);
+    // score = (likeCount * 2) + (commentCount * 3) - ageFactor
+    const ageFactor = ageInHours * 1.5; // lose 1.5 points per hour
+    const score = (post.likeCount * 2) + (post.commentCount * 3) - ageFactor;
+    
+    // Boost bonus if from followed users/teams
+    const bonus = (followingIds.includes(post.authorId) ? 10 : 0) + 
+                  (post.teamTeamId && followedTeamIds.includes(post.teamTeamId) ? 15 : 0);
 
-  // 2. Fetch Lineups from these users
-  // Note: ideally we mix Posts and Lineups. For now, let's focus on Lineups as the main content.
-  const feedItems = await prisma.lineup.findMany({
-    where: {
-      userId: {
-        in: followingIds,
-      },
-      isPublic: true,
-    },
-    take: limit,
-    skip: skip,
-    orderBy: {
-      createdAt: 'desc',
-    },
-    include: {
-      user: {
-        select: {
-          name: true,
-          avatar: true,
-        },
-      },
-      _count: {
-        select: { likes: true }, 
-      },
-      // Check if current user liked it requires more complex query or separate check
-      // For MVP, we just return the lineup
-    },
+    return {
+      ...post,
+      finalScore: score + bonus,
+      currentUserLiked: post.likes.length > 0
+    };
+  });
+
+  // Sort descending by score
+  scoredPosts.sort((a, b) => b.finalScore - a.finalScore);
+
+  // Pagination
+  const paginatedPosts = scoredPosts.slice(skip, skip + limit);
+
+  // Clean up data for response
+  const feedItems = paginatedPosts.map(p => {
+    const { likes, finalScore, ...rest } = p;
+    return rest;
   });
 
   return ApiHandler.success({
     items: feedItems,
-    nextPage: feedItems.length === limit ? page + 1 : null,
+    nextPage: skip + limit < scoredPosts.length ? page + 1 : null,
   });
 });
+

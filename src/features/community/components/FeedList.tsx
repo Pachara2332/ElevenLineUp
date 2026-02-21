@@ -14,24 +14,29 @@ interface Post {
     content: string;
     imageUrl: string | null;
     createdAt: string;
+    likeCount: number;
+    commentCount: number;
+    currentUserLiked: boolean;
+    finalScore: number;
     author: {
         name: string;
         avatar?: string | null;
     };
-    _count: {
-        likes: number;
-        comments: number;
-    };
-    likes: { userId: string }[];
+    team?: {
+        name: string;
+        logo: string;
+    } | null;
     comments?: any[]
 }
 
 
 async function fetchPosts() {
-    const res = await fetch('/api/posts');
+    const res = await fetch('/api/community/feed');
     if (!res.ok) throw new Error('Failed to fetch posts');
     const json = await res.json();
-    return json.data as Post[];
+    console.log('API response:', json); // ดูว่าคืนค่าอะไรมา
+    const posts = json.data?.items ?? [];
+    return Array.isArray(posts) ? (posts as Post[]) : [];
 }
 
 export default function FeedList() {
@@ -55,10 +60,10 @@ export default function FeedList() {
 function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string }) {
     const [showComments, setShowComments] = useState(false)
 
-    const isLiked = post.likes.some(l => l.userId === currentUserId);
-    const [liked, setLiked] = useState(isLiked);
-    const [likesCount, setLikesCount] = useState(post._count.likes);
+    const [liked, setLiked] = useState(post.currentUserLiked);
+    const [likesCount, setLikesCount] = useState(post.likeCount);
     const [comments, setComments] = useState(post.comments || [])
+    const calculatedCommentCount = Math.max(post.commentCount, comments.length);
 
     const toggleLike = async () => {
         if (!currentUserId) return;
@@ -127,7 +132,7 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
                     className="flex items-center gap-2 text-emerald-900/60 hover:text-emerald-900 font-semibold transition-colors"
                 >
                     <ChatBubbleLeftIcon className="w-6 h-6" />
-                    <span>{comments.length} Comments</span>
+                    <span>{calculatedCommentCount} Comments</span>
                 </button>
 
             </div>
