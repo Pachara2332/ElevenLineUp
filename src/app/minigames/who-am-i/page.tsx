@@ -3,7 +3,8 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { Brain02Icon, HelpCircleIcon, Award01Icon } from 'hugeicons-react';
+import { AcademicCapIcon, QuestionMarkCircleIcon, TrophyIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function WhoAmIQuizContent() {
     const { user } = useAuth();
@@ -117,15 +118,15 @@ function WhoAmIQuizContent() {
         }
     };
 
-    if (loading) return <div className="text-center mt-20 text-white font-bold animate-pulse text-2xl">Loading Quiz...</div>;
+    if (loading) return <div className="text-center mt-20 text-emerald-900 font-black animate-pulse text-2xl uppercase tracking-widest">Loading Quiz...</div>;
 
     if (error) return (
-        <div className="max-w-md mx-auto mt-20 text-center glass-panel p-8 rounded-3xl">
-            <h2 className="text-2xl font-black text-rose-500 mb-2">Oops!</h2>
-            <p className="text-emerald-800">{error}</p>
+        <div className="max-w-md mx-auto mt-20 text-center glass-panel p-10 rounded-[2.5rem] border border-slate-200">
+            <h2 className="text-3xl font-black text-rose-500 mb-4 uppercase tracking-tighter">Oops!</h2>
+            <p className="text-slate-600 font-medium mb-8 leading-relaxed">{error}</p>
             <button
                 onClick={() => router.push('/minigames/quiz-hub')}
-                className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold"
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
             >
                 Back to Hub
             </button>
@@ -134,111 +135,138 @@ function WhoAmIQuizContent() {
 
     if (!quiz) return null;
 
-    const baseBgColor = difficulty === 'HARDCORE' ? 'bg-orange-50/90' : difficulty === 'COMPETITIVE' ? 'bg-blue-50/90' : 'bg-emerald-50/90';
     const accentColor = difficulty === 'HARDCORE' ? 'text-orange-600' : difficulty === 'COMPETITIVE' ? 'text-blue-600' : 'text-emerald-600';
+    const accentBg = difficulty === 'HARDCORE' ? 'bg-orange-100' : difficulty === 'COMPETITIVE' ? 'bg-blue-100' : 'bg-emerald-100';
 
     return (
-        <div className="max-w-2xl mx-auto py-10 px-4">
-            <div className="flex justify-between items-center mb-6">
+        <div className="max-w-2xl mx-auto py-12 px-4">
+            <div className="flex justify-between items-end mb-10 pb-6 border-b border-slate-200/50">
                 <div>
-                    <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm flex items-center gap-2">
-                        <Brain02Icon size={32} className="text-emerald-500" /> Who Am I?
-                    </h1>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mt-2 uppercase tracking-wide text-white ${difficulty === 'HARDCORE' ? 'bg-orange-500' : difficulty === 'COMPETITIVE' ? 'bg-blue-500' : 'bg-emerald-500'}`}>
-                        {difficulty}
-                    </span>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className={`p-2 rounded-xl ${accentBg}`}>
+                            <AcademicCapIcon className={`w-6 h-6 ${accentColor}`} />
+                        </div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Who Am I?</h1>
+                    </div>
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm ${difficulty === 'HARDCORE' ? 'bg-orange-600' : difficulty === 'COMPETITIVE' ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+                        <SparklesIcon className="w-3 h-3" /> {difficulty}
+                    </div>
                 </div>
                 {status === 'playing' && (
                     <div className="text-right">
-                        <div className="text-4xl font-black text-slate-800 tabular-nums">
+                        <div className="flex items-center justify-end gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-1">
+                            <ClockIcon className="w-3 h-3" /> Time
+                        </div>
+                        <div className="text-3xl font-black text-slate-900 tabular-nums leading-none">
                             {Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}
                         </div>
-                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Time Elapsed</div>
                     </div>
                 )}
             </div>
 
-            <div className={`p-6 md:p-8 rounded-[2rem] border shadow-xl backdrop-blur-md mb-8 ${baseBgColor} border-white/50`}>
-                <div className="space-y-4 mb-8">
+            <div className="glass-panel p-8 md:p-10 rounded-[3rem] border border-slate-200/50 bg-white/40 shadow-xl overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -mr-32 -mt-32 pointer-events-none" />
+                
+                <div className="space-y-6 mb-10 relative z-10">
                     {visibleHints === 0 && difficulty === 'HARDCORE' && (
-                        <div className="text-center p-6 border-2 border-dashed border-orange-300 rounded-xl bg-orange-100/50">
-                            <HelpCircleIcon size={48} className="mx-auto text-orange-400 mb-2 opacity-50" />
-                            <p className="text-orange-800 font-bold mb-4">Hardcore Mode Active</p>
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="text-center p-10 border-2 border-dashed border-orange-200 rounded-[2rem] bg-white/50 backdrop-blur-sm"
+                        >
+                            <QuestionMarkCircleIcon className="w-16 h-16 mx-auto text-orange-200 mb-4" />
+                            <h3 className="text-orange-900 font-black uppercase tracking-widest text-sm mb-2">Hardcore Mode</h3>
+                            <p className="text-slate-500 text-xs font-medium mb-6">The first hint is hidden. Reveal it to start your quest.</p>
                             <button
                                 onClick={handleRevealHint}
-                                className="px-6 py-2 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-400 transition"
+                                className="px-8 py-3 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-100"
                             >
-                                Reveal First Hint (-5 XP)
+                                Reveal First Hint <span className="opacity-50 ml-1">(-5 XP)</span>
                             </button>
-                        </div>
+                        </motion.div>
                     )}
 
-                    {hints.slice(0, visibleHints).map((hint, idx) => (
-                        <div
-                            key={idx}
-                            className="p-4 bg-white/80 rounded-xl border border-emerald-100 shadow-sm animate-in slide-in-from-left duration-500 flex items-start gap-4"
-                        >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${difficulty === 'HARDCORE' ? 'bg-orange-100 text-orange-600' : difficulty === 'COMPETITIVE' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                {idx + 1}
-                            </div>
-                            <p className="text-slate-700 font-medium text-lg leading-relaxed pt-0.5">{hint}</p>
-                        </div>
-                    ))}
+                    <AnimatePresence>
+                        {hints.slice(0, visibleHints).map((hint, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-start gap-5 group hover:border-emerald-200 transition-colors"
+                            >
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 shadow-sm ${accentBg} ${accentColor}`}>
+                                    {idx + 1}
+                                </div>
+                                <p className="text-slate-700 font-bold text-lg leading-relaxed pt-1.5 tracking-tight">{hint}</p>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
 
                 {status === 'playing' && visibleHints < hints.length && visibleHints > 0 && (
                     <button
                         onClick={handleRevealHint}
-                        className="w-full py-3 mb-8 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-semibold hover:border-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-4 mb-10 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-50 hover:border-emerald-200 hover:text-emerald-600 transition-all flex items-center justify-center gap-2"
                     >
-                        <HelpCircleIcon size={20} /> Request another hint (Reduces XP)
+                        <QuestionMarkCircleIcon className="w-4 h-4" /> Request Another Hint
                     </button>
                 )}
 
-                {status === 'playing' ? (
-                    <form onSubmit={handleSubmit} className="relative">
-                        <input
-                            type="text"
-                            value={userAnswer}
-                            onChange={(e) => setUserAnswer(e.target.value)}
-                            placeholder="Type player's full name..."
-                            className="w-full text-xl p-4 bg-white border-2 border-emerald-200 rounded-xl outline-none focus:border-emerald-500 text-slate-800 shadow-inner font-medium placeholder:text-slate-400"
-                            autoFocus
-                        />
-                        <button
-                            type="submit"
-                            disabled={!userAnswer.trim()}
-                            className="absolute right-2 top-2 bottom-2 px-6 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-500 disabled:opacity-50 transition"
+                <div className="relative z-10">
+                    {status === 'playing' ? (
+                        <form onSubmit={handleSubmit} className="relative group">
+                            <input
+                                type="text"
+                                value={userAnswer}
+                                onChange={(e) => setUserAnswer(e.target.value)}
+                                placeholder="Type player's full name..."
+                                className="w-full text-xl p-6 pr-32 bg-white border border-slate-200 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-slate-900 shadow-sm font-black placeholder:text-slate-300 transition-all"
+                                autoFocus
+                            />
+                            <button
+                                type="submit"
+                                disabled={!userAnswer.trim()}
+                                className="absolute right-3 top-3 bottom-3 px-8 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 transition-all shadow-lg"
+                            >
+                                Guess
+                            </button>
+                        </form>
+                    ) : (
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className={`p-10 rounded-[2.5rem] text-center border shadow-2xl ${status === 'correct' ? 'bg-emerald-50 border-emerald-200 shadow-emerald-500/10' : 'bg-rose-50 border-rose-200 shadow-rose-500/10'}`}
                         >
-                            Guess
-                        </button>
-                    </form>
-                ) : (
-                    <div className={`p-6 rounded-2xl text-center border-2 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 ${status === 'correct' ? 'bg-emerald-100 border-emerald-400 shadow-[0_0_40px_rgba(52,211,153,0.3)]' : 'bg-rose-100 border-rose-400'}`}>
-                        <div className={`text-4xl mb-4 ${status === 'correct' ? 'animate-bounce' : 'animate-pulse'}`}>{status === 'correct' ? '🎉' : '❌'}</div>
-                        <h2 className={`text-2xl font-black mb-2 ${status === 'correct' ? 'text-emerald-800' : 'text-rose-800'}`}>
-                            {status === 'correct' ? 'Brilliant!' : 'Not Quite!'}
-                        </h2>
+                            <div className={`text-6xl mb-6 ${status === 'correct' ? 'animate-bounce' : 'animate-pulse'}`}>{status === 'correct' ? '🏆' : '💔'}</div>
+                            <h2 className={`text-3xl font-black mb-4 uppercase tracking-tighter ${status === 'correct' ? 'text-emerald-900' : 'text-rose-900'}`}>
+                                {status === 'correct' ? 'Absolute Legend!' : 'Heartbreaker!'}
+                            </h2>
 
-                        <div className="text-lg text-slate-700 font-medium mb-4">
-                            The correct answer was <span className="font-black text-slate-900 border-b-2 border-slate-400">{resultData?.correctAnswer}</span>
-                        </div>
-
-                        {status === 'correct' && (
-                            <div className="inline-flex items-center justify-center gap-2 bg-yellow-100 border border-yellow-300 px-6 py-3 rounded-full shadow-sm mt-4">
-                                <Award01Icon size={24} className="text-yellow-600" />
-                                <span className="text-yellow-800 font-black text-xl">+{resultData?.xpEarned} XP</span>
+                            <div className="text-slate-500 font-bold mb-8 flex flex-col items-center">
+                                <span className="text-[10px] uppercase tracking-[0.3em] mb-1 opacity-50">Correct Answer</span>
+                                <span className="text-2xl text-slate-900 font-black uppercase border-b-4 border-emerald-500/20 px-2">{resultData?.correctAnswer}</span>
                             </div>
-                        )}
 
-                        <button
-                            onClick={() => router.push('/minigames/quiz-hub')}
-                            className="mt-6 w-full py-4 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition"
-                        >
-                            Back to Quiz Hub
-                        </button>
-                    </div>
-                )}
+                            {status === 'correct' && (
+                                <div className="inline-flex flex-col items-center justify-center gap-1 bg-white border border-yellow-200 p-6 rounded-3xl shadow-xl shadow-yellow-500/5 mb-8">
+                                    <div className="flex items-center gap-2">
+                                        <TrophyIcon className="w-5 h-5 text-yellow-500" />
+                                        <span className="text-yellow-700 font-black text-2xl">+{resultData?.xpEarned} XP</span>
+                                    </div>
+                                    <span className="text-[8px] font-black text-yellow-600 uppercase tracking-widest">Master of the Game</span>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => router.push('/minigames/quiz-hub')}
+                                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg"
+                            >
+                                Back to Hub
+                            </button>
+                        </motion.div>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -246,7 +274,7 @@ function WhoAmIQuizContent() {
 
 export default function WhoAmIPage() {
     return (
-        <Suspense fallback={<div className="text-center mt-20 text-white font-bold animate-pulse text-2xl">Loading Context...</div>}>
+        <Suspense fallback={<div className="text-center mt-20 text-emerald-900 font-black animate-pulse text-2xl uppercase tracking-widest">Loading...</div>}>
             <WhoAmIQuizContent />
         </Suspense>
     );

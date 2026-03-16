@@ -1,54 +1,62 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowRightIcon } from '@heroicons/react/24/solid';
-import { useLanguage } from '@/contexts/LanguageContext';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
+import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LandingNavbar from "@/components/LandingNavbar";
 
 export default function Home() {
-    const { t } = useLanguage();
+  const { t } = useLanguage();
 
-    return (
-        <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center relative">
-            <div className="absolute top-8 right-8 z-50">
-                <LanguageSwitcher />
-            </div>
+  return (
+    <main className="relative min-h-screen w-full overflow-hidden bg-black flex flex-col items-center justify-center text-center">
+      {/* Background with overlay */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-60"
+        style={{ backgroundImage: 'url("/images/stadium-hero.png")' }}
+      />
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-transparent to-black" />
 
-            <div className="max-w-4xl w-full glass-panel p-12 md:p-20 rounded-[3rem] shadow-2xl animate-in zoom-in duration-700">
-                <div className="mb-8 inline-block px-6 py-2 rounded-full bg-white/20 border border-white/40 backdrop-blur-md">
-                    <span className="text-emerald-900 font-bold tracking-widest uppercase text-sm">{t.landing.season}</span>
-                </div>
+      {/* Navbar */}
+      <LandingNavbar />
 
-                <h1 className="text-6xl md:text-8xl font-black mb-6 text-emerald-900 tracking-tighter drop-shadow-sm leading-[0.9]">
-                    {t.landing.title_start}<br />
-                    <span className="text-white drop-shadow-md">{t.landing.title_end}</span>
-                </h1>
+      {/* Content */}
+      <div className="relative z-20 max-w-4xl px-8 flex flex-col items-center animate-in zoom-in duration-1000">
 
-                <p className="text-xl md:text-2xl text-emerald-800 mb-12 font-medium max-w-2xl mx-auto leading-relaxed">
-                    {t.landing.subtitle}
-                </p>
 
-                <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                    <Link
-                        href="/login"
-                        className="group relative px-10 py-5 rounded-2xl glass-button text-xl uppercase tracking-widest flex items-center gap-3"
-                    >
-                        {t.landing.start_building}
-                        <span className="group-hover:translate-x-1 transition-transform">→</span>
-                    </Link>
+        {/* Title */}
+        <h1 className="text-7xl md:text-9xl font-black mb-6 leading-none tracking-tighter text-white drop-shadow-2xl">
+          {t.landing.title_start}{" "}
+          <span className="text-[#10b981]">{t.landing.title_end}</span>
+        </h1>
 
-                    <Link
-                        href="/register"
-                        className="px-10 py-5 rounded-2xl bg-emerald-900/10 text-emerald-900 font-bold text-xl uppercase tracking-widest hover:bg-emerald-900/20 transition-all border-2 border-transparent hover:border-emerald-900/20"
-                    >
-                        {t.landing.create_account}
-                    </Link>
-                </div>
-            </div>
+        {/* Subtitle */}
+        <p className="text-base md:text-lg text-white/80 mb-12 max-w-2xl font-medium leading-relaxed text-shadow-sm">
+          {t.landing.subtitle}
+        </p>
 
-            <div className="mt-12 text-emerald-900/60 font-semibold text-sm">
-                {t.landing.footer}
-            </div>
-        </main>
-    );
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <Link
+            href="/login"
+            className="btn-primary-green min-w-[220px] justify-center"
+          >
+            {t.landing.start_building}
+          </Link>
+
+          <Link
+            href="/register"
+            className="btn-glass min-w-[220px] justify-center"
+          >
+            {t.landing.create_account}
+          </Link>
+        </div>
+      </div>
+
+      {/* Footer decoration */}
+      <div className="absolute bottom-12 left-0 right-0 z-20 flex justify-center gap-12 opacity-20 pointer-events-none">
+        <div className="h-[1px] w-24 bg-white/50" />
+        <div className="h-[1px] w-24 bg-white/50" />
+      </div>
+    </main>
+  );
 }

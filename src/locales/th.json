@@ -7,13 +7,20 @@
         "home": "หน้าแรก"
     },
     "landing": {
+        "badge": "Elite Manager Division",
         "season": "ฤดูกาล 2025/26",
         "title_start": "ELEVEN",
         "title_end": "LINEUP",
-        "subtitle": "สุดยอดโปรแกรมจัดทีมพรีเมียร์ลีก จำลองทีมในฝันของคุณได้ในไม่กี่วินาที",
+        "subtitle": "ก้าวเข้าสู่อารีน่าแห่งการจัดการทีมระดับอาชีพ สร้างทีมของคุณด้วยระบบวิเคราะห์แบบเรียลไทม์และการแสดงผลระดับพรีเมียม",
         "start_building": "เริ่มจัดทีม",
         "create_account": "สร้างบัญชี",
-        "footer": "© 2026 ElevenLineUp. สร้างเพื่อแฟนบอล"
+        "footer": "© 2026 ElevenLineUp. สร้างเพื่อแฟนบอล",
+        "nav": {
+            "leagues": "ลีก",
+            "players": "นักเตะ",
+            "stats": "สถิติ",
+            "live": "ถ่ายทอดสด"
+        }
     },
     "auth": {
         "welcome_back": "ยินดีต้อนรับกลับ",
@@ -36,13 +43,50 @@
     },
     "dashboard": {
         "welcome": "ยินดีต้อนรับ",
-        "profile": "โปรไฟล์",
-        "logout": "ออกจากระบบ",
         "menu": {
             "dashboard": "แดชบอร์ด",
             "community": "ชุมชน",
             "minigames": "มินิเกม",
             "profile": "การตั้งค่า"
+        },
+        "standings": {
+            "title": "ตารางคะแนน",
+            "season": "ฤดูกาล 2025/26",
+            "view_full_table": "ดูตารางคะแนนฉบับเต็ม"
+        },
+        "fixtures": {
+            "upcoming": "ตารางการแข่งขัน",
+            "subtitle": "ห้ามพลาดการแข่งขัน",
+            "view_match": "ดูแมตช์"
+        },
+        "stats": {
+            "title": "สถิติของคุณ",
+            "xp": "XP",
+            "squads": "ทีมทั้งหมด",
+            "wins": "ชนะ",
+            "win_rate": "อัตราการชนะ",
+            "played": "เล่นแล้ว",
+            "streak": "สถิติต่อเนื่อง"
+        },
+        "profile": {
+            "manager_center": "ศูนย์กลางผู้จัดการทีม",
+            "command_squad": "บัญชาการทีมของคุณและนำพวกเขาไปสู่ความรุ่งโรจน์",
+            "start_building": "เริ่มจัดทีม",
+            "public_profile": "โปรไฟล์สาธารณะ",
+            "lineups": "ทีมที่จัด",
+            "posts": "โพสต์",
+            "streak": "สถิติต่อเนื่อง",
+            "information": "ข้อมูลส่วนตัว",
+            "edit_profile": "แก้ไขโปรไฟล์",
+            "display_name": "ชื่อที่ใช้แสดง",
+            "username": "ชื่อผู้ใช้",
+            "game_performance": "ผลงานการเล่น",
+            "achievements": "ความสำเร็จ",
+            "change_password": "เปลี่ยนรหัสผ่าน",
+            "update_password": "อัปเดตรหัสผ่าน",
+            "preferences": "การตั้งค่า",
+            "email_notifications": "การแจ้งเตือนอีเมล",
+            "logout": "ออกจากระบบ"
         }
     },
     "admin": {

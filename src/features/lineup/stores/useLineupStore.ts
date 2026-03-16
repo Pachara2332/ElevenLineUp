@@ -514,7 +514,7 @@ interface LineupState {
 
   // Actions
   setSlots: (slots: LineupSlot[]) => void;
-  updateSlot: (slotId: string, player: Player) => void;
+  updateSlot: (slotId: string, player: Player | null) => void;
   setSquad: (players: Player[]) => void;
   setSelectedTeamId: (id: string) => void;
   setSelectedSlotId: (id: string | null) => void;
@@ -537,6 +537,14 @@ export const useLineupStore = create<LineupState>((set, get) => ({
     set((state) => {
       const targetSlot = state.slots.find((s) => s.id === slotId);
       if (!targetSlot) return state;
+
+      if (!player) {
+         return {
+           slots: state.slots.map((slot) =>
+             slot.id === slotId ? { ...slot, player: undefined } : slot,
+           ),
+         };
+      }
 
       // Helper to check if position is GK
       const isGKPosition = (pos: string | undefined): boolean => {
@@ -561,7 +569,6 @@ export const useLineupStore = create<LineupState>((set, get) => ({
       }
 
       // 2. Prevent Duplicates (Move player if already on pitch)
-      // Remove this player from any other slots they might occupy
       const slotsWithoutPlayer = state.slots.map((slot) =>
         slot.player && slot.player.id === player.id
           ? { ...slot, player: undefined }

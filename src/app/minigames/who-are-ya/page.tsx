@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
+import {
+  PhotoIcon,
+  SparklesIcon,
+  TicketIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Game {
   id: string;
@@ -11,6 +21,7 @@ interface Game {
 }
 
 export default function WhoAreYaPage() {
+  const router = useRouter();
   const { data: game, isLoading } = useQuery<Game>({
     queryKey: ["who-are-ya"],
     queryFn: async () => {
@@ -22,7 +33,7 @@ export default function WhoAreYaPage() {
 
   const [attempts, setAttempts] = useState(0);
   const [solved, setSolved] = useState(false);
-  const [blurLevel, setBlurLevel] = useState(20);
+  const [blurLevel, setBlurLevel] = useState(30);
   const [guessInput, setGuessInput] = useState("");
   const [feedback, setFeedback] = useState("");
 
@@ -43,16 +54,18 @@ export default function WhoAreYaPage() {
     if (json.correct) {
       setSolved(true);
       setBlurLevel(0);
-      setFeedback(`Correct! It was ${json.playerName}`);
+      setFeedback(`Identity Verified: It was ${json.playerName}`);
     } else {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
-      setFeedback("Incorrect! Try again.");
+      setFeedback("Identity Mismatch. Recalibrating sensors...");
       setGuessInput("");
-      setBlurLevel(Math.max(0, 20 - newAttempts * 2.5));
+      setBlurLevel(Math.max(0, 30 - newAttempts * 3.5));
 
       if (newAttempts >= 8) {
-        setFeedback("Game Over! Run out of attempts.");
+        setFeedback(
+          `Out of Intel. Target was ${json.playerName || "the mystery player"}.`,
+        );
         setBlurLevel(0);
       }
     }
@@ -60,154 +73,163 @@ export default function WhoAreYaPage() {
 
   if (isLoading)
     return (
-      <div className="min-h-screen flex flex-col">
-        <div className="mb-6 text-center mt-4 md:mt-8">
-          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
-            Who Are Ya? <span className="text-emerald-400">Overview</span>
-          </h1>
-          <p className="text-emerald-700 font-medium mt-1">Guess the mystery player</p>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-emerald-600 text-xl font-bold animate-pulse">
-            Loading Mystery Player...
-          </div>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="text-emerald-900 font-black animate-pulse text-2xl uppercase tracking-[0.5em]">
+          Analysing Target...
         </div>
       </div>
     );
 
   if (!game)
     return (
-      <div className="min-h-screen flex flex-col">
-        <div className="mb-6 text-center mt-4 md:mt-8">
-          <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
-            Who Are Ya? <span className="text-emerald-400">Overview</span>
-          </h1>
-          <p className="text-emerald-700 font-medium mt-1">Guess the mystery player</p>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-gray-500 text-xl font-bold">No Game Today</div>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full glass-panel p-10 rounded-[3rem] border border-slate-200 text-center">
+          <InformationCircleIcon className="w-16 h-16 text-slate-300 mx-auto mb-6" />
+          <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-4">
+            No Intel Today
+          </h2>
+          <p className="text-slate-500 font-medium mb-8">
+            The mystery player database will refresh soon. Check back tomorrow.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-slate-200"
+          >
+            Return to Field
+          </button>
         </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="mb-6 text-center mt-4 md:mt-8">
-        <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm">
-          Who Are Ya? <span className="text-emerald-400">Overview</span>
-        </h1>
-        <p className="text-emerald-700 font-medium mt-1">Guess the mystery player</p>
+    <div className="max-w-2xl mx-auto py-12 px-4">
+      <div className="flex justify-between items-end mb-10 pb-6 border-b border-slate-200/50">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-xl bg-purple-100">
+              <PhotoIcon className="w-6 h-6 text-purple-600" />
+            </div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+              Who Are Ya?
+            </h1>
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm bg-purple-600">
+            <SparklesIcon className="w-3 h-3" /> Mystery Target
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-1">
+            Status
+          </div>
+          <div
+            className={clsx(
+              "text-3xl font-black tabular-nums leading-none",
+              attempts >= 6 ? "text-rose-600" : "text-slate-900",
+            )}
+          >
+            {attempts}
+            <span className="text-slate-300 mx-0.5">/</span>8
+          </div>
+        </div>
       </div>
 
-      <div className="px-4 md:px-8 pb-8 flex-1">
-        <div className="max-w-2xl mx-auto">
-          {/* Stats Header */}
-          <div className="glass-panel rounded-3xl p-6 mb-6 flex items-center justify-between">
-            <div className="text-center">
-              <div
+      <div className="glass-panel p-8 md:p-10 rounded-[3rem] border border-slate-200/50 bg-white shadow-xl overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full -ml-32 -mt-32 pointer-events-none" />
+
+        <div className="relative w-full aspect-square bg-slate-50 rounded-[2.5rem] overflow-hidden mb-10 border border-slate-200 shadow-inner group">
+          <div className="absolute inset-0 flex items-center justify-center opacity-5 text-slate-900"></div>
+
+          <AnimatePresence>
+            {game.blurredImage && (
+              <motion.img
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                src={game.blurredImage}
+                className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 z-10"
+                style={{ filter: `blur(${solved ? 0 : blurLevel}px)` }}
+                alt="Mystery Player"
+              />
+            )}
+          </AnimatePresence>
+
+          {solved && (
+            <div className="absolute inset-0 bg-emerald-500/10 mix-blend-overlay z-20" />
+          )}
+
+          <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[2.5rem] pointer-events-none z-30"></div>
+        </div>
+
+        <div className="space-y-6">
+          <AnimatePresence mode="wait">
+            {feedback && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 className={clsx(
-                  "text-4xl font-black",
-                  attempts >= 7 ? "text-red-600" : "text-purple-600"
+                  "p-5 rounded-2xl flex items-center gap-4 border text-sm font-black uppercase tracking-tight",
+                  solved
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : attempts >= 8
+                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                      : "bg-slate-50 text-slate-600 border-slate-200",
                 )}
               >
-                {attempts}/8
-              </div>
-              <div className="text-xs font-bold text-emerald-700 uppercase">
-                Attempts
-              </div>
-            </div>
-
-            {solved && (
-              <div className="bg-emerald-600 text-white px-6 py-3 rounded-xl font-black text-lg animate-in zoom-in">
-                🎉 CORRECT!
-              </div>
+                {solved ? (
+                  <CheckCircleIcon className="w-6 h-6 flex-shrink-0" />
+                ) : (
+                  <XCircleIcon className="w-6 h-6 flex-shrink-0" />
+                )}
+                {feedback}
+              </motion.div>
             )}
+          </AnimatePresence>
 
-            {attempts >= 8 && !solved && (
-              <div className="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-lg animate-in zoom-in">
-                ❌ GAME OVER
+          {!solved && attempts < 8 && (
+            <form onSubmit={submitGuess} className="relative group">
+              <input
+                value={guessInput}
+                onChange={(e) => setGuessInput(e.target.value)}
+                className="w-full text-xl p-6 pr-32 bg-white border border-slate-200 rounded-2xl outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 text-slate-900 shadow-sm font-black placeholder:text-slate-300 transition-all uppercase"
+                placeholder="Enter player identity..."
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={!guessInput.trim()}
+                className="absolute right-3 top-3 bottom-3 px-8 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 transition-all shadow-lg"
+              >
+                Guess
+              </button>
+            </form>
+          )}
+
+          {game.teamName && attempts > 4 && !solved && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="pt-6 border-t border-slate-100 flex flex-col items-center"
+            >
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3">
+                Decrypted Intelligence
+              </span>
+              <div className="flex items-center gap-3 px-6 py-3 bg-purple-50 border border-purple-200 rounded-2xl">
+                <TicketIcon className="w-5 h-5 text-purple-600" />
+                <span className="font-black text-purple-900 uppercase tracking-tighter">
+                  Current Team: {game.teamName}
+                </span>
               </div>
-            )}
-          </div>
+            </motion.div>
+          )}
 
-          {/* Image Card */}
-          <div className="glass-panel rounded-3xl overflow-hidden shadow-xl relative max-w-md mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none z-10" />
-
-            <div className="relative aspect-square bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden flex items-center justify-center">
-              {/* Silhouette SVG fallback underneath */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-20 text-purple-900">
-                <svg className="w-1/2 h-1/2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-              </div>
-
-              {game.blurredImage && (
-                <img
-                  src={game.blurredImage}
-                  className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 z-10"
-                  style={{ filter: `blur(${solved ? 0 : blurLevel}px)` }}
-                  alt="Mystery Player"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
-
-              {solved && (
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-emerald-600 to-transparent p-8 text-center backdrop-blur-sm animate-in slide-in-from-bottom z-20">
-                  <div className="text-white font-black text-3xl uppercase drop-shadow-lg">
-                    Correct!
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Controls */}
-            <div className="p-6 md:p-8 bg-white/40 relative z-20">
-              {feedback && (
-                <div
-                  className={clsx(
-                    "mb-6 p-4 rounded-xl text-center font-bold text-sm shadow-sm",
-                    solved
-                      ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-300"
-                      : "bg-red-100 text-red-700 border-2 border-red-300"
-                  )}
-                >
-                  {feedback}
-                </div>
-              )}
-
-              {!solved && attempts < 8 && (
-                <form onSubmit={submitGuess} className="flex gap-3">
-                  <input
-                    value={guessInput}
-                    onChange={(e) => setGuessInput(e.target.value)}
-                    className="flex-1 p-4 bg-white border-2 border-emerald-200 rounded-xl font-bold text-lg outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300 transition-all text-emerald-900 placeholder:text-emerald-400"
-                    placeholder="Type player name..."
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    className="bg-gradient-to-br from-purple-600 to-pink-600 text-white font-black uppercase px-8 rounded-xl hover:from-purple-700 hover:to-pink-700 active:scale-95 transition-all shadow-lg"
-                  >
-                    Guess
-                  </button>
-                </form>
-              )}
-
-              {game.teamName && attempts > 4 && !solved && (
-                <div className="mt-6 text-center animate-in fade-in">
-                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest block mb-2">
-                    💡 HINT: TEAM
-                  </span>
-                  <div className="font-black text-purple-700 text-xl bg-white inline-block px-6 py-2 rounded-xl border-2 border-purple-300 shadow-md">
-                    {game.teamName}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          {(solved || attempts >= 8) && (
+            <button
+              onClick={() => router.push("/minigames")}
+              className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+            >
+              Return to Hub
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -6,26 +6,23 @@ export default function LanguageSwitcher() {
     const { language, setLanguage } = useLanguage();
 
     return (
-        <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full p-1 border border-white/30">
+        <div className="flex items-center gap-2">
             <button
-                onClick={() => setLanguage('th')}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${language === 'th'
-                    ? 'bg-white shadow-md scale-105'
-                    : 'hover:bg-white/30 opacity-70 hover:opacity-100'
-                    }`}
-                title="Switch to Thai"
+                onClick={() => setLanguage(language === 'en' ? 'th' : 'en')}
+                className={`relative inline-flex h-7 w-16 items-center rounded-full transition-all duration-300 focus:outline-none shadow-inner border border-slate-200/50 ${
+                    language === 'th' ? 'bg-emerald-500' : 'bg-slate-300'
+                }`}
             >
-                <span className="text-xl">TH</span>
-            </button>
-            <button
-                onClick={() => setLanguage('en')}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${language === 'en'
-                    ? 'bg-white shadow-md scale-105'
-                    : 'hover:bg-white/30 opacity-70 hover:opacity-100'
+                <div className="absolute inset-0 flex items-center justify-between px-2.5 pointer-events-none">
+                    <span className={`text-[9px] font-black transition-all duration-300 outline-none ${language === 'th' ? 'text-white opacity-100 scale-110' : 'text-slate-500 opacity-60'}`}>TH</span>
+                    <span className={`text-[9px] font-black transition-all duration-300 outline-none ${language === 'en' ? 'text-slate-800 opacity-100 scale-110' : 'text-white opacity-60'}`}>EN</span>
+                </div>
+
+                <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+                        language === 'en' ? 'translate-x-[36px]' : 'translate-x-[2px]'
                     }`}
-                title="Switch to English"
-            >
-                <span className="text-xl">EN</span>
+                />
             </button>
         </div>
     );

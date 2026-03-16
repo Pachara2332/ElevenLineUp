@@ -3,8 +3,9 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { Image01Icon, SearchingIcon, Award01Icon } from 'hugeicons-react';
+import { PhotoIcon, MagnifyingGlassIcon, TrophyIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function GuessThePlayerContent() {
     const { user } = useAuth();
@@ -18,10 +19,9 @@ function GuessThePlayerContent() {
     const [error, setError] = useState('');
 
     // Game State
-    // Blur logic: Casual starts slightly blurred (10px), Hardcore starts extremely blurred (40px)
     const initialBlur = difficulty === 'HARDCORE' ? 40 : difficulty === 'COMPETITIVE' ? 25 : 10;
     const [currentBlur, setCurrentBlur] = useState(initialBlur);
-    const [clarityLevel, setClarityLevel] = useState(0); // number of times user revealed more
+    const [clarityLevel, setClarityLevel] = useState(0); 
 
     const [userAnswer, setUserAnswer] = useState('');
     const [status, setStatus] = useState<'playing' | 'correct' | 'wrong'>('playing');
@@ -72,7 +72,7 @@ function GuessThePlayerContent() {
 
     const handleRevealMore = () => {
         if (currentBlur > 0) {
-            setCurrentBlur(prev => Math.max(0, prev - 10)); // Reduce blur by 10px
+            setCurrentBlur(prev => Math.max(0, prev - 10)); 
             setClarityLevel(prev => prev + 1);
         }
     };
@@ -102,7 +102,7 @@ function GuessThePlayerContent() {
 
             setStatus(result.isCorrect ? 'correct' : 'wrong');
             setResultData(result);
-            setCurrentBlur(0); // Reveal full image on submit
+            setCurrentBlur(0); 
 
         } catch (err) {
             console.error("Failed to submit:", err);
@@ -110,15 +110,15 @@ function GuessThePlayerContent() {
         }
     };
 
-    if (loading) return <div className="text-center mt-20 text-white font-bold animate-pulse text-2xl">Loading Quiz...</div>;
+    if (loading) return <div className="text-center mt-20 text-emerald-900 font-black animate-pulse text-2xl uppercase tracking-widest">Initialising Game...</div>;
 
     if (error) return (
-        <div className="max-w-md mx-auto mt-20 text-center glass-panel p-8 rounded-3xl">
-            <h2 className="text-2xl font-black text-rose-500 mb-2">Oops!</h2>
-            <p className="text-emerald-800">{error}</p>
+        <div className="max-w-md mx-auto mt-20 text-center glass-panel p-10 rounded-[2.5rem] border border-slate-200">
+            <h2 className="text-3xl font-black text-rose-500 mb-4 uppercase tracking-tighter">Oops!</h2>
+            <p className="text-slate-600 font-medium mb-8 leading-relaxed">{error}</p>
             <button
                 onClick={() => router.push('/minigames/quiz-hub')}
-                className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold"
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
             >
                 Back to Hub
             </button>
@@ -127,107 +127,124 @@ function GuessThePlayerContent() {
 
     if (!quiz) return null;
 
-    const baseBgColor = difficulty === 'HARDCORE' ? 'bg-orange-50/90' : difficulty === 'COMPETITIVE' ? 'bg-blue-50/90' : 'bg-emerald-50/90';
+    const accentColor = difficulty === 'HARDCORE' ? 'text-orange-600' : difficulty === 'COMPETITIVE' ? 'text-blue-600' : 'text-emerald-600';
+    const accentBg = difficulty === 'HARDCORE' ? 'bg-orange-100' : difficulty === 'COMPETITIVE' ? 'bg-blue-100' : 'bg-emerald-100';
 
     return (
-        <div className="max-w-2xl mx-auto py-10 px-4">
-            <div className="flex justify-between items-center mb-6">
+        <div className="max-w-2xl mx-auto py-12 px-4">
+            <div className="flex justify-between items-end mb-10 pb-6 border-b border-slate-200/50">
                 <div>
-                    <h1 className="text-3xl font-black text-emerald-900 drop-shadow-sm flex items-center gap-2">
-                        <Image01Icon size={32} className="text-emerald-500" /> Guess The Player
-                    </h1>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mt-2 uppercase tracking-wide text-white ${difficulty === 'HARDCORE' ? 'bg-orange-500' : difficulty === 'COMPETITIVE' ? 'bg-blue-500' : 'bg-emerald-500'}`}>
-                        {difficulty}
-                    </span>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className={`p-2 rounded-xl ${accentBg}`}>
+                            <PhotoIcon className={`w-6 h-6 ${accentColor}`} />
+                        </div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Guess Player</h1>
+                    </div>
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm ${difficulty === 'HARDCORE' ? 'bg-orange-600' : difficulty === 'COMPETITIVE' ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+                        <SparklesIcon className="w-3 h-3" /> {difficulty}
+                    </div>
                 </div>
                 {status === 'playing' && (
                     <div className="text-right">
-                        <div className="text-4xl font-black text-slate-800 tabular-nums">
+                        <div className="flex items-center justify-end gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-1">
+                            <ClockIcon className="w-3 h-3" /> Time
+                        </div>
+                        <div className="text-3xl font-black text-slate-900 tabular-nums leading-none">
                             {Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}
                         </div>
-                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Time Elapsed</div>
                     </div>
                 )}
             </div>
 
-            <div className={`p-6 md:p-8 rounded-[2rem] border shadow-xl backdrop-blur-md mb-8 ${baseBgColor} border-white/50`}>
-
-                <div className="relative w-full aspect-square md:aspect-video rounded-2xl overflow-hidden mb-6 bg-slate-200 shadow-inner flex items-center justify-center">
-                    {/* Placeholder or Actual Image */}
+            <div className="glass-panel p-8 md:p-10 rounded-[3rem] border border-slate-200/50 bg-white/40 shadow-xl overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -mr-32 -mt-32 pointer-events-none" />
+                
+                <div className="relative w-full aspect-square md:aspect-video rounded-[2rem] overflow-hidden mb-8 bg-slate-100 shadow-inner border border-slate-200 flex items-center justify-center group">
                     {quiz.imageUrl ? (
                         <Image
                             src={quiz.imageUrl}
                             alt="Guess the player"
                             fill
-                            className="object-cover transition-all duration-1000"
+                            className="object-cover transition-all duration-1000 ease-in-out"
                             style={{ filter: `blur(${currentBlur}px)` }}
                         />
                     ) : (
-                        <div className="text-slate-400 font-bold flex flex-col items-center gap-2">
-                            <Image01Icon size={48} />
-                            No Image Provided
+                        <div className="text-slate-300 font-black flex flex-col items-center gap-4">
+                            <PhotoIcon className="w-20 h-20 opacity-20" />
+                            <span className="text-[10px] uppercase tracking-[0.4em]">Image Unavailable</span>
                         </div>
                     )}
 
-                    {/* Hardcore overlay effect */}
                     {difficulty === 'HARDCORE' && status === 'playing' && currentBlur > 0 && (
-                        <div className="absolute inset-0 bg-orange-900/10 mix-blend-color-burn pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-orange-950/20 mix-blend-color-burn pointer-events-none"></div>
                     )}
+
+                    <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[2rem] pointer-events-none"></div>
                 </div>
 
                 {status === 'playing' && currentBlur > 0 && (
                     <button
                         onClick={handleRevealMore}
-                        className="w-full py-4 mb-8 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 shadow-sm"
+                        className="w-full py-5 mb-10 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-slate-800 transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200"
                     >
-                        <SearchingIcon size={20} /> Reveal More Detail (Reduces XP by 5)
+                        <MagnifyingGlassIcon className="w-4 h-4" /> Reveal More <span className="opacity-40">(-5 XP)</span>
                     </button>
                 )}
 
-                {status === 'playing' ? (
-                    <form onSubmit={handleSubmit} className="relative">
-                        <input
-                            type="text"
-                            value={userAnswer}
-                            onChange={(e) => setUserAnswer(e.target.value)}
-                            placeholder="Type player's full name..."
-                            className="w-full text-xl p-4 bg-white border-2 border-emerald-200 rounded-xl outline-none focus:border-emerald-500 text-slate-800 shadow-inner font-medium placeholder:text-slate-400"
-                            autoFocus
-                        />
-                        <button
-                            type="submit"
-                            disabled={!userAnswer.trim()}
-                            className="absolute right-2 top-2 bottom-2 px-6 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-500 disabled:opacity-50 transition"
+                <div className="relative z-10">
+                    {status === 'playing' ? (
+                        <form onSubmit={handleSubmit} className="relative group">
+                            <input
+                                type="text"
+                                value={userAnswer}
+                                onChange={(e) => setUserAnswer(e.target.value)}
+                                placeholder="Type player's full name..."
+                                className="w-full text-xl p-6 pr-32 bg-white border border-slate-200 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-slate-900 shadow-sm font-black placeholder:text-slate-300 transition-all"
+                                autoFocus
+                            />
+                            <button
+                                type="submit"
+                                disabled={!userAnswer.trim()}
+                                className="absolute right-3 top-3 bottom-3 px-8 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 transition-all shadow-lg"
+                            >
+                                Guess
+                            </button>
+                        </form>
+                    ) : (
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className={`p-10 rounded-[2.5rem] text-center border shadow-2xl ${status === 'correct' ? 'bg-emerald-50 border-emerald-200 shadow-emerald-500/10' : 'bg-rose-50 border-rose-200 shadow-rose-500/10'}`}
                         >
-                            Guess
-                        </button>
-                    </form>
-                ) : (
-                    <div className={`p-6 rounded-2xl text-center border-2 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 ${status === 'correct' ? 'bg-emerald-100 border-emerald-400 shadow-[0_0_40px_rgba(52,211,153,0.3)]' : 'bg-rose-100 border-rose-400'}`}>
-                        <div className={`text-4xl mb-4 ${status === 'correct' ? 'animate-bounce' : 'animate-pulse'}`}>{status === 'correct' ? '🎉' : '❌'}</div>
-                        <h2 className={`text-2xl font-black mb-2 ${status === 'correct' ? 'text-emerald-800' : 'text-rose-800'}`}>
-                            {status === 'correct' ? 'Eagle Eyes!' : 'Not Quite!'}
-                        </h2>
+                            <div className={`text-6xl mb-6 ${status === 'correct' ? 'animate-bounce' : 'animate-pulse'}`}>{status === 'correct' ? '👀' : '🌵'}</div>
+                            <h2 className={`text-3xl font-black mb-4 uppercase tracking-tighter ${status === 'correct' ? 'text-emerald-900' : 'text-rose-900'}`}>
+                                {status === 'correct' ? 'Eagle Vision!' : 'Close But No Cigar!'}
+                            </h2>
 
-                        <div className="text-lg text-slate-700 font-medium mb-4">
-                            The correct answer was <span className="font-black text-slate-900 border-b-2 border-slate-400">{resultData?.correctAnswer}</span>
-                        </div>
-
-                        {status === 'correct' && (
-                            <div className="inline-flex items-center justify-center gap-2 bg-yellow-100 border border-yellow-300 px-6 py-3 rounded-full shadow-sm mt-4">
-                                <Award01Icon size={24} className="text-yellow-600" />
-                                <span className="text-yellow-800 font-black text-xl">+{resultData?.xpEarned} XP</span>
+                            <div className="text-slate-500 font-bold mb-8 flex flex-col items-center">
+                                <span className="text-[10px] uppercase tracking-[0.3em] mb-1 opacity-50">Identity Revealed</span>
+                                <span className="text-2xl text-slate-900 font-black uppercase border-b-4 border-emerald-500/20 px-2">{resultData?.correctAnswer}</span>
                             </div>
-                        )}
 
-                        <button
-                            onClick={() => router.push('/minigames/quiz-hub')}
-                            className="mt-6 w-full py-4 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition"
-                        >
-                            Back to Quiz Hub
-                        </button>
-                    </div>
-                )}
+                            {status === 'correct' && (
+                                <div className="inline-flex flex-col items-center justify-center gap-1 bg-white border border-yellow-200 p-6 rounded-3xl shadow-xl shadow-yellow-500/5 mb-8">
+                                    <div className="flex items-center gap-2">
+                                        <TrophyIcon className="w-5 h-5 text-yellow-500" />
+                                        <span className="text-yellow-700 font-black text-2xl">+{resultData?.xpEarned} XP</span>
+                                    </div>
+                                    <span className="text-[8px] font-black text-yellow-600 uppercase tracking-widest">Master of the Pitch</span>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => router.push('/minigames/quiz-hub')}
+                                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg"
+                            >
+                                Back to Hub
+                            </button>
+                        </motion.div>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -235,7 +252,7 @@ function GuessThePlayerContent() {
 
 export default function GuessThePlayerPage() {
     return (
-        <Suspense fallback={<div className="text-center mt-20 text-white font-bold animate-pulse text-2xl">Loading Context...</div>}>
+        <Suspense fallback={<div className="text-center mt-20 text-emerald-900 font-black animate-pulse text-2xl uppercase tracking-widest">Loading...</div>}>
             <GuessThePlayerContent />
         </Suspense>
     );

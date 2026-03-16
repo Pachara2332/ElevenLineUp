@@ -44,7 +44,7 @@ export default function TrendingSidebar() {
     }
 
     return (
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-xl">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-xl">
             <h2 className="text-xl font-black text-emerald-100 mb-6 flex items-center gap-2">
                 🔥 Trending Lineups
             </h2>

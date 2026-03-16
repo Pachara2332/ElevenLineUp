@@ -116,7 +116,7 @@ export default function DashboardHeader() {
                 )}
               </div>
               <span className="font-bold text-emerald-900 hidden sm:block pr-1">
-                {t.dashboard.profile}
+                {t.dashboard.menu.profile}
               </span>
             </button>
             <LogoutButton />

@@ -64,7 +64,7 @@ export default function AdminOverviewClient({ usersCount, lineupsCount, postsCou
 
 function StatCard({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) {
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-emerald-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-emerald-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
                 <div className="w-32 h-32">{icon}</div>
             </div>
@@ -73,7 +73,7 @@ function StatCard({ title, value, icon }: { title: string; value: number; icon: 
                     <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">{title}</h3>
                     <p className="text-4xl font-black text-gray-900 dark:text-gray-100">{value}</p>
                 </div>
-                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-2xl">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
                     {icon}
                 </div>
             </div>
@@ -83,7 +83,7 @@ function StatCard({ title, value, icon }: { title: string; value: number; icon: 
 
 function ActionCard({ href, title, desc, colorClass }: { href: string, title: string, desc: string, colorClass: string }) {
     return (
-        <Link href={href} className={`block p-8 rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 border ${colorClass.split(' ')[2]} dark:bg-gray-800 group relative overflow-hidden`}>
+        <Link href={href} className={`block p-8 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border ${colorClass.split(' ')[2]} dark:bg-gray-800 group relative overflow-hidden`}>
             <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 ${colorClass.split(' ')[0]}`}></div>
             <h2 className={`text-2xl font-bold mb-3 ${colorClass.split(' ')[1]} dark:text-gray-100 flex items-center justify-between`}>
                 {title}

@@ -1,204 +1,180 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-// Since user might not have shadcn/ui dialog, I'll build a custom simple modal to be safe and dependency-free for this step
+import { motion, AnimatePresence } from 'framer-motion';
+import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon, BoltIcon } from '@heroicons/react/24/outline';
+import { useLanguage } from "@/contexts/LanguageContext";
+import translationsEn from "@/locales/en.json";
+import translationsTh from "@/locales/th.json";
 
-interface Fixture {
+interface Match {
     id: string;
     league: string;
-    season: string;
     homeTeam: string;
     awayTeam: string;
-    kickoff: string;
+    homeTeamId?: string;
+    awayTeamId?: string;
+    matchDate: string;
+    venue: string;
     status: string;
+    kickoff?: string;
 }
 
-interface Prediction {
-    fixtureId: string;
-    predictedHome: number;
-    predictedAway: number;
-}
+const LEAGUES = [
+    { id: 'premier-league', name: 'Premier League', icon: 'https://crests.football-data.org/PL.png' },
+    { id: 'la-liga', name: 'La Liga', icon: 'https://crests.football-data.org/PD.png' },
+    { id: 'bundesliga', name: 'Bundesliga', icon: 'https://crests.football-data.org/BL1.png' },
+    { id: 'thai-league', name: 'Thai League', icon: '🇹🇭' },
+];
 
-async function fetchFixtures() {
-    const res = await fetch('/api/fixtures');
+async function fetchFixtures(leagueId: string) {
+    const res = await fetch(`/api/fixtures?leagueId=${leagueId}`);
     if (!res.ok) throw new Error('Failed to fetch fixtures');
     const json = await res.json();
-    return json.data as Fixture[];
-}
-
-async function fetchMyPredictions() {
-    const res = await fetch('/api/predictions');
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data as Prediction[];
+    return json.data as Match[];
 }
 
 export default function DashboardFixtures() {
-    const queryClient = useQueryClient();
+    const { language } = useLanguage();
+    const t = language === "th" ? translationsTh : translationsEn;
+    const [selectedLeague, setSelectedLeague] = useState(LEAGUES[0].id);
+    const [page, setPage] = useState(0);
+
     const { data: fixtures, isLoading } = useQuery({
-        queryKey: ['fixtures'],
-        queryFn: fetchFixtures,
+        queryKey: ['fixtures', selectedLeague],
+        queryFn: () => fetchFixtures(selectedLeague),
     });
 
-    const { data: myPredictions } = useQuery({
-        queryKey: ['myPredictions'],
-        queryFn: fetchMyPredictions
-    });
-
-    const [selectedFixture, setSelectedFixture] = useState<Fixture | null>(null);
-    const [homeScore, setHomeScore] = useState('');
-    const [awayScore, setAwayScore] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const predictMutation = useMutation({
-        mutationFn: async () => {
-            const res = await fetch('/api/predictions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fixtureId: selectedFixture?.id,
-                    homeScore: parseInt(homeScore),
-                    awayScore: parseInt(awayScore)
-                })
-            });
-            if (!res.ok) throw new Error('Failed to predict');
-            return res.json();
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['myPredictions'] });
-            closeModal();
-        },
-        onError: (err) => {
-            alert('Failed to submit prediction. Match might have started.');
-        }
-    });
-
-    const openModal = (fixture: Fixture) => {
-        const existing = myPredictions?.find((p: any) => p.fixtureId === fixture.id);
-        if (existing) {
-            setHomeScore(existing.predictedHome.toString());
-            setAwayScore(existing.predictedAway.toString());
-        } else {
-            setHomeScore('');
-            setAwayScore('');
-        }
-        setSelectedFixture(fixture);
-    };
-
-    const closeModal = () => {
-        setSelectedFixture(null);
-        setHomeScore('');
-        setAwayScore('');
-    };
-
-    if (isLoading) {
-        return (
-            <div className="glass-panel p-6 rounded-3xl animate-pulse mt-6">
-                <div className="h-8 bg-white/20 rounded w-1/3 mb-4"></div>
-                <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => (
-                        <div key={i} className="h-16 bg-white/10 rounded w-full"></div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
+    const pageSize = 3;
+    const paginatedFixtures = fixtures?.slice(page * pageSize, (page + 1) * pageSize);
+    const totalPages = Math.ceil((fixtures?.length || 0) / pageSize);
 
     return (
-        <div className="glass-panel p-6 rounded-3xl mt-6 relative">
-            <h2 className="text-2xl font-bold text-emerald-900 mb-4 px-2">Upcoming Fixtures</h2>
-            <div className="space-y-3">
-                {fixtures?.map((fixture) => {
-                    const prediction = myPredictions?.find((p: any) => p.fixtureId === fixture.id);
-                    const isPredicted = !!prediction;
-
-                    return (
-                        <div
-                            key={fixture.id}
-                            onClick={() => openModal(fixture)}
-                            className="group bg-white/20 p-4 rounded-xl flex items-center justify-between hover:bg-white/30 transition-all border border-white/10 cursor-pointer"
-                        >
-                            <div className="flex-1 text-right font-bold text-emerald-900 text-sm md:text-base">
-                                {fixture.homeTeam}
-                            </div>
-
-                            <div className="px-4 flex flex-col items-center min-w-[100px]">
-                                {isPredicted ? (
-                                    <div className="bg-emerald-100/50 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold mb-1 border border-emerald-200">
-                                        {prediction.predictedHome} - {prediction.predictedAway}
-                                    </div>
-                                ) : (
-                                    <span className="text-xs font-bold bg-emerald-600 text-white px-2 py-0.5 rounded-full mb-1 group-hover:scale-110 transition-transform">
-                                        Predict
-                                    </span>
-                                )}
-                                <span className="text-xs text-emerald-800 font-semibold">
-                                    {format(new Date(fixture.kickoff), 'EEE d MMM, HH:mm')}
-                                </span>
-                            </div>
-
-                            <div className="flex-1 text-left font-bold text-emerald-900 text-sm md:text-base">
-                                {fixture.awayTeam}
-                            </div>
-                        </div>
-                    )
-                })}
-                {fixtures?.length === 0 && (
-                    <div className="text-center text-emerald-800 py-4">No upcoming fixtures scheduled.</div>
-                )}
-            </div>
-
-            {/* Simple Modal */}
-            {selectedFixture && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200">
-                        <h3 className="text-xl font-bold text-emerald-900 text-center mb-2">Predict Score</h3>
-                        <p className="text-center text-emerald-600 mb-6 text-sm">
-                            {selectedFixture.homeTeam} vs {selectedFixture.awayTeam}
-                        </p>
-
-                        <div className="flex justify-center items-center gap-4 mb-8">
-                            <div className="text-center">
-                                <label className="block text-xs font-bold text-emerald-800 mb-1">{selectedFixture.homeTeam}</label>
-                                <input
-                                    type="number"
-                                    value={homeScore}
-                                    onChange={(e) => setHomeScore(e.target.value)}
-                                    className="w-16 h-16 text-center text-2xl font-black bg-emerald-50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-emerald-900"
-                                />
-                            </div>
-                            <span className="text-2xl font-black text-emerald-300">-</span>
-                            <div className="text-center">
-                                <label className="block text-xs font-bold text-emerald-800 mb-1">{selectedFixture.awayTeam}</label>
-                                <input
-                                    type="number"
-                                    value={awayScore}
-                                    onChange={(e) => setAwayScore(e.target.value)}
-                                    className="w-16 h-16 text-center text-2xl font-black bg-emerald-50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-emerald-900"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={closeModal}
-                                className="flex-1 py-3 px-4 rounded-xl font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => predictMutation.mutate()}
-                                disabled={!homeScore || !awayScore || predictMutation.isPending}
-                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {predictMutation.isPending ? 'Saving...' : 'Submit'}
-                            </button>
-                        </div>
+        <div className="glass-panel overflow-hidden rounded-[10px] shadow-sm border border-slate-200 bg-white/50">
+            <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-slate-100 rounded-lg">
+                        <CalendarDaysIcon className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-900 leading-none">{t.dashboard.fixtures.upcoming}</h2>
+                        <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-widest">{t.dashboard.fixtures.subtitle}</p>
                     </div>
                 </div>
-            )}
+
+                <div className="flex items-center gap-3">
+                    <select 
+                        value={selectedLeague}
+                        onChange={(e) => {
+                            setSelectedLeague(e.target.value);
+                            setPage(0);
+                        }}
+                        className="bg-white border border-slate-200 text-slate-700 text-[10px] font-bold uppercase rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-slate-200 transition-all cursor-pointer"
+                    >
+                        {LEAGUES.map(league => (
+                            <option key={league.id} value={league.id}>{league.name}</option>
+                        ))}
+                    </select>
+
+                    <div className="flex gap-1">
+                        <button 
+                            disabled={page === 0}
+                            onClick={() => setPage(p => p - 1)}
+                            className="p-1.5 rounded-lg hover:bg-slate-50 disabled:opacity-20 transition-all border border-slate-200"
+                        >
+                            <ChevronLeftIcon className="w-3 h-3 text-slate-600" />
+                        </button>
+                        <button 
+                            disabled={page >= totalPages - 1}
+                            onClick={() => setPage(p => p + 1)}
+                            className="p-1.5 rounded-lg hover:bg-slate-50 disabled:opacity-20 transition-all border border-slate-200"
+                        >
+                            <ChevronRightIcon className="w-3 h-3 text-slate-600" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-6">
+                <AnimatePresence mode="wait">
+                    <motion.div 
+                        key={`${selectedLeague}-${page}`}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{ duration: 0.2 }}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    >
+                        {isLoading ? (
+                            [...Array(3)].map((_, i) => (
+                                <div key={i} className="h-44 bg-slate-50 animate-pulse rounded-xl border border-slate-100" />
+                            ))
+                        ) : paginatedFixtures?.length === 0 ? (
+                            <div className="col-span-3 py-16 text-center">
+                                <BoltIcon className="w-8 h-8 text-slate-200 mx-auto mb-3" />
+                                <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No matches scheduled</p>
+                            </div>
+                        ) : (
+                            paginatedFixtures?.map((match) => (
+                                <div 
+                                    key={match.id}
+                                    className="bg-white border border-slate-200 p-5 rounded-xl transition-all hover:shadow-md hover:border-slate-300 group"
+                                >
+                                    <div className="flex justify-between items-center mb-6">
+                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${match.status === 'LIVE' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
+                                            {match.status}
+                                        </span>
+                                        <div className="text-right">
+                                            <div className="text-[10px] font-bold text-slate-900">
+                                                {new Date(match.matchDate || match.kickoff || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                            <div className="text-[9px] font-bold text-slate-400 uppercase">
+                                                {new Date(match.matchDate || match.kickoff || '').toLocaleDateString(language === 'th' ? 'th-TH' : 'en-GB', { day: 'numeric', month: 'short' })}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 truncate">
+                                                <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5 flex-shrink-0">
+                                                    <img 
+                                                        src={match.homeTeamId ? `https://crests.football-data.org/${match.homeTeamId}.png` : `https://ui-avatars.com/api/?name=${match.homeTeam}&background=f8fafc&color=94a3b8&font-size=0.5&bold=true`} 
+                                                        alt="" 
+                                                        className="w-full h-full object-contain"
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${match.homeTeam.substring(0, 1)}&background=f8fafc&color=94a3b8`; }}
+                                                    />
+                                                </div>
+                                                <span className="font-bold text-slate-700 text-xs truncate">{match.homeTeam}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 truncate">
+                                                <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5 flex-shrink-0">
+                                                    <img 
+                                                        src={match.awayTeamId ? `https://crests.football-data.org/${match.awayTeamId}.png` : `https://ui-avatars.com/api/?name=${match.awayTeam}&background=f8fafc&color=94a3b8&font-size=0.5&bold=true`} 
+                                                        alt="" 
+                                                        className="w-full h-full object-contain"
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${match.awayTeam.substring(0, 1)}&background=f8fafc&color=94a3b8`; }}
+                                                    />
+                                                </div>
+                                                <span className="font-bold text-slate-700 text-xs truncate">{match.awayTeam}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 pt-4 border-t border-slate-100">
+                                        <button className="w-full py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all">
+                                            {t.dashboard.fixtures.view_match}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </motion.div>
+                </AnimatePresence>
+            </div>
         </div>
     );
 }

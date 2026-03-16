@@ -7,13 +7,20 @@
         "home": "Home"
     },
     "landing": {
+        "badge": "Elite Manager Division",
         "season": "Season 2025/26",
         "title_start": "ELEVEN",
         "title_end": "LINEUP",
-        "subtitle": "The ultimate Premier League squad builder. Mock up your dream team in seconds.",
+        "subtitle": "Step into the cinematic arena of professional management. Build your squad with real-time analytics and broadcast-grade visualization.",
         "start_building": "Start Building",
         "create_account": "Create Account",
-        "footer": "© 2026 ElevenLineUp. Built for fans."
+        "footer": "© 2026 ElevenLineUp. Built for fans.",
+        "nav": {
+            "leagues": "LEAGUES",
+            "players": "PLAYERS",
+            "stats": "STATS",
+            "live": "LIVE"
+        }
     },
     "auth": {
         "welcome_back": "Welcome Back",
@@ -36,13 +43,50 @@
     },
     "dashboard": {
         "welcome": "Welcome back",
-        "profile": "Profile",
-        "logout": "Logout",
         "menu": {
             "dashboard": "Dashboard",
             "community": "Community",
             "minigames": "Mini Games",
             "profile": "Profile"
+        },
+        "standings": {
+            "title": "League Standings",
+            "season": "Season 2025/26",
+            "view_full_table": "VIEW FULL TABLE"
+        },
+        "fixtures": {
+            "upcoming": "Upcoming Match",
+            "subtitle": "DON'T MISS THE ACTION",
+            "view_match": "VIEW MATCH"
+        },
+        "stats": {
+            "title": "Your Stats",
+            "xp": "XP",
+            "squads": "Squads",
+            "wins": "Wins",
+            "win_rate": "Win Rate",
+            "played": "Played",
+            "streak": "Streak"
+        },
+        "profile": {
+            "manager_center": "Manager Center",
+            "command_squad": "Command your squad and lead them to glory.",
+            "start_building": "Start Building",
+            "public_profile": "Public Profile",
+            "lineups": "Lineups",
+            "posts": "Posts",
+            "streak": "Streak",
+            "information": "Information",
+            "edit_profile": "Edit Profile",
+            "display_name": "Display Name",
+            "username": "Username",
+            "game_performance": "Game Performance",
+            "achievements": "Achievements",
+            "change_password": "Change Password",
+            "update_password": "Update Password",
+            "preferences": "Preferences",
+            "email_notifications": "Email Notifications",
+            "logout": "Logout"
         }
     },
     "admin": {

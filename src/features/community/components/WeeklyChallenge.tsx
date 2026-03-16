@@ -80,7 +80,7 @@ export default function WeeklyChallenge() {
 
     if (!challengeData?.challenge) {
         return (
-            <div className="bg-white rounded-3xl p-8 text-center shadow-lg border border-emerald-100">
+            <div className="bg-white rounded-xl p-8 text-center shadow-lg border border-emerald-100">
                 <h2 className="text-2xl font-black text-emerald-900 mb-2">Weekly Lineup Challenge</h2>
                 <p className="text-gray-500">There is no active challenge this week. Check back soon!</p>
             </div>
@@ -94,7 +94,7 @@ export default function WeeklyChallenge() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Draft UI */}
-            <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-xl border border-emerald-100">
+            <div className="lg:col-span-2 bg-white rounded-xl p-8 shadow-xl border border-emerald-100">
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h2 className="text-3xl font-black text-emerald-900 tracking-tighter uppercase">Week {challengeData.challenge.week} Challenge</h2>
@@ -163,7 +163,7 @@ export default function WeeklyChallenge() {
             </div>
 
             {/* Leaderboard */}
-            <div className="bg-emerald-900 rounded-3xl p-6 shadow-xl text-white">
+            <div className="bg-emerald-900 rounded-xl p-6 shadow-xl text-white">
                 <h3 className="text-xl font-black uppercase tracking-wider mb-6 flex items-center gap-2">
                     <span className="text-2xl">🏆</span> Leaderboard
                 </h3>

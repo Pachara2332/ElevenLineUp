@@ -1,56 +1,58 @@
 @import "tailwindcss";
 
 :root {
-  --background: #a3e635;
-  /* Lime 400 */
-  --foreground: #1a2e05;
-  --primary: #ffffff;
-  --primary-foreground: #064e3b;
-  /* Emerald 900 */
-  --card: rgba(255, 255, 255, 0.25);
-  --card-foreground: #064e3b;
-  --input: rgba(255, 255, 255, 0.5);
+  --background: #f1f5f9; /* Slate 100 - consistent, weighted light background */
+  --foreground: #0f172a; /* Slate 900 */
+  --primary: #10b981;    /* Emerald 500 */
+  --primary-foreground: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --input: #ffffff;
   --ring: #10b981;
-  /* Emerald 500 */
 }
 
 @theme {
-  --font-sans: 'Outfit', sans-serif;
-  --color-brand-lime: #a3e635;
+  --font-sans: 'Outfit', 'Noto Sans Thai', sans-serif;
+  --color-brand-lime: #84cc16; /* Shifting to a more natural lime */
   --color-brand-emerald: #10b981;
-  --color-brand-dark: #064e3b;
+  --color-brand-dark: #1e293b; /* Slate 800 for better depth */
+}
+
+:lang(th) {
+  font-family: 'Noto Sans Thai', sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
   min-height: 100vh;
+  background-color: var(--background);
 }
 
-/* Auth Pages Background - ใช้เฉพาะหน้า login/register */
+/* Auth Pages Background */
 .auth-page-bg {
-  background: linear-gradient(to bottom right, #a3e635, #10b981);
-  /* Polka Dot Pattern */
-  background-image:
-    radial-gradient(rgba(255, 255, 255, 0.3) 2px, transparent 2px),
-    linear-gradient(to bottom right, #a3e635, #10b981);
-  background-size: 32px 32px, 100% 100%;
+  @apply bg-slate-950 relative;
+  background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%), url("/images/stadium-hero.png");
+  background-size: cover;
+  background-position: center;
 }
+
+.input-dark {
+    @apply bg-slate-800/50 border border-slate-700/50 rounded-lg px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:bg-slate-800 transition-all;
+}
+
+.label-dark {
+    @apply block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1;
+}
+
 
 /* Homepage Background - ถ้ามี */
 .home-page-bg {
-  background-color: var(--background);
-  /* Polka Dot Pattern */
-  background-image: radial-gradient(rgba(255, 255, 255, 0.3) 2px, transparent 2px);
-  background-size: 32px 32px;
+  background-color: #f1f5f9;
 }
 
 /* Glassmorphism Utilities */
 .glass-panel {
-  background: var(--card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    @apply bg-white border border-slate-200 shadow-sm rounded-2xl;
 }
 
 .glass-input {
@@ -155,3 +157,37 @@ body {
 .slide-in-from-bottom {
   animation: slideInFromBottom 0.5s ease-out;
 }
+
+/* Redesign Utilities */
+.glass-panel-dark {
+    @apply bg-black/30 backdrop-blur-md border border-white/10;
+}
+
+.title-white {
+    @apply text-white font-black tracking-tighter;
+}
+
+.title-green {
+    @apply text-[#10b981] font-black tracking-tighter;
+}
+
+.btn-primary-green {
+    @apply bg-[#10b981] text-white font-bold px-8 py-4 rounded-xl hover:bg-[#059669] transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95;
+}
+
+.btn-glass {
+    @apply bg-black/20 backdrop-blur-md border border-white/20 text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 transition-all shadow-lg active:scale-95;
+}
+
+.nav-link {
+    @apply text-white/70 hover:text-white font-bold tracking-widest text-xs uppercase transition-colors;
+}
+
+.badge-glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-1 flex items-center gap-2;
+}
+
+.text-shadow-sm {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+

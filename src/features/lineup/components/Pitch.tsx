@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { LineupSlot } from "@/types";
 import clsx from "clsx";
 
@@ -81,9 +81,20 @@ const PitchSlot: React.FC<PitchSlotProps> = ({
   onClick,
   isValidDropZone,
 }) => {
-  const { isOver, setNodeRef } = useDroppable({
+  const { isOver, setNodeRef: setDroppableRef } = useDroppable({
     id: slot.id,
     data: slot,
+  });
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDraggableRef,
+    isDragging,
+  } = useDraggable({
+    id: `pitch-player-${slot.id}`,
+    data: slot.player,
+    disabled: !slot.player,
   });
 
   const hasPlayer = !!slot.player;
@@ -97,7 +108,7 @@ const PitchSlot: React.FC<PitchSlotProps> = ({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={setDroppableRef}
       onClick={onClick}
       style={{
         left: `${slot.x}%`,
@@ -115,6 +126,9 @@ const PitchSlot: React.FC<PitchSlotProps> = ({
 
       {/* Main slot container */}
       <div
+        ref={setDraggableRef}
+        {...listeners}
+        {...attributes}
         className={clsx(
           "w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all duration-300",
           // Drop states
@@ -128,77 +142,44 @@ const PitchSlot: React.FC<PitchSlotProps> = ({
             !isOver &&
             !isSelected &&
             "border-2 border-emerald-400 border-dashed bg-emerald-500/20",
-          // Has player - add hover scale 3x
+          // Has player - add hover scale
           hasPlayer &&
             !isOver &&
             !isSelected &&
-            "bg-gradient-to-b from-slate-800/90 to-slate-900/90 backdrop-blur-sm shadow-xl hover:scale-[1.5] hover:z-50 hover:shadow-2xl",
-          // Empty slot
-          !hasPlayer &&
+            "bg-gradient-to-b from-slate-800/90 to-slate-900/90 backdrop-blur-sm shadow-xl hover:scale-110 hover:shadow-2xl",
+          // Empty slot or currently dragging player from here
+          (!hasPlayer || isDragging) &&
             !isOver &&
             !isSelected &&
             !isValidDropZone &&
             "bg-black/30 border-2 border-white/20 hover:border-white/40 hover:bg-black/40",
         )}
       >
-        {hasPlayer ? (
+        {hasPlayer && !isDragging ? (
           <>
-            {/* Hover popup - with image */}
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50">
-              <div className="bg-slate-900 rounded-xl p-2 shadow-xl border border-slate-600 whitespace-nowrap flex items-center gap-2">
-                {/* Small image */}
-                <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
-                  {showImage ? (
-                    <img
-                      src={slot.player!.image}
-                      alt={displayName}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold">
-                      {displayName.charAt(0)}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-white font-bold text-xs">
-                    {slot.player?.name?.replace(/\s*\(\d+\)$/, "")}
-                  </span>
-                  <span className="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded text-center">
-                    {shortenPosition(slot.player?.position)}
-                  </span>
-                </div>
-              </div>
-              {/* Arrow */}
-              <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-slate-900" />
-            </div>
-
-            {/* Player image - larger and cleaner */}
+            {/* Player image */}
             <div className="w-11 h-11 rounded-xl overflow-hidden ring-2 ring-white/50 bg-slate-700 flex-shrink-0 shadow-lg">
               {showImage ? (
                 <img
                   src={slot.player!.image}
                   alt={displayName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
+                  className="w-full h-full object-cover pointer-events-none"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm pointer-events-none">
                   {displayName.charAt(0)}
                 </div>
               )}
             </div>
             {/* Player name */}
-            <span className="text-[10px] font-bold text-white mt-0.5 truncate max-w-14 drop-shadow-lg">
+            <span className="text-[10px] font-bold text-white mt-0.5 truncate max-w-14 drop-shadow-lg pointer-events-none">
               {displayName}
             </span>
           </>
         ) : (
           <span
             className={clsx(
-              "text-xs font-bold",
+              "text-xs font-bold pointer-events-none",
               isSelected
                 ? "text-yellow-200"
                 : "text-white/60 group-hover:text-white/80",

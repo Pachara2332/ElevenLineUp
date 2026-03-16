@@ -50,7 +50,7 @@ export default function SuggestedTeams() {
     if (!user || loading || !teams || teams.length === 0) return null;
 
     return (
-        <div className="glass-panel rounded-3xl p-6 hidden lg:block sticky top-8">
+        <div className="glass-panel rounded-xl p-6 hidden lg:block sticky top-8">
             <h3 className="text-lg font-black text-emerald-900 mb-4 uppercase tracking-tighter">
                 Suggested Teams
             </h3>

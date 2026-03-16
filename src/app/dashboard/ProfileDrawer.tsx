@@ -1,4 +1,19 @@
 import { useState, useEffect } from 'react'
+import { 
+  XMarkIcon, 
+  ArrowTopRightOnSquareIcon, 
+  ChartBarIcon, 
+  Cog6ToothIcon, 
+  UserIcon,
+  QueueListIcon,
+  DocumentTextIcon,
+  FireIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  CheckIcon
+} from '@heroicons/react/24/outline'
+import { TrophyIcon } from '@heroicons/react/24/solid'
+
 
 interface Props {
   open: boolean
@@ -44,6 +59,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   // State สำหรับข้อมูลสถิติที่ดึงจาก API
   const [stats, setStats] = useState<UserStats | null>(null)
@@ -202,7 +218,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
     <>
       {savedNotification && (
         <div className="fixed top-4 right-4 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <span className="text-xl">✓</span>
+          <CheckIcon className="w-5 h-5" />
           <span className="font-semibold">Saved successfully!</span>
         </div>
       )}
@@ -212,17 +228,17 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
         className={`fixed inset-0 bg-black/40 transition-opacity z-40 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
 
-      <div className={`fixed top-0 right-0 h-full w-[420px] bg-gradient-to-br from-slate-50 to-gray-100 shadow-2xl transition-transform overflow-y-auto z-50 ${open ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="relative bg-gradient-to-r from-emerald-600 to-teal-600 h-32 px-6 pt-6">
+      <div className={`fixed top-0 right-0 h-full w-[420px] bg-white border-l border-slate-200 shadow-2xl transition-transform overflow-y-auto z-50 ${open ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="relative bg-slate-900 h-32 px-6 pt-6">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition z-10"
           >
-            ✕
+            <XMarkIcon className="w-5 h-5 text-white" />
           </button>
 
           <div className="absolute -bottom-12 left-6">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white shadow-xl">
+            <div className="w-24 h-24 rounded-xl overflow-hidden border-4 border-white shadow-lg">
               {avatar ? (
                 <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
@@ -237,8 +253,8 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
         <div className="px-6 pt-16 pb-6">
           <div className="mb-6 flex justify-between items-start">
             <div>
-              <div className="font-bold text-2xl text-gray-900">{user.name}</div>
-              <div className="text-sm text-gray-500">{user.email}</div>
+              <div className="font-bold text-2xl text-slate-900">{user.name}</div>
+              <div className="text-sm text-slate-500 font-medium">{user.email}</div>
             </div>
             <a
               href={`/u/${user.username || user.userId}`}
@@ -246,148 +262,176 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
               rel="noopener noreferrer"
               className="text-xs font-bold leading-tight bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-full hover:bg-emerald-100 transition flex items-center gap-1"
             >
-              Public Profile ↗
+              Public Profile <ArrowTopRightOnSquareIcon className="w-3 h-3" />
             </a>
           </div>
 
           <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition border border-gray-200">
-              <div className="text-2xl mb-1">⚽</div>
-              <div className="font-bold text-xl text-gray-900">
+            <div className="bg-white rounded-xl p-4 text-center shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col items-center">
+              <div className="p-2 bg-emerald-50 rounded-lg mb-2">
+                <QueueListIcon className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div className="font-bold text-xl text-slate-900">
                 {loadingStats ? (
-                  <div className="h-7 w-8 mx-auto bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-7 w-8 mx-auto bg-slate-100 animate-pulse rounded"></div>
                 ) : (
                   displayStats.lineupsCount
                 )}
               </div>
-              <div className="text-xs text-gray-500 font-medium">Lineups</div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Lineups</div>
             </div>
 
-            <div className="bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition border border-gray-200">
-              <div className="text-2xl mb-1">📝</div>
-              <div className="font-bold text-xl text-gray-900">
+            <div className="bg-white rounded-xl p-4 text-center shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col items-center">
+              <div className="p-2 bg-blue-50 rounded-lg mb-2">
+                <DocumentTextIcon className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="font-bold text-xl text-slate-900">
                 {loadingStats ? (
-                  <div className="h-7 w-8 mx-auto bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-7 w-8 mx-auto bg-slate-100 animate-pulse rounded"></div>
                 ) : (
                   displayStats.postsCount
                 )}
               </div>
-              <div className="text-xs text-gray-500 font-medium">Posts</div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Posts</div>
             </div>
 
-            <div className="bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition border border-gray-200">
-              <div className="text-2xl mb-1">🔥</div>
-              <div className="font-bold text-xl text-emerald-600">
+            <div className="bg-white rounded-xl p-4 text-center shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col items-center">
+              <div className="p-2 bg-orange-50 rounded-lg mb-2">
+                <FireIcon className="w-6 h-6 text-orange-600" />
+              </div>
+              <div className="font-bold text-xl text-slate-900">
                 {loadingStats ? (
-                  <div className="h-7 w-8 mx-auto bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-7 w-8 mx-auto bg-slate-100 animate-pulse rounded"></div>
                 ) : (
                   displayStats.streak
                 )}
               </div>
-              <div className="text-xs text-gray-500 font-medium">Streak</div>
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Streak</div>
             </div>
           </div>
 
-          <div className="flex gap-2 mb-6 bg-white rounded-2xl p-1.5 shadow-sm">
+          <div className="flex gap-2 mb-6 bg-slate-100 rounded-xl p-1">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition ${activeTab === 'profile' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`flex-1 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 ${activeTab === 'profile' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-emerald-600 hover:bg-white/50'}`}
             >
-              Profile
+              <UserIcon className="w-4 h-4" /> Profile
             </button>
             <button
               onClick={() => setActiveTab('stats')}
-              className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition ${activeTab === 'stats' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`flex-1 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 ${activeTab === 'stats' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-emerald-600 hover:bg-white/50'}`}
             >
-              Stats
+              <ChartBarIcon className="w-4 h-4" /> Stats
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition ${activeTab === 'settings' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`flex-1 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 ${activeTab === 'settings' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-emerald-600 hover:bg-white/50'}`}
             >
-              Settings
+              <Cog6ToothIcon className="w-4 h-4" /> Settings
             </button>
           </div>
 
           {activeTab === 'profile' && (
-            <div className="space-y-4 bg-white rounded-2xl p-5 shadow-sm">
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-700 block">
-                  Profile Picture
-                </label>
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-200 border-2 border-gray-300 flex-shrink-0 relative">
-                    {avatar ? (
-                      <img src={avatar} alt="Avatar preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center font-bold text-2xl text-gray-500">
-                        {name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    {uploadSuccess && (
-                      <div className="absolute inset-0 bg-emerald-600/90 flex items-center justify-center">
-                        <span className="text-white text-3xl">✓</span>
-                      </div>
-                    )}
+            <div className="space-y-4">
+              {!isEditing ? (
+                <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-900">Information</h3>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="text-xs font-bold text-emerald-600 hover:text-emerald-700 underline"
+                    >
+                      Edit Profile
+                    </button>
                   </div>
-
-                  <div className="flex-1">
-                    <label className="cursor-pointer inline-block">
-                      <div className={`px-4 py-2 rounded-lg transition font-medium text-sm text-center ${uploading
-                          ? 'bg-gray-400 cursor-not-allowed'
-                          : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                        }`}>
-                        {uploading ? 'Uploading...' : 'Choose Image'}
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                      />
-                    </label>
-                    <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Display Name</span>
+                      <p className="font-semibold text-slate-700 text-lg">{user.name}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Username</span>
+                      <p className="font-semibold text-slate-700 italic">@{user.username || 'n/a'}</p>
+                    </div>
                   </div>
                 </div>
-
-                {uploadSuccess && (
-                  <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 bg-emerald-50 px-4 py-2.5 rounded-lg border border-emerald-200 animate-fade-in">
-                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span>Uploaded successfully! Click "Save Changes" to confirm.</span>
+              ) : (
+                <div className="space-y-4 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-bold text-slate-900">Edit Mode</h3>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="text-xs font-bold text-slate-400 hover:text-slate-600"
+                    >
+                      Cancel
+                    </button>
                   </div>
-                )}
-              </div>
+                  <div className="space-y-3">
+                    <label className="text-sm font-semibold text-slate-700 block">
+                      Profile Picture
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 relative">
+                        {avatar ? (
+                          <img src={avatar} alt="Avatar preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center font-bold text-2xl text-slate-400">
+                            {name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        {uploadSuccess && (
+                          <div className="absolute inset-0 bg-emerald-600/90 flex items-center justify-center">
+                            <span className="text-white text-3xl">✓</span>
+                          </div>
+                        )}
+                      </div>
 
-              <div>
-                <label className="text-sm font-semibold text-gray-700 mb-2 block">
-                  Display Name
-                </label>
-                <input
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-emerald-500 focus:outline-none transition"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your name"
-                />
-              </div>
+                      <div className="flex-1">
+                        <label className="cursor-pointer inline-block">
+                          <div className={`px-4 py-2 rounded-lg transition font-bold text-xs uppercase tracking-wider text-center ${uploading
+                              ? 'bg-slate-300 cursor-not-allowed'
+                              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+                            }`}>
+                            {uploading ? 'Uploading...' : 'Choose Image'}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                            disabled={uploading}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
 
-              <button
-                onClick={saveProfile}
-                className={`w-full text-white px-4 py-3 rounded-xl font-semibold transition ${uploadSuccess || name !== user?.name
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-lg animate-pulse-slow'
-                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-lg'
-                  }`}
-              >
-                {uploadSuccess || name !== user?.name ? 'Save Changes ⚠️' : 'Save Changes'}
-              </button>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">
+                      Display Name
+                    </label>
+                    <input
+                      className="w-full border border-slate-200 rounded-lg px-4 py-2.5 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none transition text-sm"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name"
+                    />
+                  </div>
+
+                  <button
+                    onClick={saveProfile}
+                    className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg font-bold uppercase tracking-widest text-sm hover:bg-emerald-700 transition shadow-sm"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === 'stats' && (
             <div className="space-y-4">
-              <div className="bg-white rounded-2xl p-5 shadow-sm">
+              <div className="bg-white rounded-xl p-5 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-4">Game Performance</h3>
                 {loadingStats ? (
                   <div className="space-y-3">
@@ -432,7 +476,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
                 )}
               </div>
 
-              <div className="bg-white rounded-2xl p-5 shadow-sm">
+              <div className="bg-white rounded-xl p-5 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-4">Achievements</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div className={`rounded-xl p-3 text-center border-2 ${displayStats.lineupsCount > 0
@@ -470,7 +514,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
 
           {activeTab === 'settings' && (
             <div className="space-y-4">
-              <div className="bg-white rounded-2xl p-5 shadow-sm">
+              <div className="bg-white rounded-xl p-5 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-3">Change Password</h3>
                 <div className="space-y-2.5">
                   <div className="relative">
@@ -487,14 +531,9 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                     >
                       {showPassword ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                        </svg>
+                        <EyeSlashIcon className="w-5 h-5" />
                       ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
+                        <EyeIcon className="w-5 h-5" />
                       )}
                     </button>
                   </div>
@@ -507,7 +546,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-5 shadow-sm">
+              <div className="bg-white rounded-xl p-5 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-3">Preferences</h3>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between py-1.5">

@@ -81,22 +81,46 @@ export default function LineupBuilder() {
       const targetSlot = slots.find((s) => s.id === over.id) as LineupSlot;
 
       if (targetSlot) {
-        // ตรวจสอบเฉพาะ GK เท่านั้น
+        // Validation for GK
         const isPlayerGK = player.position?.toUpperCase().includes("GOAL") || 
                           player.position?.toUpperCase() === "GK";
         const isSlotGK = targetSlot.position === "GK";
 
-        // Rule: GK player can ONLY go into GK slot
-        if (isPlayerGK && !isSlotGK) {
-          return; // Silently reject
-        }
-        // Rule: GK slot can ONLY accept GK player
-        if (isSlotGK && !isPlayerGK) {
-          return; // Silently reject
-        }
+        if (isPlayerGK && !isSlotGK) return;
+        if (isSlotGK && !isPlayerGK) return;
 
-        // ตำแหน่งอื่นๆ ใส่ได้หมด
-        updateSlot(over.id as string, player);
+        // Check if dragging from another slot
+        const sourceIdMatch = String(active.id).match(/pitch-player-(.+)/);
+        if (sourceIdMatch) {
+          const sourceSlotId = sourceIdMatch[1];
+          if (sourceSlotId === over.id) return; // Dropped on same slot
+
+          // SWAP logic
+          const sourceSlot = slots.find(s => s.id === sourceSlotId);
+          const currentPlayerInTarget = targetSlot.player;
+
+          // Update target slot with new player
+          updateSlot(over.id as string, player);
+          
+          // If target had a player, move them to source slot (SWAP)
+          if (currentPlayerInTarget && sourceSlot) {
+             // Validate if target player can go to source slot (GK check)
+             const isTargetPlayerGK = currentPlayerInTarget.position?.toUpperCase().includes("GOAL") || 
+                                     currentPlayerInTarget.position?.toUpperCase() === "GK";
+             const isSourceSlotGK = sourceSlot.position === "GK";
+
+             if (isTargetPlayerGK === isSourceSlotGK) {
+                updateSlot(sourceSlotId, currentPlayerInTarget);
+             } else {
+                updateSlot(sourceSlotId, null); // Clear if invalid swap
+             }
+          } else if (sourceSlot) {
+            updateSlot(sourceSlotId, null); // Move, clear source
+          }
+        } else {
+          // Normal drag from sidebar
+          updateSlot(over.id as string, player);
+        }
       }
     }
   };
