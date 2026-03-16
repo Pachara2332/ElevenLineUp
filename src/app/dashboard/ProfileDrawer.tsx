@@ -13,7 +13,8 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline'
 import { TrophyIcon } from '@heroicons/react/24/solid'
-
+import Cropper from 'react-easy-crop'
+import getCroppedImg from '@/lib/cropImage'
 
 interface Props {
   open: boolean
@@ -60,6 +61,13 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+
+  // Cropper states
+  const [imageSrc, setImageSrc] = useState<string | null>(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [showCropper, setShowCropper] = useState(false)
 
   // State สำหรับข้อมูลสถิติที่ดึงจาก API
   const [stats, setStats] = useState<UserStats | null>(null)
@@ -162,26 +170,41 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
-      return
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0]
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB')
+        return
+      }
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file')
+        return
+      }
+      const reader = new FileReader()
+      reader.addEventListener('load', () => setImageSrc(reader.result?.toString() || null))
+      reader.readAsDataURL(file)
+      setShowCropper(true)
     }
+    // reset input value so user can select same file again if needed
+    e.target.value = ''
+  }
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file')
-      return
-    }
+  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels)
+  }
 
+  const handleCropUpload = async () => {
+    if (!imageSrc || !croppedAreaPixels) return
     try {
       setUploading(true)
-      const formData = new FormData()
-      formData.append('file', file)
+      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, 0)
+      if (!croppedImage) throw new Error('Failed to crop')
 
-      console.log('Uploading file:', file.name)
+      const formData = new FormData()
+      formData.append('file', croppedImage, 'avatar.jpg')
+
+      console.log('Uploading cropped file')
 
       const res = await fetch('/api/auth/avatar', {
         method: 'POST',
@@ -198,10 +221,11 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
 
       setAvatar(data.url)
       setUploadSuccess(true)
-
-    } catch (error) {
+      setShowCropper(false)
+      setImageSrc(null)
+    } catch (error: any) {
       console.error('Upload error:', error)
-      alert('Failed to upload image')
+      alert(error.message || 'Failed to upload image')
     } finally {
       setUploading(false)
     }
@@ -216,6 +240,56 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
 
   return (
     <>
+      {showCropper && imageSrc && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold mb-4 text-slate-800">Crop Avatar</h3>
+            <div className="relative w-full h-72 bg-slate-100 mb-6 rounded-xl overflow-hidden shadow-inner">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+            {/* Zoom Slider */}
+            <div className="mb-6 px-2 flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-400">Zoom</span>
+              <input
+                type="range"
+                value={zoom}
+                min={1}
+                max={3}
+                step={0.1}
+                aria-labelledby="Zoom"
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="w-full select-none"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowCropper(false); setImageSrc(null) }}
+                className="flex-1 py-3 font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCropUpload}
+                disabled={uploading}
+                className="flex-1 py-3 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-md disabled:bg-slate-400"
+              >
+                {uploading ? 'Saving...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {savedNotification && (
         <div className="fixed top-4 right-4 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 animate-fade-in">
           <CheckIcon className="w-5 h-5" />
@@ -398,7 +472,7 @@ export default function ProfileDrawer({ open, onClose, user }: Props) {
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={handleImageUpload}
+                            onChange={onFileChange}
                             disabled={uploading}
                           />
                         </label>
