@@ -44,6 +44,9 @@ export async function POST(
   ])
 
   // Create Notification
+  const io = (global as any).io;
+  console.log('Socket.IO instance:', io ? 'exists' : 'null');
+
   if (comment.post.authorId !== user.userId) {
     const notification = await prisma.notification.create({
       data: {
@@ -58,9 +61,11 @@ export async function POST(
     });
 
     // Emit Socket Event
-    const io = (global as any).io;
     if (io) {
-        io.to(`user-${comment.post.authorId}`).emit('notification', notification);
+        const roomName = `user-${comment.post.authorId}`;
+        console.log('Emitting notification to room:', roomName);
+        io.to(roomName).emit('notification', notification);
+        console.log('Notification emitted successfully');
     }
   }
 
@@ -68,9 +73,10 @@ export async function POST(
   await awardXP(user.userId, 2)
 
   // Emit to post room for real-time comments
-  const io = (global as any).io;
+  console.log('Emitting new_comment to post room:', `post-${id}`);
   if (io) {
       io.to(`post-${id}`).emit('new_comment', comment);
+      console.log('New comment emitted successfully');
   }
 
   return NextResponse.json(comment)

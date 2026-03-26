@@ -48,13 +48,21 @@ export default function NotificationBell() {
             path: '/socket.io',
         });
 
-        // Join user room
-        socket.emit('join', `user-${user.userId}`);
+        socket.on('connect', () => {
+            console.log('Notification socket connected:', socket.id);
+            // Join user room once connected
+            socket.emit('join', `user-${user.userId}`);
+        });
 
         // Listen for new notifications
         socket.on('notification', (notification: Notification) => {
+            console.log('Received notification:', notification);
             setNotifications(prev => [notification, ...prev]);
             setUnreadCount(prev => prev + 1);
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Notification socket error:', err);
         });
 
         return () => {

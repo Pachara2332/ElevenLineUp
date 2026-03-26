@@ -63,40 +63,29 @@ export const GET = ApiHandler.handle(async (req) => {
     },
   });
 
-  // 4. Ranking Algorithm
-  const now = Date.now();
-  const scoredPosts = posts.map(post => {
-    const ageInHours = (now - new Date(post.createdAt).getTime()) / (1000 * 60 * 60);
-    // score = (likeCount * 2) + (commentCount * 3) - ageFactor
-    const ageFactor = ageInHours * 1.5; // lose 1.5 points per hour
-    const score = (post.likeCount * 2) + (post.commentCount * 3) - ageFactor;
-    
-    // Boost bonus if from followed users/teams
-    const bonus = (followingIds.includes(post.authorId) ? 10 : 0) + 
-                  (post.teamTeamId && followedTeamIds.includes(post.teamTeamId) ? 15 : 0);
-
+  // 4. Add currentUserLiked flag
+  const postsWithLikeFlag = posts.map(post => {
     return {
       ...post,
-      finalScore: score + bonus,
       currentUserLiked: post.likes.length > 0
     };
   });
 
-  // Sort descending by score
-  scoredPosts.sort((a, b) => b.finalScore - a.finalScore);
+  // Sort by latest post first (createdAt desc)
+  postsWithLikeFlag.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   // Pagination
-  const paginatedPosts = scoredPosts.slice(skip, skip + limit);
+  const paginatedPosts = postsWithLikeFlag.slice(skip, skip + limit);
 
   // Clean up data for response
   const feedItems = paginatedPosts.map(p => {
-    const { likes, finalScore, ...rest } = p;
+    const { likes, ...rest } = p;
     return rest;
   });
 
   return ApiHandler.success({
     items: feedItems,
-    nextPage: skip + limit < scoredPosts.length ? page + 1 : null,
+    nextPage: skip + limit < postsWithLikeFlag.length ? page + 1 : null,
   });
 });
 
