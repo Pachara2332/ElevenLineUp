@@ -5,10 +5,11 @@ import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { HandThumbUpIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { HandThumbUpIcon as HandThumbUpIconSolid } from '@heroicons/react/24/solid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import clsx from 'clsx';
 import Link from 'next/link';
+import io from 'socket.io-client';
 
 interface Post {
     id: string;
@@ -101,6 +102,48 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
     const [comments, setComments] = useState(post.comments || [])
     const calculatedCommentCount = Math.max(post.commentCount, comments.length);
 
+    // Sync comments from server when post prop changes
+    useEffect(() => {
+        setComments(post.comments || []);
+    }, [post.comments]);
+
+    // Socket.IO for real-time comments
+    useEffect(() => {
+        if (!showComments) return;
+
+        const socket = io({
+            path: '/socket.io',
+        });
+
+        socket.on('connect', () => {
+            console.log('Socket connected:', socket.id);
+            // Join post room once connected
+            socket.emit('join', `post-${post.id}`);
+        });
+
+        // Listen for new comments
+        socket.on('new_comment', (comment: any) => {
+            console.log('Received new comment:', comment);
+            setComments(prev => {
+                // Strict duplicate check
+                if (prev.find(c => c.id === comment.id)) {
+                    console.log('Duplicate comment ignored:', comment.id);
+                    return prev;
+                }
+                return [...prev, comment];
+            });
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Socket connection error:', err);
+        });
+
+        return () => {
+            console.log('Disconnecting socket');
+            socket.disconnect();
+        };
+    }, [post.id, showComments]);
+
     const toggleLike = async () => {
         if (!currentUserId) return;
 
@@ -182,7 +225,13 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
 
                     <CommentBox
                         postId={post.id}
-                        onNewComment={(c) => setComments(prev => [...prev, c])}
+                        onNewComment={(c) => {
+                            // Check for duplicates before adding
+                            setComments(prev => {
+                                if (prev.find(existing => existing.id === c.id)) return prev;
+                                return [...prev, c];
+                            });
+                        }}
                     />
                 </div>
             )}

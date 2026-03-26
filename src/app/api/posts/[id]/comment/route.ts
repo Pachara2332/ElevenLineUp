@@ -67,5 +67,11 @@ export async function POST(
   // Award XP to the commenter
   await awardXP(user.userId, 2)
 
+  // Emit to post room for real-time comments
+  const io = (global as any).io;
+  if (io) {
+      io.to(`post-${id}`).emit('new_comment', comment);
+  }
+
   return NextResponse.json(comment)
 }

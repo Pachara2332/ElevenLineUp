@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
+import io from 'socket.io-client';
 
 type Notification = {
     id: string;
@@ -41,7 +42,24 @@ export default function NotificationBell() {
         };
 
         fetchNotifications();
-        // In a real app, you would set up Socket.IO listeners here for real-time updates ComponentDidMount
+
+        // Socket.IO for real-time notifications
+        const socket = io({
+            path: '/socket.io',
+        });
+
+        // Join user room
+        socket.emit('join', `user-${user.userId}`);
+
+        // Listen for new notifications
+        socket.on('notification', (notification: Notification) => {
+            setNotifications(prev => [notification, ...prev]);
+            setUnreadCount(prev => prev + 1);
+        });
+
+        return () => {
+            socket.disconnect();
+        };
     }, [user]);
 
     // Handle clicking outside to close

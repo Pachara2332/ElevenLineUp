@@ -30,11 +30,11 @@ app.prepare().then(() => {
     io.on("connection", (socket) => {
         console.log("Client connected:", socket.id);
 
-        // Join user room
-        socket.on("join", (userId) => {
-            if (userId) {
-                socket.join(`user-${userId}`);
-                console.log(`Socket ${socket.id} joined room user-${userId}`);
+        // Join room (user room or post room)
+        socket.on("join", (roomId) => {
+            if (roomId) {
+                socket.join(roomId);
+                console.log(`Socket ${socket.id} joined room: ${roomId}`);
             }
         });
 

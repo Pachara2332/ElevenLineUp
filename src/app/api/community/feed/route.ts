@@ -48,6 +48,14 @@ export const GET = ApiHandler.handle(async (req) => {
       team: {
         select: { name: true, logo: true }
       },
+      comments: {
+        include: {
+          user: {
+            select: { name: true, avatar: true, username: true }
+          }
+        },
+        orderBy: { createdAt: 'asc' }
+      },
       likes: {
         where: { userId: user.userId },
         select: { id: true }
