@@ -6,7 +6,7 @@ import LogoutButton from "@/components/LogoutButton";
 import ProfileDrawer from "@/app/dashboard/ProfileDrawer";
 import NotificationDropdown from "./NotificationDropdown";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
@@ -79,9 +79,7 @@ export default function DashboardHeader() {
               className="group flex items-center gap-3"
             >
               <div className={`bg-emerald-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ${scrolled ? "w-8 h-8" : "w-10 h-10"}`}>
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
+                <PaperAirplaneIcon className="w-5 h-5 text-white -rotate-45" />
               </div>
               <div className="flex flex-col">
                 <h1 className={`font-brand font-black tracking-tight leading-none ${scrolled ? "text-lg text-slate-900" : "text-xl md:text-2xl text-slate-900"}`}>

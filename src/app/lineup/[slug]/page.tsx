@@ -4,6 +4,7 @@ import { StaticPitch } from "@/components/lineup/StaticPitch";
 import { ShareButton } from "@/components/lineup/ShareButton";
 import Link from "next/link";
 import { Metadata } from "next";
+import { HeartIcon } from "@heroicons/react/24/solid";
 
 interface LineupPageProps {
     params: Promise<{ slug: string }>;
@@ -155,9 +156,7 @@ export default async function PublicLineupPage({ params }: LineupPageProps) {
                         </div>
                         <div className="w-1 h-1 rounded-full bg-slate-600 mx-2" />
                         <div className="flex items-center gap-1 text-pink-400">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                            </svg>
+                            <HeartIcon className="w-4 h-4 text-pink-500" />
                             <span className="font-bold">{lineup._count.likes}</span>
                         </div>
                     </div>
