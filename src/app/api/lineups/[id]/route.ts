@@ -61,9 +61,9 @@ export async function PUT(
             position: slot.position,
             x: slot.x,
             y: slot.y,
-            playerId: slot.player?.id,
-            playerName: slot.player?.name,
-            playerImage: slot.player?.image,
+            playerId: slot.player?.id ? String(slot.player.id) : null,
+            playerName: slot.player?.name || null,
+            playerImage: slot.player?.image || null,
           })),
         }),
       ]);

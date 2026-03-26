@@ -43,12 +43,20 @@ export async function POST(req: NextRequest) {
     // 🔍 LOG 2: ตรวจสอบว่า user และ team มีอยู่จริง
     console.log('✅ User found:', user.userId);
     
-    const teamExists = await prisma.team.findUnique({ where: { teamId } });
+    let teamExists = await prisma.team.findUnique({ where: { teamId } });
     if (!teamExists) {
-      console.error('❌ Team not found:', teamId);
-      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+      console.log('⚠️ Team not found, creating a new dummy team for ID:', teamId);
+      teamExists = await prisma.team.create({
+        data: {
+          teamId,
+          name: 'Unknown Team',
+          league: 'Unknown League',
+          logo: '/default-team.png',
+          players: [],
+        }
+      });
     }
-    console.log('✅ Team found:', teamExists.name);
+    console.log('✅ Team found / created:', teamExists.name);
 
     function generateSlug(name: string, formation: string): string {
       const base = `${name}-${formation}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -71,7 +79,7 @@ export async function POST(req: NextRequest) {
             position: slot.position,
             x: slot.x,
             y: slot.y,
-            playerId: slot.player?.id || null,
+            playerId: slot.player?.id ? String(slot.player.id) : null,
             playerName: slot.player?.name || null,
             playerImage: slot.player?.image || null,
           };
