@@ -79,11 +79,18 @@ export async function POST(req: Request) {
         imageUrl,
       },
       include: {
-          author: { select: { name: true, avatar: true } },
+          author: { select: { name: true, avatar: true, username: true } },
           _count: { select: { likes: true, comments: true } },
           likes: true
       }
     });
+
+    // Broadcast new post to all connected clients via Socket.IO
+    const io = (global as any).io;
+    if (io) {
+        console.log('Broadcasting new post to feed room');
+        io.to('feed').emit('new_post', post);
+    }
 
     // Award XP for creating a post
     await awardPostXP(user.userId);

@@ -48,6 +48,44 @@ export default function FeedList() {
         queryKey: ['posts'],
         queryFn: fetchPosts,
     });
+    const [realtimePosts, setRealtimePosts] = useState<Post[]>([]);
+
+    // Socket.IO for real-time new posts
+    useEffect(() => {
+        const socket = io({
+            path: '/socket.io',
+        });
+
+        socket.on('connect', () => {
+            console.log('Feed socket connected:', socket.id);
+            // Join global feed room
+            socket.emit('join', 'feed');
+        });
+
+        // Listen for new posts
+        socket.on('new_post', (post: Post) => {
+            console.log('Received new post:', post);
+            setRealtimePosts(prev => {
+                // Avoid duplicates
+                if (prev.find(p => p.id === post.id) || posts?.find(p => p.id === post.id)) {
+                    return prev;
+                }
+                return [post, ...prev];
+            });
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Feed socket error:', err);
+        });
+
+        return () => {
+            console.log('Disconnecting feed socket');
+            socket.disconnect();
+        };
+    }, [posts]);
+
+    // Combine fetched posts with real-time posts
+    const allPosts = [...(realtimePosts || []), ...(posts || [])];
 
     if (isLoading) {
         return (
@@ -75,7 +113,7 @@ export default function FeedList() {
         );
     }
 
-    if (!posts || posts.length === 0) {
+    if (!allPosts || allPosts.length === 0) {
         return (
             <div className="text-center py-16 px-4 glass-panel rounded-3xl border-dashed border-2 border-emerald-200">
                 <div className="text-6xl mb-4 opacity-50 relative animate-bounce">🏟️</div>
@@ -87,7 +125,7 @@ export default function FeedList() {
 
     return (
         <div className="space-y-6">
-            {posts?.map(post => (
+            {allPosts?.map(post => (
                 <PostCard key={post.id} post={post} currentUserId={user?.userId} />
             ))}
         </div>
