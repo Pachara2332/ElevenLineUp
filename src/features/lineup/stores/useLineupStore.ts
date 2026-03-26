@@ -654,20 +654,33 @@ export const useLineupStore = create<LineupState>((set, get) => ({
       // Update formation
       set({ formation: data.formation });
 
-      // Map slots back to state structure
-      const loadedSlots = data.slots.map((slot: { slotId?: string; id: string; position: string; x: number; y: number; playerId?: string; playerName?: string; playerImage?: string }) => ({
-        id: slot.slotId || slot.id, // รองรับทั้ง slotId (ถ้ามี) และ id
-        position: slot.position,
-        x: slot.x,
-        y: slot.y,
-        player: slot.playerId
-          ? {
-              id: slot.playerId,
-              name: slot.playerName || "Unknown",
-              image: slot.playerImage || null,
-            }
-          : null,
-      }));
+      const templateSlots = FORMATIONS[data.formation] || FORMATIONS["4-3-3"];
+
+      // Map slots back to state structure using the template's id to prevent breaking when formation changes later
+      const loadedSlots = templateSlots.map((tSlot) => {
+        // Find the matching slot from the database by position and approximate x,y
+        const dbSlot = data.slots.find(
+          (s: any) =>
+            s.position === tSlot.position &&
+            Math.abs(s.x - tSlot.x) < 1 &&
+            Math.abs(s.y - tSlot.y) < 1
+        );
+
+        return {
+          id: tSlot.id,
+          position: tSlot.position,
+          x: tSlot.x,
+          y: tSlot.y,
+          player: dbSlot?.playerId
+            ? {
+                id: dbSlot.playerId,
+                name: dbSlot.playerName || "Unknown",
+                image: dbSlot.playerImage || null,
+                position: dbSlot.position || tSlot.position,
+              }
+            : null,
+        };
+      });
 
       // Update slots in store
       set({ slots: loadedSlots });

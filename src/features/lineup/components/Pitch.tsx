@@ -93,7 +93,7 @@ const PitchSlot: React.FC<PitchSlotProps> = ({
     isDragging,
   } = useDraggable({
     id: `pitch-player-${slot.id}`,
-    data: slot.player,
+    data: slot.player || undefined,
     disabled: !slot.player,
   });
 
@@ -161,7 +161,7 @@ const PitchSlot: React.FC<PitchSlotProps> = ({
             <div className="w-11 h-11 rounded-xl overflow-hidden ring-2 ring-white/50 bg-slate-700 flex-shrink-0 shadow-lg">
               {showImage ? (
                 <img
-                  src={slot.player!.image}
+                  src={slot.player!.image || undefined}
                   alt={displayName}
                   className="w-full h-full object-cover pointer-events-none"
                 />
