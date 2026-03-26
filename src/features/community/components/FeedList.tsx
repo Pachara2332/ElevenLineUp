@@ -84,8 +84,9 @@ export default function FeedList() {
         };
     }, [posts]);
 
-    // Combine fetched posts with real-time posts
+    // Combine fetched posts with real-time posts and deduplicate by ID
     const allPosts = [...(realtimePosts || []), ...(posts || [])];
+    const uniquePosts = Array.from(new Map(allPosts.map(p => [p.id, p])).values());
 
     if (isLoading) {
         return (
@@ -113,7 +114,7 @@ export default function FeedList() {
         );
     }
 
-    if (!allPosts || allPosts.length === 0) {
+    if (!uniquePosts || uniquePosts.length === 0) {
         return (
             <div className="text-center py-16 px-4 glass-panel rounded-3xl border-dashed border-2 border-emerald-200">
                 <div className="text-6xl mb-4 opacity-50 relative animate-bounce">🏟️</div>
@@ -125,7 +126,7 @@ export default function FeedList() {
 
     return (
         <div className="space-y-6">
-            {allPosts?.map(post => (
+            {uniquePosts?.map(post => (
                 <PostCard key={post.id} post={post} currentUserId={user?.userId} />
             ))}
         </div>
