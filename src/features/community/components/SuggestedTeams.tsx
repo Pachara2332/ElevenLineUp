@@ -49,13 +49,24 @@ export default function SuggestedTeams() {
 
     if (!user || loading || !teams || teams.length === 0) return null;
 
+    // Filter out invalid/unknown teams
+    const validTeams = teams.filter(t => 
+        t.name && 
+        t.name !== 'Unknown Team' && 
+        t.logo && 
+        !t.logo.includes('undefined') &&
+        !t.logo.includes('null')
+    );
+
+    if (validTeams.length === 0) return null;
+
     return (
         <div className="glass-panel rounded-xl p-6 hidden lg:block sticky top-8">
             <h3 className="text-lg font-black text-emerald-900 mb-4 uppercase tracking-tighter">
                 Suggested Teams
             </h3>
             <div className="space-y-4">
-                {teams.map(team => (
+                {validTeams.map(team => (
                     <div key={team.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <img src={team.logo} alt={team.name} className="w-10 h-10 object-contain drop-shadow-sm" />
