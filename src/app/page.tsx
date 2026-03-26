@@ -24,9 +24,8 @@ export default function Home() {
 
 
         {/* Title */}
-        <h1 className="text-7xl md:text-9xl font-black mb-6 leading-none tracking-tighter text-white drop-shadow-2xl">
-          {t.landing.title_start}{" "}
-          <span className="text-[#10b981]">{t.landing.title_end}</span>
+        <h1 className="text-7xl md:text-9xl font-black mb-6 leading-none tracking-tighter text-white drop-shadow-2xl font-brand">
+          ELEVEN <span className="text-[#10b981]">LINEUP</span>
         </h1>
 
         {/* Subtitle */}

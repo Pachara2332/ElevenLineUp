@@ -25,7 +25,7 @@ export default function AdminSidebar() {
             {/* Brand Header */}
             <div className="p-8 pb-4">
                 <h2 className="text-2xl font-black tracking-tight">{t.admin.panel_title}</h2>
-                <p className="text-emerald-400 text-xs uppercase tracking-widest font-bold mt-1">Eleven Lineup</p>
+                <p className="text-emerald-400 text-xs uppercase tracking-widest font-bold mt-1 font-brand">Eleven Lineup</p>
             </div>
 
             {/* Navigation */}

@@ -39,7 +39,12 @@
         "dont_have_account": "Don't have an account?",
         "already_have_account": "Already have an account?",
         "register_here": "Register Here",
-        "sign_in_here": "Sign In Here"
+        "sign_in_here": "Sign In Here",
+        "forgot_password_subtitle": "Enter your email to receive a reset link",
+        "send_reset_link": "Send Reset Link",
+        "back_to_login": "Back to Login",
+        "reset_password_title": "Reset Password",
+        "reset_password_subtitle": "Enter your new password below"
     },
     "dashboard": {
         "welcome": "Welcome back",

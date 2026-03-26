@@ -73,22 +73,25 @@ export default function DashboardHeader() {
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <button
               onClick={() => router.push("/dashboard")}
-              className="text-left group"
+              className="group flex items-center gap-3"
             >
-              <h1
-                className={`font-black text transition-all duration-300 group-hover:opacity-80 ${scrolled ? "text-xl" : "text-2xl md:text-3xl"
-                  }`}
-              >
-                {title} <span className="text-emerald-500">{highlight}</span>
-              </h1>
-              {!scrolled && (
-                <p className="text-emerald-700 text-sm md:text-base transition-opacity">
-                  {t.dashboard.welcome}, {user.name}
-                </p>
-              )}
+              <div className={`bg-emerald-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ${scrolled ? "w-8 h-8" : "w-10 h-10"}`}>
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <h1 className={`font-brand font-black tracking-tight leading-none ${scrolled ? "text-lg text-slate-900" : "text-xl md:text-2xl text-slate-900"}`}>
+                  ELEVEN <span className="text-emerald-500">LINEUP</span>
+                </h1>
+                <div className={`flex items-center gap-1.5 transition-opacity ${scrolled ? "opacity-0 h-0" : "opacity-100 mt-1"}`}>
+                  <span className="text-[#10b981] font-bold text-xs uppercase tracking-wider">{title}</span>
+                  <span className="text-slate-400 font-medium text-xs uppercase tracking-widest">{highlight}</span>
+                </div>
+              </div>
             </button>
           </div>
 

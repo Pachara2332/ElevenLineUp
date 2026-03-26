@@ -404,14 +404,29 @@ model LineupSlot {
 - PostgreSQL database
 - npm/yarn/pnpm
 
-### Installation
+### 📦 สำหรับเพื่อนร่วมงาน: รายการ Packages (Dependencies) ที่สำคัญ
+ในโปรเจกต์นี้เรามีการใช้ Libraries หลักๆ ดังนี้ (ไม่ต้องลงใหม่ทีละตัว แค่รัน `npm install` ระบบจะจัดการให้ทั้งหมด):
+
+- **Core & Framework**: `next`, `react`, `react-dom`
+- **Database & ORM**: `prisma`, `@prisma/client`, `@prisma/adapter-pg`
+- **State Management & Data Fetching**: `zustand`, `@tanstack/react-query`
+- **UI & Styling**: `tailwindcss`, `framer-motion`, `clsx`, `tailwind-merge`
+- **Drag & Drop**: `@dnd-kit/core`
+- **Authentication**: `bcryptjs`, `jsonwebtoken`
+- **Validation**: `zod`
+- **Real-time (WebSockets)**: `socket.io`, `socket.io-client`
+- **Icons**: `hugeicons-react`, `@heroicons/react`
+- **Image Processing**: `sharp`, `react-easy-crop`
+- **Utilities**: `axios`, `date-fns`, `uuid`
+
+### Installation (การติดตั้งโปรเจกต)
 
 ```bash
 # Clone repository
 git clone <repo-url>
 cd lineup-builder
 
-# Install dependencies
+# Install dependencies (ติดตั้ง Packages ทั้งหมดที่ระบุไว้ด้านบน)
 npm install
 
 # Set up environment variables
@@ -423,7 +438,7 @@ npx prisma db push
 npx prisma generate
 
 # Seed database
-npm run seed
+npm run dev:seed
 
 # Start development server
 npm run dev

@@ -82,8 +82,45 @@ export default function TeamSelection() {
 
   if (isLoading && !teams) {
     return (
-      <div className="text-white text-2xl font-bold animate-pulse">
-        Loading Teams...
+      <div className="w-full max-w-6xl mx-auto p-8 glass-panel rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700">
+        {/* Title Skeleton */}
+        <div className="h-12 w-3/4 max-w-sm bg-emerald-900/10 rounded-xl mx-auto mb-4 animate-pulse" />
+        <div className="h-6 w-1/2 max-w-xs bg-emerald-800/10 rounded-lg mx-auto mb-8 animate-pulse" />
+
+        {/* Search Bar Skeleton */}
+        <div className="flex justify-center mb-10">
+          <div className="w-full max-w-md h-12 bg-white/40 rounded-xl animate-pulse" />
+        </div>
+
+        {/* League Tabs Skeleton */}
+        <div className="flex justify-center gap-3 mb-12 flex-wrap">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="h-9 w-24 bg-white/40 rounded-lg animate-pulse"
+            />
+          ))}
+        </div>
+
+        {/* Teams Grid Skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="p-6 rounded-2xl bg-white/20 flex flex-col items-center justify-center gap-4 aspect-square animate-pulse"
+            >
+              {/* Logo placeholder */}
+              <div className="w-20 h-20 bg-white/30 rounded-full" />
+              {/* Name placeholder */}
+              <div className="w-24 h-5 bg-white/30 rounded-md" />
+            </div>
+          ))}
+        </div>
+
+        {/* Button Skeleton */}
+        <div className="flex justify-center">
+          <div className="w-48 h-14 rounded-3xl bg-emerald-600/30 animate-pulse" />
+        </div>
       </div>
     );
   }

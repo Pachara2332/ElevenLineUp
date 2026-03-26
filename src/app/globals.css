@@ -18,8 +18,16 @@
   --color-brand-dark: #1e293b; /* Slate 800 for better depth */
 }
 
-:lang(th) {
+:lang(th) body:not(.font-brand) {
   font-family: 'Noto Sans Thai', sans-serif;
+}
+
+/* Force Outfit for brand elements regardless of language */
+.font-brand, 
+h1.font-brand,
+span.font-brand {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 900 !important;
 }
 
 body {

@@ -9,7 +9,7 @@ export interface Player {
   name: string;
   position: string;
   teamId?: string;
-  image?: string;
+  image?: string | null;
   nationality?: string;
   dateOfBirth?: string;
   height?: number;
@@ -30,7 +30,7 @@ export interface LineupSlot {
   position: string;
   x: number;
   y: number;
-  player?: Player;
+  player?: Player | null;
 }
 
 export interface Lineup {
