@@ -1,504 +1,236 @@
-# Premier League Lineup Builder
+# ElevenLineUp
 
-> A production-ready lineup builder for Premier League Big Six teams with drag & drop interface
-
----
-
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [System Architecture](#-system-architecture)
-- [Data Design](#-data-design)
-- [UI/UX Structure](#-uiux-structure)
-- [API Endpoints](#-api-endpoints)
-- [Features](#-features)
-- [Roadmap](#-roadmap)
-- [Tech Stack](#-tech-stack)
-- [Design Decisions](#-design-decisions)
+แพลตฟอร์มฟุตบอลแบบ **Community + Lineup Builder + Fixtures/Standings + Mini Games**  
+เอกสารนี้เขียนสำหรับการคุยงานเชิงธุรกิจ (BA style) เพื่อให้ทีม Dev, Product และลูกค้าเห็นภาพเดียวกัน
 
 ---
 
-## 🎯 Overview
+## 1) โปรเจกต์นี้ทำอะไร
 
-**Premier League Lineup Builder** is a tactical lineup management system that allows users to:
+`ElevenLineUp` คือเว็บแอปสำหรับแฟนฟุตบอลที่รวม 4 ส่วนหลักไว้ในระบบเดียว:
 
-- Select from Big Six Premier League teams
-- Build custom lineups using drag & drop
-- Manage starting XI and bench players
-- Save and share lineups
-- Switch between different formations
+- **Lineup Builder**: จัดตัวผู้เล่นด้วย Drag & Drop และบันทึกแผนทีม
+- **Match Center**: ดูตารางคะแนน (Standings), โปรแกรมแข่ง (Fixtures), และรายละเอียดแมตช์
+- **Community**: โพสต์, คอมเมนต์, Follow, Poll, Trending
+- **Mini Games**: เกมตอบคำถามฟุตบอลและเกมทายผู้เล่น
 
-### Key Principles
-
-✅ **UI-First** - No complex ratings or AI scoring  
-✅ **Clean Data** - JSON-based player roster  
-✅ **Production-Ready** - Scalable and maintainable  
-✅ **User-Friendly** - Intuitive drag & drop interface
+มุมมองธุรกิจ:
+- เพิ่ม **Engagement** ผ่านการกลับมาใช้งานบ่อย (dashboard + mini game)
+- เพิ่ม **Retention** ผ่านระบบโปรไฟล์, สถิติผู้ใช้, และ community interaction
+- เปิดทางต่อยอดสู่ **Monetization** เช่น Premium Feature, Sponsored Challenge, หรือ In-app Competition
 
 ---
 
-## 🏗️ System Architecture
+## 2) กลุ่มผู้ใช้งาน (Target Users)
 
-### Domain Model
-
-```
-User
- └── Lineup
-       ├── Team (Big Six - Read-only)
-       │     └── players (JSON Array)
-       │
-       ├── Pitch Slots (11 players)
-       └── Bench Slots (7 substitutes)
-```
-
-### Data Flow
-
-```
-Login → Select Team → Create/Select Lineup → Build Formation → Save
-```
+- แฟนฟุตบอลที่ชอบจัดทีมและแชร์ความเห็น
+- ผู้ใช้งานที่ต้องการดูตารางแข่ง/คะแนนแบบสั้นและเร็ว
+- กลุ่มที่ชอบเกมทายผู้เล่นและ Challenge รายวัน
 
 ---
 
-## 📊 Data Design
+## 3) ภาพรวมการทำงานของระบบ (Business Flow)
 
-### Database Schema
-
-```prisma
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  lineups   Lineup[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Team {
-  id        String   @id @default(cuid())
-  name      String
-  logo      String
-  players   Json     // Array of player objects
-  createdAt DateTime @default(now())
-  lineups   Lineup[]
-}
-
-model Lineup {
-  id            String       @id @default(cuid())
-  name          String
-  formation     String
-  userId        String
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  TeamId String
-  Team   Team  @relation(fields: [TeamId], references: [id])
-  slots         LineupSlot[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-}
-
-model LineupSlot {
-  id          String   @id @default(cuid())
-  lineupId    String
-  lineup      Lineup   @relation(fields: [lineupId], references: [id], onDelete: Cascade)
-  position    String   // GK, LCB, RCM, ST, etc.
-  x           Float    // Position on pitch (0-1)
-  y           Float    // Position on pitch (0-1)
-  playerId    String?  // Reference to player in JSON
-  playerName  String?
-  playerImage String?
-  
-  @@unique([lineupId, position])
-}
-```
-
-### Player JSON Structure
-
-```json
-{
-  "id": "salah",
-  "name": "Mohamed Salah",
-  "number": 11,
-  "primaryPosition": "RW",
-  "secondaryPositions": ["ST"],
-  "imageKey": "players/liverpool/salah.png"
-}
-```
-
-### Big Six Teams (Master Data)
-
-- Manchester City
-- Arsenal
-- Liverpool
-- Manchester United
-- Chelsea
-- Tottenham Hotspur
+1. ผู้ใช้สมัครสมาชิก / Login  
+2. เข้า Dashboard เพื่อดู Standings + Fixtures + สถิติตัวเอง  
+3. สร้าง/แก้ไข Lineup จากทีมที่เลือก  
+4. มีส่วนร่วมใน Community (โพสต์, คอมเมนต์, โหวต Poll)  
+5. เล่น Mini Games เพื่อเก็บสถิติการเล่น
 
 ---
 
-## 🎨 UI/UX Structure
+## 4) โมดูลหลัก
 
-### Page Flow
+### 4.1 Dashboard
+- แสดงภาพรวมผู้ใช้ (XP, Win Rate, จำนวน Lineup)
+- แสดง Standings ตามลีกที่เลือก
+- แสดง Fixtures ตามลีก และเปิดดู Match Detail Modal ได้
 
-```
-/login
-  ↓
-/register
-  ↓
-/select-team
-  ↓
-/lineups (List of user's lineups)
-  ↓
-/lineups/:id (Lineup Builder)
-```
+### 4.2 Lineup Builder
+- รองรับการลากผู้เล่นลงตำแหน่งในสนาม
+- มีการตรวจความเหมาะสมของตำแหน่ง (Position Compatibility)
+- บันทึกชุดผู้เล่นเป็น Lineup และแก้ไขได้ภายหลัง
 
-### Lineup Builder Layout
+### 4.3 Community
+- Feed โพสต์แบบโซเชียล
+- Like / Comment / Follow
+- Poll และ Suggested Team
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Player List (Sidebar)                 │
-│  • Search by name                                        │
-│  • Filter by position                                    │
-│  • Draggable player cards                                │
-└─────────────────────────────────────────────────────────┘
+### 4.4 Public Profile
+- หน้าโปรไฟล์สาธารณะ `/u/[username]`
+- มี UI แบบการ์ดและ Animation ด้วย Three.js
 
-┌─────────────────────────────────────────────────────────┐
-│                    Football Pitch                        │
-│                                                          │
-│                         GK                               │
-│                                                          │
-│              LB    LCB    RCB    RB                      │
-│                                                          │
-│                  LCM    CM    RCM                        │
-│                                                          │
-│              LW          ST         RW                   │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────┐
-│                    Bench (7 substitutes)                 │
-│   Sub1  |  Sub2  |  Sub3  |  Sub4  |  Sub5  |  Sub6  | 7│
-└─────────────────────────────────────────────────────────┘
-```
-
-### Key Components
-
-| Component           | Description                          |
-|---------------------|--------------------------------------|
-| `AuthProvider`      | Global authentication context        |
-| `ProtectedRoute`    | Route guard for authenticated users  |
-| `TeamSelectPage`    | Choose from Big Six teams            |
-| `LineupListPage`    | View all saved lineups               |
-| `LineupBuilder`     | Main formation builder               |
-| `FormationSelector` | Switch between formations            |
-| `Pitch`             | Football field with slot positions   |
-| `PitchSlot`         | Drop zone for players                |
-| `PlayerSidebar`     | Searchable player list               |
-| `PlayerCard`        | Draggable player element             |
-| `BenchPanel`        | Substitute management                |
+### 4.5 Mini Games
+- Quiz Hub / Guessing Games / TicTacToe
+- บางเกมพร้อมใช้งานจริง บางเกมยังเป็น mock data (ดูหัวข้อสถานะ)
 
 ---
 
-## 🔌 API Endpoints
+## 5) Data Source สำคัญ (โดยเฉพาะ “จัดทีมนักเตะ”)
 
-### Authentication
+### 5.1 แหล่งข้อมูลสำหรับ “เลือกทีม” และ “ผู้เล่น”
 
-| Method | Endpoint              | Description           |
-|--------|-----------------------|-----------------------|
-| POST   | `/api/auth/register`  | Create new user       |
-| POST   | `/api/auth/login`     | Login user            |
-| POST   | `/api/auth/logout`    | Logout user           |
-| GET    | `/api/auth/me`        | Get current user      |
+### ทีม (Team Search)
+- Endpoint ภายใน: `/api/teams/search`
+- Endpoint ภายนอกที่เรียกต่อ: `${EXTERNAL_API_URL}/api/teams/search`
+- รองรับการค้นหาทีมจากหลายลีกหลัก (เช่น GB1, ES1, IT1, L1, FR1)
 
-### Master Data
+### ผู้เล่นในทีม (Players by Team)
+- Endpoint ภายใน: `/api/teams/[teamId]/players`
+- Endpoint ภายนอกที่เรียกต่อ: `${EXTERNAL_API_URL}/api/teams/{teamId}/players`
+- มี filter เช่น `position`, `search`, `nationality`, `foot`, `season`
+- ระบบจะแปลงข้อมูลผู้เล่นเป็น format กลางเพื่อใช้กับ Lineup Builder
 
-| Method | Endpoint                  | Description              |
-|--------|---------------------------|--------------------------|
-| GET    | `/api/premier-teams`      | List all Big Six teams   |
-| GET    | `/api/premier-teams/:id`  | Get team with players    |
-| GET    | `/api/formations`         | List available formations|
+> สรุปเชิง BA: ข้อมูลจัดทีม “ไม่ได้ hardcode ในหน้า UI” แต่ดึงจาก External Football Data Service ผ่าน API layer ของระบบเรา เพื่อควบคุม format และกติกาให้คงที่
 
-### Lineup Management
+### 5.2 ข้อมูลตารางคะแนน (Standings)
+- Endpoint ภายใน: `/api/standings?league=PL`
+- Source หลัก: `football-data.org` (`/v4/competitions/{league}/standings`)
+- ถ้า API quota หมด (`429`) หรือไม่พบลีก จะ fallback เป็น empty payload เพื่อไม่ให้หน้า Dashboard พัง
 
-| Method | Endpoint              | Description                |
-|--------|-----------------------|----------------------------|
-| POST   | `/api/lineups`        | Create new lineup          |
-| GET    | `/api/lineups`        | Get user's lineups         |
-| GET    | `/api/lineups/:id`    | Get specific lineup        |
-| PUT    | `/api/lineups/:id`    | Update lineup              |
-| DELETE | `/api/lineups/:id`    | Delete lineup              |
+### 5.3 ข้อมูลโปรแกรมแข่ง (Fixtures)
+- Endpoint ภายใน: `/api/fixtures?leagueId=PL`
+- Source หลัก: `football-data.org` (`/v4/competitions/{leagueId}/matches?status=SCHEDULED`)
+- ถ้าเรียก external ไม่สำเร็จ จะ fallback ไปอ่านจากฐานข้อมูล `Fixture` ใน PostgreSQL
 
-### Slot Management
-
-| Method | Endpoint                    | Description                    |
-|--------|-----------------------------|--------------------------------|
-| PUT    | `/api/lineups/:id/slots`    | Update all slots (full state)  |
-
-### Assets
-
-| Method | Endpoint                | Description                  |
-|--------|-------------------------|------------------------------|
-| GET    | `/api/images/:key`      | Serve player/team images     |
+### 5.4 ข้อมูลที่เก็บในระบบเราเอง (PostgreSQL + Prisma)
+- User / Auth / Refresh Token
+- Lineup / LineupSlot
+- Community Data (Post, Comment, Like, Follow, Poll)
+- MatchPrediction
+- User Stats และ Mini-game attempts
 
 ---
 
-## ✨ Features
+## 6) โครงสร้างเทคนิค (Technical Stack)
 
-### V1 - Core Features
-
-- [x] User authentication (JWT + bcrypt)
-- [x] Big Six team selection
-- [x] Lineup CRUD operations
-- [x] Drag & drop pitch interface
-- [x] Formation presets (4-3-3, 4-2-3-1, 3-5-2)
-- [x] Save lineup functionality
-
-### V1.5 - UX Enhancement
-
-- [ ] Bench/substitute system
-- [ ] Player swap animation
-- [ ] Search & filter players
-- [ ] Real-time formation switching
-- [ ] Validation feedback
-
-### V2 - Advanced Features
-
-- [ ] Share lineup (public link)
-- [ ] Duplicate lineup
-- [ ] Add more leagues
-- [ ] Mobile responsive design
-- [ ] Light AI suggestions (optional)
-- [ ] Export as image
+- **Frontend**: Next.js (App Router), React 19, TypeScript, Tailwind CSS
+- **Animation/UI**: Framer Motion, Three.js (`@react-three/fiber`, `@react-three/drei`)
+- **State/Data**: Zustand, TanStack Query
+- **Backend**: Next.js Route Handlers + Custom Node Server (`server.js`)
+- **Realtime**: Socket.IO
+- **Database**: PostgreSQL + Prisma ORM
+- **Auth**: JWT + HttpOnly Cookie
 
 ---
 
-## 🛠️ Tech Stack
-
-### Frontend
-- **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Drag & Drop**: react-dnd / dnd-kit
-- **State**: React Context / Zustand
-- **Forms**: React Hook Form + Zod
-
-### Backend
-- **Runtime**: Node.js
-- **Database**: PostgreSQL (Neon)
-- **ORM**: Prisma 5.10.2
-- **Auth**: JWT + HttpOnly Cookies
-- **Password**: bcrypt
-
-### Infrastructure
-- **Storage**: Backend file storage (local/S3/Supabase)
-- **Deployment**: Vercel / Railway
-- **Database**: Neon PostgreSQL
-
----
-
-## 🧠 Design Decisions
-
-### Why Players as JSON?
-
-**Decision**: Store players in JSON field instead of separate table
-
-**Reasons**:
-- Players are read-only master data
-- Fixed roster per team (no user modifications)
-- Reduces database joins
-- Better performance for drag & drop UI
-- Simpler seed data management
-
-**Trade-off**: Less normalized but more practical for this use case
-
----
-
-### Why Separate LineupSlot Table?
-
-**Decision**: Create dedicated table for pitch/bench slots
-
-**Reasons**:
-- Unified abstraction for pitch and bench
-- Easy swap/animation logic
-- Clean validation rules
-- Scalable for future features
-- Clear slot positioning (x, y coordinates)
-
-**Alternative Considered**: Inline JSON slots in Lineup table  
-**Why Rejected**: Harder to query, validate, and update individual slots
-
----
-
-### Why Separate Image Management?
-
-**Decision**: Store images in backend storage with metadata table
-
-**Reasons**:
-- Decouple storage provider (local → S3 → CDN)
-- Enable caching and CDN integration
-- Better security and access control
-- Production-grade approach
-- Easy migration between storage solutions
-
-**Alternative Considered**: Store paths directly in JSON  
-**Why Rejected**: Hardcoded paths, no flexibility, harder to manage at scale
-
----
-
-### Why Custom Auth Instead of NextAuth?
-
-**Decision**: Implement JWT + HttpOnly Cookie authentication
-
-**Reasons**:
-- Full control over auth flow
-- Simpler for MVP scope
-- No external dependencies
-- Educational value (demonstrates auth implementation)
-- Easy to migrate to NextAuth/Clerk later
-
-**Trade-off**: More code to maintain but better learning experience
-
----
-
-## 📅 Roadmap
-
-### Sprint 1 - Core (2 weeks)
-- Set up Next.js + Prisma
-- Implement authentication
-- Seed Big Six teams data
-- Build lineup CRUD
-- Create drag & drop pitch
-- Basic save functionality
-
-**Deliverable**: Working prototype for portfolio
-
----
-
-### Sprint 2 - UX Polish (2 weeks)
-- Implement bench system
-- Add swap animations
-- Search and filter players
-- Formation switching
-- Validation messages
-- Responsive design (desktop)
-
-**Deliverable**: Production-quality product
-
----
-
-### Sprint 3 - Extension (2 weeks)
-- Public lineup sharing
-- Lineup duplication
-- Add more leagues/teams
-- Mobile optimization
-- Optional AI suggestions
-- Export as image/PDF
-
-**Deliverable**: SaaS-ready platform
-
----
-
-## 🚀 Getting Started
+## 7) วิธีติดตั้งและรันระบบ (Local Development)
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL database
-- npm/yarn/pnpm
+- PostgreSQL
+- npm
 
-### 📦 สำหรับเพื่อนร่วมงาน: รายการ Packages (Dependencies) ที่สำคัญ
-ในโปรเจกต์นี้เรามีการใช้ Libraries หลักๆ ดังนี้ (ไม่ต้องลงใหม่ทีละตัว แค่รัน `npm install` ระบบจะจัดการให้ทั้งหมด):
-
-- **Core & Framework**: `next`, `react`, `react-dom`
-- **Database & ORM**: `prisma`, `@prisma/client`, `@prisma/adapter-pg`
-- **State Management & Data Fetching**: `zustand`, `@tanstack/react-query`
-- **UI & Styling**: `tailwindcss`, `framer-motion`, `clsx`, `tailwind-merge`
-- **Drag & Drop**: `@dnd-kit/core`
-- **Authentication**: `bcryptjs`, `jsonwebtoken`
-- **Validation**: `zod`
-- **Real-time (WebSockets)**: `socket.io`, `socket.io-client`
-- **Icons**: `hugeicons-react`, `@heroicons/react`
-- **Image Processing**: `sharp`, `react-easy-crop`
-- **Utilities**: `axios`, `date-fns`, `uuid`
-
-### Installation (การติดตั้งโปรเจกต)
+### Setup
 
 ```bash
-# Clone repository
-git clone <repo-url>
-cd lineup-builder
-
-# Install dependencies (ติดตั้ง Packages ทั้งหมดที่ระบุไว้ด้านบน)
+git clone <your-repo-url>
+cd ElevenLineUp
 npm install
+```
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your DATABASE_URL
+สร้างไฟล์ `.env` แล้วใส่ค่าอย่างน้อย:
 
-# Run Prisma migrations
-npx prisma db push
+```env
+DATABASE_URL="postgresql://<user>:<password>@<host>:5432/<db>"
+JWT_SECRET="your-strong-secret"
+NEXT_PUBLIC_API_URL="http://localhost:3000"
+FOOTBALL_API_KEY="your-football-data-api-key"
+EXTERNAL_API_URL="http://localhost:8000"
+```
+
+เตรียมฐานข้อมูล:
+
+```bash
 npx prisma generate
-
-# Seed database
+npx prisma db push
 npm run dev:seed
+```
 
-# Start development server
+รันโปรเจกต์:
+
+```bash
 npm run dev
 ```
 
-### Environment Variables
-
-```env
-DATABASE_URL="postgresql://user:password@host:5432/database"
-JWT_SECRET="your-secret-key"
-NEXT_PUBLIC_API_URL="http://localhost:3000"
-```
+ระบบจะเริ่มที่ `http://localhost:3000`
 
 ---
 
-## 📝 Validation Rules
+## 8) API หลักที่ใช้บ่อย
 
-### System Validation
-- ✅ Each player can only be in one location (pitch or bench)
-- ✅ Exactly 1 goalkeeper on pitch
-- ✅ Position slots must match player primary position
-- ✅ Player ID must exist in team's JSON roster
-- ✅ User can only edit their own lineups
-- ✅ Maximum 7 substitutes on bench
+### Auth
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
 
-### Drag & Drop Rules
-- ✅ Sidebar → Pitch (adds player)
-- ✅ Pitch → Bench (removes from pitch)
-- ✅ Bench → Pitch (adds to pitch, removes from bench)
-- ✅ Pitch → Pitch (swap positions)
-- ✅ Invalid drop → snap back animation
+### Lineup
+- `GET /api/lineups`
+- `POST /api/lineups`
+- `GET /api/lineups/[id]`
+- `PUT /api/lineups/[id]`
+- `DELETE /api/lineups/[id]`
 
----
+### Match Data
+- `GET /api/standings?league=PL`
+- `GET /api/fixtures?leagueId=PL`
+- `GET /api/predictions`
+- `POST /api/predictions`
 
-## 🎤 Interview Talking Points
-
-### "Why not store players in a separate table?"
-
-> "Players are master data that never change per session. They're read-only roster information, similar to how a sports API would return team data. Using JSON reduces unnecessary joins and makes the UI faster. For this use case, it's the right trade-off between normalization and performance."
-
-### "How would you scale this?"
-
-> "The architecture is designed for extension: separate image storage for CDN integration, formation presets as data for easy expansion, slot abstraction that works for any formation, and clean API boundaries. To scale, we'd add caching, implement CDN for images, and potentially move to microservices for user-generated content vs. master data."
-
-### "What about real-time collaboration?"
-
-> "The slot-based architecture makes this straightforward. We'd add WebSocket connections, implement optimistic updates, and use conflict resolution for simultaneous edits. The state is already centralized in the database, so adding real-time sync is a natural extension."
+### Team/Player Data
+- `GET /api/teams/search`
+- `GET /api/teams/[teamId]/players`
 
 ---
 
-## 📄 License
+## 9) สถานะฟีเจอร์ปัจจุบัน (Project Status)
 
-MIT License - Feel free to use for portfolio projects
+### พร้อมใช้งาน (Production-ready ในระดับฟีเจอร์)
+- ระบบ Login/Register + Session
+- Dashboard (Standings + Fixtures)
+- Match detail modal
+- Lineup Builder พร้อม Drag & Drop และกติกาตำแหน่ง
+- Community หลัก (โพสต์/คอมเมนต์/ไลก์/ติดตาม)
+- Public Profile (พร้อม Three.js visual effect)
+
+### กำลังพัฒนา (In Progress)
+- ปรับคุณภาพข้อมูล Mini Games ให้เป็น dynamic มากขึ้น
+- เพิ่มความสมบูรณ์ของ realtime interaction ในบาง flow
+- ปรับ UX บางจุดของเกมให้สื่อสารผลลัพธ์ชัดเจนขึ้น
+- ปรับปรุง test coverage และ hardening ฝั่ง API
+
+### ยังเป็น Mock Data บางส่วน
+- `GET /api/minigames/tictactoe`
+- `GET/POST /api/minigames/who-are-ya`
+- `GET/POST /api/minigames/missing-xi`
+
+> หมายเหตุ BA: เกมที่ยังเป็น mock ใช้เพื่อ validate UX flow และเก็บ feedback ก่อนเชื่อมข้อมูลจริงเต็มรูปแบบ
 
 ---
 
-## 🤝 Contributing
+## 10) ข้อควรทราบสำหรับฝั่งธุรกิจ
 
-This is a portfolio/educational project. Feel free to fork and customize for your own use!
+- หากไม่มี `FOOTBALL_API_KEY` ระบบยังเปิดได้ แต่ Standings/Fixtures จะมี fallback mode (ข้อมูลอาจไม่ครบ)
+- คุณภาพข้อมูลผู้เล่นขึ้นกับ `EXTERNAL_API_URL` ที่เชื่อมต่อ
+- โมดูล Community + Lineup เหมาะกับการต่อยอดแคมเปญระยะยาว (เช่น Ranking, Contest, Rewards)
 
 ---
 
-**Built with ❤️ for learning and demonstration purposes**
+## 11) โครงสร้างหน้าใช้งานหลัก (User-facing Routes)
+
+- `/login`, `/register`
+- `/dashboard`
+- `/dashboard/create`
+- `/lineups`, `/lineups/[teamId]`, `/lineup/[slug]`
+- `/community`
+- `/fixtures`
+- `/minigames/*`
+- `/u/[username]`
+- `/admin/*` (สำหรับหลังบ้าน)
+
+---
+
+## 12) License
+
+โปรเจกต์นี้ใช้เพื่อการพัฒนาและต่อยอดผลิตภัณฑ์ สามารถกำหนด License ให้ตรงนโยบายองค์กรได้ในขั้น deploy จริง
