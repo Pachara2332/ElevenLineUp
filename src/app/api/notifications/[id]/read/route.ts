@@ -13,10 +13,10 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  await prisma.notification.update({
+  await prisma.notification.updateMany({
     where: {
       id,
-      userId: user.userId // Ensure ownership
+      userId: user.userId
     },
     data: {
       isRead: true

@@ -4,7 +4,7 @@ import CommentList from './CommentList'
 import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { HandThumbUpIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
-import { HandThumbUpIcon as HandThumbUpIconSolid } from '@heroicons/react/24/solid';
+import { HandThumbUpIcon as HandThumbUpIconSolid, SparklesIcon } from '@heroicons/react/24/solid';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import clsx from 'clsx';
@@ -21,6 +21,7 @@ interface Post {
     currentUserLiked: boolean;
     finalScore: number;
     author: {
+        userId?: string;
         name: string;
         username?: string | null;
         avatar?: string | null;
@@ -29,7 +30,18 @@ interface Post {
         name: string;
         logo: string;
     } | null;
-    comments?: any[]
+    comments?: Comment[]
+}
+
+interface Comment {
+    id: string;
+    text: string;
+    createdAt: string;
+    user: {
+        name: string;
+        username?: string | null;
+        avatar?: string | null;
+    };
 }
 
 
@@ -49,6 +61,7 @@ export default function FeedList() {
         queryFn: fetchPosts,
     });
     const [realtimePosts, setRealtimePosts] = useState<Post[]>([]);
+    const [newPostToast, setNewPostToast] = useState<Post | null>(null);
 
     // Socket.IO for real-time new posts
     useEffect(() => {
@@ -72,6 +85,10 @@ export default function FeedList() {
                 }
                 return [post, ...prev];
             });
+            if (post.author.userId !== user?.userId) {
+                setNewPostToast(post);
+                window.setTimeout(() => setNewPostToast(current => current?.id === post.id ? null : current), 4800);
+            }
         });
 
         socket.on('connect_error', (err) => {
@@ -82,7 +99,7 @@ export default function FeedList() {
             console.log('Disconnecting feed socket');
             socket.disconnect();
         };
-    }, [posts]);
+    }, [posts, user?.userId]);
 
     // Combine fetched posts with real-time posts and deduplicate by ID
     const allPosts = [...(realtimePosts || []), ...(posts || [])];
@@ -125,11 +142,39 @@ export default function FeedList() {
     }
 
     return (
-        <div className="space-y-6">
-            {uniquePosts?.map(post => (
-                <PostCard key={post.id} post={post} currentUserId={user?.userId} />
-            ))}
-        </div>
+        <>
+            <NewPostToast post={newPostToast} onClose={() => setNewPostToast(null)} />
+            <div className="space-y-6">
+                {uniquePosts?.map(post => (
+                    <PostCard key={post.id} post={post} currentUserId={user?.userId} />
+                ))}
+            </div>
+        </>
+    );
+}
+
+function NewPostToast({ post, onClose }: { post: Post | null, onClose: () => void }) {
+    if (!post) return null;
+
+    return (
+        <button
+            onClick={() => {
+                document.getElementById(`post-${post.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                onClose();
+            }}
+            className="fixed left-1/2 top-20 z-50 w-[min(92vw,28rem)] -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white/95 px-4 py-3 text-left shadow-2xl shadow-emerald-950/15 backdrop-blur animate-in"
+        >
+            <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
+                    <SparklesIcon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black uppercase tracking-wide text-emerald-600">New community post</p>
+                    <p className="truncate text-sm font-bold text-emerald-950">{post.author.name} just posted</p>
+                    <p className="truncate text-xs text-slate-500">{post.content || 'Shared a photo'}</p>
+                </div>
+            </div>
+        </button>
     );
 }
 
@@ -138,13 +183,13 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
 
     const [liked, setLiked] = useState(post.currentUserLiked);
     const [likesCount, setLikesCount] = useState(post.likeCount);
-    const [comments, setComments] = useState(post.comments || [])
+    const [liveComments, setLiveComments] = useState<Comment[]>([])
+    const baseComments = post.comments || [];
+    const comments = [
+        ...baseComments,
+        ...liveComments.filter(comment => !baseComments.some(existing => existing.id === comment.id)),
+    ];
     const calculatedCommentCount = Math.max(post.commentCount, comments.length);
-
-    // Sync comments from server when post prop changes
-    useEffect(() => {
-        setComments(post.comments || []);
-    }, [post.comments]);
 
     // Socket.IO for real-time comments
     useEffect(() => {
@@ -161,9 +206,9 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
         });
 
         // Listen for new comments
-        socket.on('new_comment', (comment: any) => {
+        socket.on('new_comment', (comment: Comment) => {
             console.log('Received new comment:', comment);
-            setComments(prev => {
+            setLiveComments(prev => {
                 // Strict duplicate check
                 if (prev.find(c => c.id === comment.id)) {
                     console.log('Duplicate comment ignored:', comment.id);
@@ -204,7 +249,7 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
     };
 
     return (
-        <div className="glass-panel p-6 rounded-3xl">
+        <article id={`post-${post.id}`} className="glass-panel scroll-mt-28 p-5 sm:p-6 rounded-3xl">
             <div className="flex items-center gap-3 mb-4">
                 {post.author.avatar ? (
                     <img
@@ -266,7 +311,7 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
                         postId={post.id}
                         onNewComment={(c) => {
                             // Check for duplicates before adding
-                            setComments(prev => {
+                            setLiveComments(prev => {
                                 if (prev.find(existing => existing.id === c.id)) return prev;
                                 return [...prev, c];
                             });
@@ -275,7 +320,7 @@ function PostCard({ post, currentUserId }: { post: Post, currentUserId?: string 
                 </div>
             )}
 
-        </div>
+        </article>
     );
 
 }

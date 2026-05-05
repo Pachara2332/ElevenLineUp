@@ -7,6 +7,12 @@ import { awardPostXP } from '@/features/gamification/services/xp-service';
 
 const prisma = new PrismaClient();
 
+type SocketEmitter = {
+  to: (room: string) => {
+    emit: (event: string, payload: unknown) => void;
+  };
+};
+
 export async function GET(req: Request) {
   try {
     const take = 50;
@@ -79,14 +85,14 @@ export async function POST(req: Request) {
         imageUrl,
       },
       include: {
-          author: { select: { name: true, avatar: true, username: true } },
+          author: { select: { userId: true, name: true, avatar: true, username: true } },
           _count: { select: { likes: true, comments: true } },
           likes: true
       }
     });
 
     // Broadcast new post to all connected clients via Socket.IO
-    const io = (global as any).io;
+    const io = (globalThis as typeof globalThis & { io?: SocketEmitter }).io;
     if (io) {
         console.log('Broadcasting new post to feed room');
         io.to('feed').emit('new_post', post);

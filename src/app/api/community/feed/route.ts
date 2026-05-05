@@ -43,7 +43,7 @@ export const GET = ApiHandler.handle(async (req) => {
     orderBy: { createdAt: 'desc' },
     include: {
       author: {
-        select: { name: true, avatar: true, username: true },
+        select: { userId: true, name: true, avatar: true, username: true },
       },
       team: {
         select: { name: true, logo: true }

@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
+    "dev:next": "next dev",
     "dev:seed": "prisma db seed",
     "build": "next build",
-    "start": "next start -p $PORT",
+    "start": "node server.js",
     "lint": "eslint"
   },
   "prisma": {
@@ -37,6 +38,7 @@
     "react-dom": "19.2.3",
     "react-easy-crop": "^5.5.7",
     "server-only": "^0.0.1",
+    "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^2.2.1",
     "three": "^0.184.0",

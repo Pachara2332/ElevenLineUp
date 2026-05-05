@@ -12,10 +12,16 @@ type Notification = {
     type: string;
     isRead: boolean;
     createdAt: string;
+    entityId?: string | null;
     actor: {
         name: string;
+        username?: string | null;
         avatar: string | null;
     };
+    post?: {
+        id: string;
+        content?: string;
+    } | null;
 };
 
 export default function NotificationBell() {
@@ -33,8 +39,8 @@ export default function NotificationBell() {
                 const res = await fetch('/api/notifications');
                 const data = await res.json();
                 if (data.success) {
-                    setNotifications(data.notifications);
-                    setUnreadCount(data.unreadCount);
+                    setNotifications(data.data?.notifications ?? []);
+                    setUnreadCount(data.data?.unreadCount ?? 0);
                 }
             } catch (err) {
                 console.error('Failed to fetch notifications', err);
@@ -170,6 +176,11 @@ export default function NotificationBell() {
                                             <p className="text-sm text-gray-800">
                                                 <span className="font-bold text-emerald-900">{n.actor.name}</span> {getMessage(n)}
                                             </p>
+                                            {n.post?.content && (
+                                                <p className="mt-1 truncate rounded-lg bg-white px-2 py-1 text-xs text-slate-500 ring-1 ring-emerald-100">
+                                                    &quot;{n.post.content}&quot;
+                                                </p>
+                                            )}
                                             <p className="text-xs text-emerald-600/70 mt-1">
                                                 {new Date(n.createdAt).toLocaleDateString()} {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>

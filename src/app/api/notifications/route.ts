@@ -16,18 +16,46 @@ export const GET = ApiHandler.handle(async (req) => {
       actor: {
         select: {
           name: true,
+          username: true,
           avatar: true,
         },
       },
     },
   });
 
+  const postIds = notifications
+    .filter((notification) => ['LIKE', 'COMMENT'].includes(notification.type) && notification.entityId)
+    .map((notification) => notification.entityId as string);
+
+  const relatedPosts = postIds.length
+    ? await prisma.post.findMany({
+        where: { id: { in: postIds } },
+        select: {
+          id: true,
+          content: true,
+          imageUrl: true,
+          author: {
+            select: {
+              name: true,
+              username: true,
+            },
+          },
+        },
+      })
+    : [];
+
+  const postsById = new Map(relatedPosts.map((post) => [post.id, post]));
+  const notificationsWithDetails = notifications.map((notification) => ({
+    ...notification,
+    post: notification.entityId ? postsById.get(notification.entityId) ?? null : null,
+  }));
+
   // Count unread
   const unreadCount = await prisma.notification.count({
     where: { userId: user.userId, isRead: false },
   });
 
-  return ApiHandler.success({ notifications, unreadCount });
+  return ApiHandler.success({ notifications: notificationsWithDetails, unreadCount });
 });
 
 export const PUT = ApiHandler.handle(async (req) => {
@@ -56,7 +84,7 @@ export const PUT = ApiHandler.handle(async (req) => {
 
   if (!notificationId) return ApiHandler.error('notificationId required', 400);
 
-  const notification = await prisma.notification.update({
+  const notification = await prisma.notification.updateMany({
     where: { id: notificationId, userId: user.userId },
     data: { isRead: true },
   });

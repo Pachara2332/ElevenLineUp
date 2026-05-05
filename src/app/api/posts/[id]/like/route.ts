@@ -3,6 +3,12 @@ import prisma from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth-helper";
 import { awardXP } from "@/features/gamification/services/xp-service";
 
+type SocketEmitter = {
+  to: (room: string) => {
+    emit: (event: string, payload: unknown) => void;
+  };
+};
+
 export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -60,12 +66,12 @@ export async function POST(
         entityId: id,
       },
       include: {
-        actor: { select: { name: true, avatar: true } },
+        actor: { select: { name: true, username: true, avatar: true } },
       },
     });
 
     // Emit Socket Event
-    const io = (global as any).io;
+    const io = (globalThis as typeof globalThis & { io?: SocketEmitter }).io;
     if (io) {
       io.to(`user-${like.post.authorId}`).emit("notification", notification);
     }

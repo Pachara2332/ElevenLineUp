@@ -3,7 +3,16 @@ import { useState } from 'react'
 
 interface Props {
   postId: string
-  onNewComment: (comment: any) => void
+  onNewComment: (comment: {
+    id: string
+    text: string
+    createdAt: string
+    user: {
+      name: string
+      username?: string | null
+      avatar?: string | null
+    }
+  }) => void
 }
 
 export default function CommentBox({ postId, onNewComment }: Props) {
