@@ -5,7 +5,8 @@ const next = require("next");
 const { Server } = require("socket.io");
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
+// In production (e.g. Railway), bind to all interfaces so the platform can route traffic.
+const hostname = process.env.HOSTNAME || (dev ? "localhost" : "0.0.0.0");
 const port = Number(process.env.PORT) || 3000;
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
