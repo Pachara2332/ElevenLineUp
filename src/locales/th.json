@@ -52,17 +52,41 @@
             "dashboard": "แดชบอร์ด",
             "community": "ชุมชน",
             "minigames": "มินิเกม",
-            "profile": "การตั้งค่า"
+            "profile": "โปรไฟล์"
+        },
+        "highlights": {
+            "overview": "ภาพรวม",
+            "hub": "ศูนย์รวม",
+            "arena": "อารีน่า",
+            "settings": "ตั้งค่า"
+        },
+        "labels": {
+            "loading_dashboard": "กำลังโหลดแดชบอร์ด...",
+            "level_short": "เลเวล",
+            "recent_badges": "เหรียญล่าสุด"
         },
         "standings": {
             "title": "ตารางคะแนน",
             "season": "ฤดูกาล 2025/26",
-            "view_full_table": "ดูตารางคะแนนฉบับเต็ม"
+            "view_full_table": "ดูตารางคะแนนฉบับเต็ม",
+            "columns": {
+                "position": "อันดับ",
+                "club": "สโมสร",
+                "played": "แข่ง",
+                "won": "ชนะ",
+                "drawn": "เสมอ",
+                "lost": "แพ้",
+                "goal_difference": "ลูกได้เสีย",
+                "points": "แต้ม"
+            },
+            "empty": "ยังไม่มีตารางคะแนนสำหรับลีกนี้"
         },
         "fixtures": {
             "upcoming": "ตารางการแข่งขัน",
             "subtitle": "ห้ามพลาดการแข่งขัน",
-            "view_match": "ดูแมตช์"
+            "view_match": "ดูแมตช์",
+            "scheduled": "ตามโปรแกรม",
+            "no_matches": "ยังไม่มีโปรแกรมแข่งขัน"
         },
         "stats": {
             "title": "สถิติของคุณ",
@@ -91,7 +115,29 @@
             "update_password": "อัปเดตรหัสผ่าน",
             "preferences": "การตั้งค่า",
             "email_notifications": "การแจ้งเตือนอีเมล",
-            "logout": "ออกจากระบบ"
+            "logout": "ออกจากระบบ",
+            "profile_tab": "โปรไฟล์",
+            "stats_tab": "สถิติ",
+            "settings_tab": "ตั้งค่า",
+            "profile_picture": "รูปโปรไฟล์",
+            "edit_mode": "โหมดแก้ไข",
+            "cancel": "ยกเลิก",
+            "choose_image": "เลือกรูปภาพ",
+            "save_changes": "บันทึกการเปลี่ยนแปลง",
+            "uploading": "กำลังอัปโหลด...",
+            "saved_success": "บันทึกสำเร็จ!",
+            "crop_avatar": "ครอปรูปโปรไฟล์",
+            "confirm": "ยืนยัน",
+            "saving": "กำลังบันทึก...",
+            "new_password_placeholder": "รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)",
+            "win_rate": "อัตราชนะ",
+            "played": "เล่น",
+            "wins": "ชนะ",
+            "no_game_statistics": "ยังไม่มีสถิติการเล่น",
+            "first_lineup": "ทีมแรก",
+            "five_day_streak": "สตรีค 5 วัน",
+            "ten_posts": "10 โพสต์",
+            "thirty_day_streak": "สตรีค 30 วัน"
         }
     },
     "admin": {

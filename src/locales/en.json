@@ -54,15 +54,39 @@
             "minigames": "Mini Games",
             "profile": "Profile"
         },
+        "highlights": {
+            "overview": "Overview",
+            "hub": "Hub",
+            "arena": "Arena",
+            "settings": "Settings"
+        },
+        "labels": {
+            "loading_dashboard": "Loading Dashboard...",
+            "level_short": "Lvl",
+            "recent_badges": "Recent Badges"
+        },
         "standings": {
             "title": "League Standings",
             "season": "Season 2025/26",
-            "view_full_table": "VIEW FULL TABLE"
+            "view_full_table": "VIEW FULL TABLE",
+            "columns": {
+                "position": "Pos",
+                "club": "Club",
+                "played": "P",
+                "won": "W",
+                "drawn": "D",
+                "lost": "L",
+                "goal_difference": "GD",
+                "points": "Pts"
+            },
+            "empty": "No standings available for this league."
         },
         "fixtures": {
             "upcoming": "Upcoming Match",
             "subtitle": "DON'T MISS THE ACTION",
-            "view_match": "VIEW MATCH"
+            "view_match": "VIEW MATCH",
+            "scheduled": "scheduled",
+            "no_matches": "No matches scheduled"
         },
         "stats": {
             "title": "Your Stats",
@@ -91,7 +115,29 @@
             "update_password": "Update Password",
             "preferences": "Preferences",
             "email_notifications": "Email Notifications",
-            "logout": "Logout"
+            "logout": "Logout",
+            "profile_tab": "Profile",
+            "stats_tab": "Stats",
+            "settings_tab": "Settings",
+            "profile_picture": "Profile Picture",
+            "edit_mode": "Edit Mode",
+            "cancel": "Cancel",
+            "choose_image": "Choose Image",
+            "save_changes": "Save Changes",
+            "uploading": "Uploading...",
+            "saved_success": "Saved successfully!",
+            "crop_avatar": "Crop Avatar",
+            "confirm": "Confirm",
+            "saving": "Saving...",
+            "new_password_placeholder": "New password (min 6 characters)",
+            "win_rate": "Win Rate",
+            "played": "Played",
+            "wins": "Wins",
+            "no_game_statistics": "No game statistics yet",
+            "first_lineup": "First Lineup",
+            "five_day_streak": "5 Day Streak",
+            "ten_posts": "10 Posts",
+            "thirty_day_streak": "30 Day Streak"
         }
     },
     "admin": {

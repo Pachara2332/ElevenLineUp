@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import DashboardStandings from '@/components/dashboard/DashboardStandings';
 import DashboardFixtures from '@/components/dashboard/DashboardFixtures';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   PuzzlePieceIcon, 
   UserGroupIcon, 
@@ -15,6 +16,7 @@ import {
 
 export default function DashboardPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
+    const { t } = useLanguage();
     const router = useRouter();
     const [userStats, setUserStats] = useState({
         lineupsCount: 0,
@@ -69,7 +71,7 @@ export default function DashboardPage() {
     }, [user])
 
     if (isLoading) {
-        return <div className="text-emerald-900 text-2xl font-bold animate-pulse text-center mt-20">Loading Dashboard...</div>;
+        return <div className="text-emerald-900 text-2xl font-bold animate-pulse text-center mt-20">{t.dashboard.labels.loading_dashboard}</div>;
     }
 
     if (!user) return null;
@@ -83,28 +85,28 @@ export default function DashboardPage() {
                     <div className="glass-panel p-8 text-center relative overflow-hidden group rounded-xl">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
                         
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2 relative z-10">Manager Center</h2>
-                        <p className="text-slate-500 mb-8 text-sm font-medium relative z-10">Command your squad and lead them to glory.</p>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-2 relative z-10">{t.dashboard.profile.manager_center}</h2>
+                        <p className="text-slate-500 mb-8 text-sm font-medium relative z-10">{t.dashboard.profile.command_squad}</p>
 
                         <div className="flex flex-col gap-3 relative z-10">
                             <button
                                 onClick={() => router.push('/dashboard/create')}
                                 className="w-full py-4 rounded-xl bg-emerald-600 text-white font-bold text-sm uppercase tracking-widest shadow-lg hover:bg-emerald-700 hover:-translate-y-0.5 transition-all outline-none ring-offset-2 focus:ring-2 focus:ring-emerald-500"
                             >
-                                Start Building
+                                {t.dashboard.profile.start_building}
                             </button>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     onClick={() => router.push('/community')}
                                     className="py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200 flex items-center justify-center gap-2"
                                 >
-                                    <UserGroupIcon className="w-4 h-4" /> Community
+                                    <UserGroupIcon className="w-4 h-4" /> {t.dashboard.menu.community}
                                 </button>
                                 <button
                                     onClick={() => router.push('/minigames/quiz-hub')}
                                     className="py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider hover:bg-slate-200 transition-all border border-slate-200 flex items-center justify-center gap-2"
                                 >
-                                    <PuzzlePieceIcon className="w-4 h-4 text-emerald-600" /> Games
+                                    <PuzzlePieceIcon className="w-4 h-4 text-emerald-600" /> {t.dashboard.menu.minigames}
                                 </button>
                             </div>
                         </div>
@@ -114,10 +116,10 @@ export default function DashboardPage() {
                     <div className="glass-panel p-6 rounded-xl">
                         <div className="flex justify-between items-center mb-6">
                            <h3 className="font-bold text-slate-900 uppercase tracking-widest text-[10px] flex items-center gap-2">
-                               <TrophyIcon className="w-3 h-3 text-emerald-600" /> Your Stats
+                               <TrophyIcon className="w-3 h-3 text-emerald-600" /> {t.dashboard.stats.title}
                            </h3>
                            <div className="px-2 py-1 rounded bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase">
-                               Lvl {Math.floor(userStats.xp / 100) + 1}
+                               {t.dashboard.labels.level_short} {Math.floor(userStats.xp / 100) + 1}
                            </div>
                         </div>
 
@@ -138,7 +140,7 @@ export default function DashboardPage() {
                                 <div className="text-base font-black text-slate-900">
                                     {userStats.lineupsCount}
                                 </div>
-                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Squads</div>
+                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t.dashboard.stats.squads}</div>
                             </div>
                             <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-100 shadow-sm transition hover:shadow-md flex flex-col items-center">
                                 <div className="p-1.5 bg-orange-50 rounded-lg mb-2">
@@ -147,13 +149,13 @@ export default function DashboardPage() {
                                 <div className="text-base font-black text-slate-900">
                                     {userStats.winRate}%
                                 </div>
-                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Wins</div>
+                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t.dashboard.stats.wins}</div>
                             </div>
                         </div>
 
                         {userStats.badges && userStats.badges.length > 0 && (
                             <div className="mt-6 pt-6 border-t border-slate-100">
-                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Recent Badges</div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">{t.dashboard.labels.recent_badges}</div>
                                 <div className="flex flex-wrap gap-2">
                                     {userStats.badges.slice(0, 3).map((badge, idx) => (
                                         <div key={idx} className="bg-white text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-1.5">

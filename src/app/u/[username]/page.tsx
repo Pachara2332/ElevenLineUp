@@ -4,10 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { BADGES } from "@/features/gamification/services/xp-service";
 import { Metadata } from 'next';
+import dynamic from "next/dynamic";
 
 type Props = {
     params: { username: string };
 };
+
+const PublicProfileScene = dynamic(
+    () => import("@/components/profile/PublicProfileScene"),
+    { ssr: false }
+);
 
 // Phase G: SEO & Share Optimization
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -58,7 +64,9 @@ export default async function PublicProfilePage({ params }: Props) {
     const highestBadge = stats.badges.length > 0 ? stats.badges[stats.badges.length - 1] : "First Team Squad";
 
     return (
-        <div className="max-w-4xl mx-auto py-10 px-4 space-y-8 animate-in fade-in duration-500">
+        <div className="relative max-w-4xl mx-auto py-10 px-4 space-y-8 animate-in fade-in duration-500 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/70 via-white to-slate-100/70 -z-20" />
+            <PublicProfileScene />
             {/* Header Section */}
             <div className="bg-white/80 dark:bg-gray-800/80 rounded-[2rem] p-8 shadow-xl backdrop-blur-md border border-emerald-100 dark:border-emerald-900/30 flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400 rounded-full blur-[100px] opacity-20 pointer-events-none"></div>

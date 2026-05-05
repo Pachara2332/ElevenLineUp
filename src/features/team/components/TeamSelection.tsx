@@ -188,7 +188,7 @@ export default function TeamSelection() {
             <img
               src={team.logo}
               alt={team.name}
-              className="w-20 h-20 object-contain drop-shadow-md transition-transform group-hover:rotate-12 duration-300"
+              className="w-20 h-20 object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1"
             />
             <span
               className={clsx(

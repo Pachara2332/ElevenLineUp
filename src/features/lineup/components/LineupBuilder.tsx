@@ -4,12 +4,16 @@ import {
   DndContext,
   DragEndEvent,
   DragStartEvent,
+  pointerWithin,
+  closestCenter,
+  CollisionDetection,
 } from "@dnd-kit/core";
 import { Pitch } from "./Pitch";
 import { DraggablePlayer } from "./DraggablePlayer";
 import { Player, LineupSlot } from "@/types";
 import { useLineupStore, FORMATION_CATEGORIES } from "../stores/useLineupStore";
 import AlertModal from "@/components/AlertModal";
+import { getPositionCategory } from "./Pitch";
 
 export default function LineupBuilder() {
   const {
@@ -72,6 +76,69 @@ export default function LineupBuilder() {
     setDraggedPlayer(player);
   };
 
+  const normalizePosition = (position?: string) =>
+    String(position || "").toUpperCase().trim();
+
+  const isPositionCompatible = (playerPosition?: string, slotPosition?: string) => {
+    const playerPos = normalizePosition(playerPosition);
+    const slotPos = normalizePosition(slotPosition);
+    const playerCategory = getPositionCategory(playerPos);
+    const slotCategory = getPositionCategory(slotPos);
+
+    // GK must remain strict.
+    if (playerCategory === "GK" || slotCategory === "GK") {
+      return playerCategory === slotCategory;
+    }
+
+    // If categories are different, always reject.
+    if (playerCategory !== slotCategory) {
+      return false;
+    }
+
+    // Defenders: tighten side-specific rules so LCB doesn't go LB, etc.
+    if (slotCategory === "DEF") {
+      if (slotPos === "LB" || slotPos === "LWB") {
+        return ["LB", "LWB"].includes(playerPos) || playerPos.includes("LEFT-BACK");
+      }
+      if (slotPos === "RB" || slotPos === "RWB") {
+        return ["RB", "RWB"].includes(playerPos) || playerPos.includes("RIGHT-BACK");
+      }
+      if (slotPos === "LCB") {
+        return ["LCB", "CB"].includes(playerPos) || playerPos.includes("CENTRE-BACK");
+      }
+      if (slotPos === "RCB") {
+        return ["RCB", "CB"].includes(playerPos) || playerPos.includes("CENTRE-BACK");
+      }
+      if (slotPos === "CB") {
+        return ["CB", "LCB", "RCB"].includes(playerPos) || playerPos.includes("CENTRE-BACK");
+      }
+    }
+
+    // MID/FWD use category matching with explicit exact support.
+    return true;
+  };
+
+  const collisionDetection: CollisionDetection = (args) => {
+    const player = args.active.data.current as Player | undefined;
+
+    const compatibleDroppableContainers = args.droppableContainers.filter((container) => {
+      const slot = slots.find((s) => s.id === container.id);
+      if (!slot || !player) return false;
+      return isPositionCompatible(player.position, slot.position);
+    });
+
+    const pointerHits = pointerWithin({
+      ...args,
+      droppableContainers: compatibleDroppableContainers,
+    });
+    if (pointerHits.length > 0) return pointerHits;
+
+    return closestCenter({
+      ...args,
+      droppableContainers: compatibleDroppableContainers,
+    });
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setDraggedPlayer(null);
@@ -81,13 +148,7 @@ export default function LineupBuilder() {
       const targetSlot = slots.find((s) => s.id === over.id) as LineupSlot;
 
       if (targetSlot) {
-        // Validation for GK
-        const isPlayerGK = player.position?.toUpperCase().includes("GOAL") || 
-                          player.position?.toUpperCase() === "GK";
-        const isSlotGK = targetSlot.position === "GK";
-
-        if (isPlayerGK && !isSlotGK) return;
-        if (isSlotGK && !isPlayerGK) return;
+        if (!isPositionCompatible(player.position, targetSlot.position)) return;
 
         // Check if dragging from another slot
         const sourceIdMatch = String(active.id).match(/pitch-player-(.+)/);
@@ -109,7 +170,7 @@ export default function LineupBuilder() {
                                      currentPlayerInTarget.position?.toUpperCase() === "GK";
              const isSourceSlotGK = sourceSlot.position === "GK";
 
-             if (isTargetPlayerGK === isSourceSlotGK) {
+             if (isTargetPlayerGK === isSourceSlotGK && isPositionCompatible(currentPlayerInTarget.position, sourceSlot.position)) {
                 updateSlot(sourceSlotId, currentPlayerInTarget);
              } else {
                 updateSlot(sourceSlotId, null); // Clear if invalid swap
@@ -247,7 +308,11 @@ export default function LineupBuilder() {
   const selectedSlot = slots.find((s) => s.id === selectedSlotId);
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext
+      collisionDetection={collisionDetection}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <div className="flex flex-col md:flex-row gap-8 h-[calc(100vh-140px)]">
         <div className="flex-grow flex items-center justify-center glass-panel rounded-3xl p-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />

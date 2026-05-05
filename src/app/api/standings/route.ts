@@ -2,13 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const revalidate = 3600; // Cache for 1 hour
 
+function buildEmptyStandingsPayload(league: string) {
+  return {
+    data: {
+      competition: { name: league, code: league },
+      standings: [{ table: [] }],
+    },
+  };
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const league = searchParams.get('league') || 'PL';
   const apiKey = process.env.FOOTBALL_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json({ error: 'API Key not configured' }, { status: 500 });
+    return NextResponse.json(buildEmptyStandingsPayload(league), { status: 200 });
   }
 
   try {
@@ -19,14 +28,9 @@ export async function GET(req: NextRequest) {
     });
 
     if (!res.ok) {
-      // If league not found or other error, return empty or mock for specific cases like T1
-      if (league === 'T1') {
-         return NextResponse.json({ 
-           data: {
-             competition: { name: 'Thai League 1', code: 'T1' },
-             standings: [{ table: [] }] 
-           } 
-         });
+      // Avoid breaking dashboard when API quota is hit or league is unavailable.
+      if (res.status === 429 || res.status === 404 || league === 'T1') {
+        return NextResponse.json(buildEmptyStandingsPayload(league), { status: 200 });
       }
       throw new Error(`External API responded with ${res.status}`);
     }
@@ -35,6 +39,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data });
   } catch (error) {
     console.error('Standings fetch error:', error);
-    return NextResponse.json({ error: 'Failed to fetch standings' }, { status: 500 });
+    return NextResponse.json(buildEmptyStandingsPayload(league), { status: 200 });
   }
 }

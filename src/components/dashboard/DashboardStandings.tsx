@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  TrophyIcon,
-  ChevronRightIcon,
   InformationCircleIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
@@ -15,12 +13,12 @@ const LEAGUES = [
   {
     id: "PL",
     name: "Premier League",
-    icon: "https://crests.football-data.org/PL.png",
+    icon: "https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg",
   },
   {
     id: "SA",
     name: "Serie A",
-    icon: "https://crests.football-data.org/SA.png",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/c/c2/Serie_A.png",
   },
   {
     id: "PD",
@@ -45,7 +43,7 @@ const LEAGUES = [
   {
     id: "DED",
     name: "Eredivisie",
-    icon: "https://crests.football-data.org/DED.png",
+    icon: "https://i.logos-download.com/114179/30713-s1280-2393da2764c605d0b728b1552d825b98.avif/Eredivisie_Logo_2025-s1280.avif",
   },
   {
     id: "PPL",
@@ -55,23 +53,9 @@ const LEAGUES = [
   {
     id: "BSA",
     name: "Brasileirão",
-    icon: "https://crests.football-data.org/BSA.png",
+    icon: "https://i.logos-download.com/114216/31028-s1280-9cc3f76b95e6105e2872252ef695dfa1.avif/Brasileir%C3%A3o_Logo_2024_Betano-s1280.avif",
   },
-  {
-    id: "CL",
-    name: "Champions League",
-    icon: "https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/UEFA_Champions_League_logo_2.svg/100px-UEFA_Champions_League_logo_2.svg.png",
-  },
-  {
-    id: "EC",
-    name: "Euro 2024",
-    icon: "https://upload.wikimedia.org/wikipedia/en/thumb/9/96/UEFA_Euro_2024_Logo.svg/100px-UEFA_Euro_2024_Logo.svg.png",
-  },
-  {
-    id: "WC",
-    name: "World Cup",
-    icon: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup_logo.svg/100px-2026_FIFA_World_Cup_logo.svg.png",
-  },
+
 ];
 
 export default function DashboardStandings() {
@@ -83,7 +67,11 @@ export default function DashboardStandings() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const selectedLeague = LEAGUES.find((l) => l.id === league) || LEAGUES[0];
+  const visibleLeagues = LEAGUES.filter(
+    (l) => !["CL", "EC", "WC"].includes(l.id),
+  );
+  const selectedLeague =
+    visibleLeagues.find((l) => l.id === league) || visibleLeagues[0];
 
   useEffect(() => {
     const fetchStandings = async () => {
@@ -154,7 +142,7 @@ export default function DashboardStandings() {
 
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-[10px] shadow-xl z-50 py-2 max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-              {LEAGUES.map((l) => (
+              {visibleLeagues.map((l) => (
                 <button
                   key={l.id}
                   onClick={() => {
@@ -187,14 +175,30 @@ export default function DashboardStandings() {
           <table className="w-full text-sm text-left border-collapse">
             <thead className="text-[10px] text-slate-500 font-bold uppercase tracking-wider bg-slate-50/50">
               <tr>
-                <th className="px-4 py-3 text-center w-14">Pos</th>
-                <th className="px-4 py-3">Club</th>
-                <th className="px-3 py-3 text-center">P</th>
-                <th className="px-3 py-3 text-center">W</th>
-                <th className="px-3 py-3 text-center">D</th>
-                <th className="px-3 py-3 text-center">L</th>
-                <th className="px-3 py-3 text-center">GD</th>
-                <th className="px-4 py-3 text-center">Pts</th>
+                <th className="px-4 py-3 text-center w-14">
+                  {t.dashboard.standings.columns.position}
+                </th>
+                <th className="px-4 py-3">
+                  {t.dashboard.standings.columns.club}
+                </th>
+                <th className="px-3 py-3 text-center">
+                  {t.dashboard.standings.columns.played}
+                </th>
+                <th className="px-3 py-3 text-center">
+                  {t.dashboard.standings.columns.won}
+                </th>
+                <th className="px-3 py-3 text-center">
+                  {t.dashboard.standings.columns.drawn}
+                </th>
+                <th className="px-3 py-3 text-center">
+                  {t.dashboard.standings.columns.lost}
+                </th>
+                <th className="px-3 py-3 text-center">
+                  {t.dashboard.standings.columns.goal_difference}
+                </th>
+                <th className="px-4 py-3 text-center">
+                  {t.dashboard.standings.columns.points}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -261,7 +265,7 @@ export default function DashboardStandings() {
                     colSpan={8}
                     className="p-10 text-center text-slate-400 font-medium"
                   >
-                    No standings available for this league.
+                    {t.dashboard.standings.empty}
                   </td>
                 </tr>
               )}
@@ -270,14 +274,6 @@ export default function DashboardStandings() {
         )}
       </div>
 
-      {!isLoading && standings.length > 0 && (
-        <div className="p-4 bg-white border-t border-slate-100 flex justify-center">
-          <button className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-widest flex items-center gap-1 group transition-colors">
-            {t.dashboard.standings.view_full_table}{" "}
-            <ChevronRightIcon className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

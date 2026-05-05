@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import LineupBuilder from "@/features/lineup/components/LineupBuilder";
-import Navbar from "@/components/Navbar";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { useLineupStore } from "@/features/lineup/stores/useLineupStore";
 
 export default function TeamLineupPage({
@@ -21,7 +21,7 @@ export default function TeamLineupPage({
 
   return (
     <div className="min-h-screen">
-      <Navbar title="Lineup" subtitle="Create your winning formation" />
+      <DashboardHeader />
 
       <div className="px-4 md:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
